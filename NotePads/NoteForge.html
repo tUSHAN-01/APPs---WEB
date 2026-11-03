@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoteForge — Advanced Notes App</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Playfair+Display:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ===== CSS VARIABLES & THEMES ===== */
+:root {
+  --bg: #f5f3ee;
+  --bg2: #ede9e1;
+  --bg3: #e2ddd5;
+  --panel: #ffffff;
+  --sidebar: #f0ece4;
+  --border: #d5cfc4;
+  --text: #2a2520;
+  --text2: #6b6560;
+  --text3: #9c9590;
+  --accent: #c0392b;
+  --accent2: #e74c3c;
+  --accent-light: #fdecea;
+  --tag: #3498db;
+  --tag-bg: #ebf5fb;
+  --success: #27ae60;
+  --warn: #f39c12;
+  --shadow: rgba(0,0,0,0.08);
+  --shadow2: rgba(0,0,0,0.15);
+  --radius: 10px;
+  --font-ui: 'DM Sans', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --font-display: 'Playfair Display', serif;
+  --toolbar-bg: #ffffff;
+  --toolbar-border: #e8e3db;
+  --note-hover: #faf8f4;
+  --selection: #c0392b22;
+}
+
+[data-theme="dark"] {
+  --bg: #1a1a1e;
+  --bg2: #222228;
+  --bg3: #2a2a32;
+  --panel: #252530;
+  --sidebar: #1e1e26;
+  --border: #3a3a46;
+  --text: #e8e6e0;
+  --text2: #9a9890;
+  --text3: #6a6860;
+  --accent: #e05252;
+  --accent2: #ff6b6b;
+  --accent-light: #3a2020;
+  --tag-bg: #1a2a3a;
+  --toolbar-bg: #252530;
+  --toolbar-border: #3a3a46;
+  --note-hover: #2e2e3a;
+  --shadow: rgba(0,0,0,0.3);
+  --selection: #e0525222;
+}
+
+[data-theme="hacker"] {
+  --bg: #0a0e0a;
+  --bg2: #0d120d;
+  --bg3: #111811;
+  --panel: #0e150e;
+  --sidebar: #080d08;
+  --border: #1a3a1a;
+  --text: #00ff41;
+  --text2: #00b82e;
+  --text3: #006e1c;
+  --accent: #00ff41;
+  --accent2: #39ff14;
+  --accent-light: #001a00;
+  --tag: #00ff41;
+  --tag-bg: #001500;
+  --toolbar-bg: #0e150e;
+  --toolbar-border: #1a3a1a;
+  --note-hover: #0d1a0d;
+  --shadow: rgba(0,255,65,0.1);
+  --selection: #00ff4122;
+  --font-ui: 'JetBrains Mono', monospace;
+  --font-display: 'JetBrains Mono', monospace;
+}
+
+[data-theme="lavender"] {
+  --bg: #f0eef8;
+  --bg2: #e8e5f4;
+  --bg3: #ddd9f0;
+  --panel: #fafafe;
+  --sidebar: #ede9f6;
+  --border: #ccc7e8;
+  --text: #2d2640;
+  --text2: #6b5f8a;
+  --text3: #9e94b8;
+  --accent: #7c5cbf;
+  --accent2: #9b7fe0;
+  --accent-light: #ece6f8;
+  --tag: #5b4fa0;
+  --tag-bg: #ede8fb;
+  --toolbar-bg: #fafafe;
+  --toolbar-border: #ddd9f0;
+  --note-hover: #f4f2fc;
+  --shadow: rgba(100,80,180,0.1);
+  --selection: #7c5cbf22;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-ui);
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+
+::selection { background: var(--selection); }
+
+/* ===== LAYOUT ===== */
+.app-wrapper { display: flex; flex: 1; overflow: hidden; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  width: 240px;
+  min-width: 200px;
+  background: var(--sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s;
+  z-index: 10;
+}
+
+.sidebar-logo {
+  padding: 20px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo h1 {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  color: var(--accent);
+  letter-spacing: -0.5px;
+}
+.sidebar-logo span { font-size: 0.65rem; color: var(--text3); display: block; margin-top: 1px; font-family: var(--font-mono); }
+
+.sidebar-nav { flex: 1; overflow-y: auto; padding: 10px 0; }
+
+.nav-section { margin-bottom: 6px; }
+.nav-section-label { padding: 6px 18px 4px; font-size: 0.62rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1.2px; }
+
+.nav-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 18px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--text2);
+  border: none; background: none; width: 100%; text-align: left;
+  border-radius: 0;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+}
+.nav-btn:hover { background: var(--bg3); color: var(--text); }
+.nav-btn.active { color: var(--accent); background: var(--accent-light); font-weight: 600; }
+.nav-btn.active::before { content:''; position:absolute; left:0; top:20%; height:60%; width:3px; background:var(--accent); border-radius:0 2px 2px 0; }
+.nav-btn svg { flex-shrink: 0; opacity: 0.75; }
+.nav-btn.active svg { opacity: 1; }
+.nav-count { margin-left: auto; background: var(--bg3); color: var(--text3); border-radius: 10px; padding: 1px 7px; font-size: 0.7rem; font-family: var(--font-mono); }
+
+/* Tags in sidebar */
+.tag-list-sidebar { padding: 0 10px 10px; }
+.tag-chip-sidebar {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; margin: 2px 2px;
+  border-radius: 20px; font-size: 0.72rem; cursor: pointer;
+  background: var(--tag-bg); color: var(--tag); border: 1px solid transparent;
+  transition: all 0.15s;
+}
+.tag-chip-sidebar:hover, .tag-chip-sidebar.active { border-color: var(--tag); }
+
+/* Theme switcher */
+.theme-bar {
+  border-top: 1px solid var(--border);
+  padding: 10px;
+  display: flex; gap: 4px; flex-wrap: wrap; justify-content: center;
+}
+.theme-btn {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent;
+  cursor: pointer; transition: all 0.2s; font-size: 0; position: relative;
+}
+.theme-btn:hover, .theme-btn.active { border-color: var(--accent); transform: scale(1.15); }
+.theme-btn[data-t="lite"] { background: linear-gradient(135deg, #f5f3ee, #c0392b); }
+.theme-btn[data-t="dark"] { background: linear-gradient(135deg, #1a1a1e, #e05252); }
+.theme-btn[data-t="hacker"] { background: linear-gradient(135deg, #0a0e0a, #00ff41); }
+.theme-btn[data-t="lavender"] { background: linear-gradient(135deg, #f0eef8, #7c5cbf); }
+
+/* ===== NOTE LIST PANEL ===== */
+.notes-panel {
+  width: 300px; min-width: 250px;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column;
+}
+
+.notes-toolbar {
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.search-box {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px 10px;
+}
+.search-box input {
+  flex: 1; border: none; background: none; outline: none;
+  font-size: 0.83rem; color: var(--text); font-family: var(--font-ui);
+}
+.search-box input::placeholder { color: var(--text3); }
+.search-box svg { color: var(--text3); flex-shrink:0; }
+
+.sort-row { display: flex; gap: 6px; align-items: center; }
+.sort-select {
+  flex: 1; border: 1px solid var(--border); border-radius: 6px;
+  padding: 4px 8px; font-size: 0.75rem; background: var(--bg2); color: var(--text);
+  outline: none; font-family: var(--font-ui); cursor: pointer;
+}
+
+.icon-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 30px; height: 30px; border-radius: 7px; border: none;
+  background: none; cursor: pointer; color: var(--text2);
+  transition: background 0.15s, color 0.15s;
+}
+.icon-btn:hover { background: var(--bg3); color: var(--accent); }
+
+.note-list { flex: 1; overflow-y: auto; padding: 6px; }
+
+.note-item {
+  padding: 12px 12px 10px;
+  border-radius: 8px; cursor: pointer; margin-bottom: 4px;
+  border: 1.5px solid transparent;
+  transition: all 0.15s; position: relative;
+}
+.note-item:hover { background: var(--note-hover); }
+.note-item.active { background: var(--accent-light); border-color: var(--accent); }
+
+.note-item-title { font-weight: 600; font-size: 0.85rem; margin-bottom: 4px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.note-item-preview { font-size: 0.75rem; color: var(--text2); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.note-item-meta { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+.note-item-date { font-size: 0.68rem; color: var(--text3); font-family: var(--font-mono); }
+.note-item-tags { display: flex; gap: 3px; flex-wrap: wrap; flex: 1; }
+.note-tag { font-size: 0.62rem; padding: 1px 6px; border-radius: 10px; background: var(--tag-bg); color: var(--tag); }
+.note-todo-badge { font-size: 0.62rem; padding: 1px 6px; border-radius: 10px; background: #27ae6022; color: var(--success); }
+.note-archived-badge { font-size: 0.62rem; padding: 1px 6px; border-radius: 10px; background: var(--bg3); color: var(--text3); }
+.note-item-actions { position: absolute; top: 8px; right: 8px; display: none; gap: 3px; }
+.note-item:hover .note-item-actions { display: flex; }
+
+/* ===== EDITOR AREA ===== */
+.editor-area {
+  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  background: var(--bg);
+}
+
+.editor-topbar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px;
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--toolbar-border);
+  flex-wrap: wrap;
+}
+
+.note-title-input {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  border: none; outline: none; background: none;
+  color: var(--text); width: 100%;
+  padding: 14px 20px 6px;
+}
+.note-title-input::placeholder { color: var(--text3); }
+
+/* Formatting toolbar */
+.fmt-toolbar {
+  display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+  padding: 8px 16px;
+  background: var(--toolbar-bg);
+  border-bottom: 1px solid var(--toolbar-border);
+}
+
+.fmt-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 30px; height: 28px; padding: 0 6px;
+  border-radius: 5px; border: none; background: none; cursor: pointer;
+  color: var(--text2); font-size: 0.78rem; font-family: var(--font-ui);
+  transition: background 0.1s, color 0.1s;
+}
+.fmt-btn:hover { background: var(--bg3); color: var(--accent); }
+.fmt-btn.active { background: var(--accent-light); color: var(--accent); }
+.fmt-btn b { font-weight: 900; font-size: 0.85rem; }
+.fmt-btn i { font-style: italic; }
+
+.fmt-sep { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
+
+.font-select {
+  height: 28px; border: 1px solid var(--border); border-radius: 5px;
+  padding: 0 6px; font-size: 0.75rem; background: var(--bg2); color: var(--text);
+  outline: none; cursor: pointer;
+}
+.font-size-input {
+  width: 42px; height: 28px; border: 1px solid var(--border); border-radius: 5px;
+  padding: 0 4px; font-size: 0.75rem; background: var(--bg2); color: var(--text);
+  outline: none; text-align: center;
+}
+
+.color-btn { position: relative; }
+.color-picker-input { position: absolute; opacity: 0; width: 100%; height: 100%; cursor: pointer; top:0; left:0; }
+
+/* Editor content */
+.editor-content-wrap { flex: 1; overflow-y: auto; padding: 0 20px 30px; }
+#editor {
+  min-height: 300px; outline: none;
+  font-size: 0.95rem; line-height: 1.7; color: var(--text);
+  font-family: var(--font-ui);
+  padding: 6px 0;
+}
+#editor:empty:before { content: attr(data-placeholder); color: var(--text3); pointer-events: none; }
+
+/* TODO mode */
+.todo-list { padding: 6px 0; }
+.todo-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 6px 4px; border-radius: 6px;
+}
+.todo-item:hover { background: var(--note-hover); }
+.todo-checkbox {
+  width: 17px; height: 17px; flex-shrink: 0; margin-top: 2px;
+  accent-color: var(--accent); cursor: pointer;
+}
+.todo-text {
+  flex: 1; border: none; background: none; outline: none;
+  font-family: var(--font-ui); font-size: 0.9rem; color: var(--text);
+  line-height: 1.5; resize: none;
+}
+.todo-text.done { text-decoration: line-through; color: var(--text3); }
+.todo-del-btn { background: none; border: none; cursor: pointer; color: var(--text3); opacity: 0; transition: opacity 0.15s; }
+.todo-item:hover .todo-del-btn { opacity: 1; }
+.add-todo-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 4px; cursor: pointer; color: var(--text3);
+  font-size: 0.85rem; border: none; background: none;
+  margin-top: 4px; border-radius: 6px; width: 100%;
+}
+.add-todo-btn:hover { color: var(--accent); background: var(--accent-light); }
+
+/* Tag editor */
+.tag-editor-row {
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 20px;
+  border-bottom: 1px solid var(--toolbar-border);
+  min-height: 36px;
+}
+.tag-editor-row .note-tag { cursor: pointer; }
+.tag-editor-row .note-tag .rm-tag { margin-left: 3px; color: var(--text3); }
+.tag-input {
+  border: none; outline: none; background: none;
+  font-size: 0.78rem; color: var(--text); font-family: var(--font-ui);
+  min-width: 60px; flex: 1;
+}
+.tag-input::placeholder { color: var(--text3); }
+
+/* Bottom status bar */
+.status-bar {
+  padding: 5px 20px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 12px;
+  font-size: 0.7rem; color: var(--text3); font-family: var(--font-mono);
+  background: var(--toolbar-bg);
+}
+.status-bar .spacer { flex: 1; }
+
+/* ===== MODALS ===== */
+.overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.45);
+  z-index: 1000; display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none; transition: opacity 0.2s;
+}
+.overlay.show { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 14px; padding: 28px; width: 460px; max-width: 95vw;
+  box-shadow: 0 20px 60px var(--shadow2);
+  transform: translateY(12px); transition: transform 0.2s;
+}
+.overlay.show .modal { transform: translateY(0); }
+
+.modal h2 { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 16px; color: var(--text); }
+.modal-close { float: right; background: none; border: none; cursor: pointer; color: var(--text2); font-size: 1.2rem; }
+
+.btn {
+  padding: 8px 18px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 0.83rem; font-family: var(--font-ui); font-weight: 600;
+  transition: all 0.15s;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); }
+.btn-secondary { background: var(--bg3); color: var(--text2); }
+.btn-secondary:hover { background: var(--border); }
+.btn-danger { background: #c0392b22; color: var(--accent); }
+.btn-danger:hover { background: var(--accent); color: #fff; }
+
+/* Export modal options */
+.export-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.export-opt {
+  padding: 14px 16px; border-radius: 10px; border: 1.5px solid var(--border);
+  cursor: pointer; text-align: center; transition: all 0.15s;
+  background: var(--bg2);
+}
+.export-opt:hover { border-color: var(--accent); background: var(--accent-light); }
+.export-opt .ext { font-size: 1.1rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); }
+.export-opt .desc { font-size: 0.72rem; color: var(--text3); margin-top: 3px; }
+
+/* Recycle bin / archive note item */
+.bin-item {
+  display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+  border-radius: 8px; margin-bottom: 4px; border: 1px solid var(--border);
+  background: var(--bg2);
+}
+.bin-item-title { flex: 1; font-size: 0.85rem; font-weight: 600; }
+.bin-item-date { font-size: 0.7rem; color: var(--text3); font-family: var(--font-mono); }
+
+/* Empty state */
+.empty-state {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text3); gap: 10px; padding: 30px;
+}
+.empty-state svg { opacity: 0.3; }
+.empty-state p { font-size: 0.85rem; text-align: center; }
+
+/* Notification toast */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--text); color: var(--bg);
+  padding: 9px 18px; border-radius: 30px; font-size: 0.82rem;
+  z-index: 9999; opacity: 0; pointer-events: none;
+  transition: all 0.3s; white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* Dropdown menus */
+.dropdown { position: relative; }
+.dropdown-menu {
+  position: absolute; top: 100%; left: 0; z-index: 200;
+  background: var(--panel); border: 1px solid var(--border);
+  border-radius: 10px; padding: 6px; min-width: 160px;
+  box-shadow: 0 8px 30px var(--shadow2);
+  display: none;
+}
+.dropdown-menu.show { display: block; }
+.dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 12px; border-radius: 6px; cursor: pointer;
+  font-size: 0.82rem; color: var(--text2); transition: background 0.1s;
+  border: none; background: none; width: 100%; text-align: left;
+}
+.dropdown-item:hover { background: var(--bg3); color: var(--text); }
+.dropdown-item.danger { color: var(--accent); }
+.dropdown-item.danger:hover { background: var(--accent-light); }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+
+/* Hacker theme special effects */
+[data-theme="hacker"] .sidebar-logo h1::after {
+  content: '_'; animation: blink 1s steps(1) infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+[data-theme="hacker"] .note-item.active { border-color: var(--accent); box-shadow: 0 0 12px rgba(0,255,65,0.2); }
+[data-theme="hacker"] .btn-primary { box-shadow: 0 0 8px rgba(0,255,65,0.3); }
+
+/* Responsive */
+@media (max-width: 700px) {
+  .sidebar { width: 56px; }
+  .sidebar-logo h1, .nav-btn span, .nav-count, .sidebar-logo span, .nav-section-label, .tag-list-sidebar { display: none; }
+  .nav-btn { justify-content: center; padding: 10px; }
+  .notes-panel { width: 220px; min-width: 180px; }
+}
+
+.view-toggle-btn {
+  display: flex; gap: 2px;
+}
+.view-btn {
+  padding: 3px 7px; border-radius: 5px; border: 1px solid var(--border);
+  background: none; cursor: pointer; color: var(--text3); font-size: 0.7rem;
+  transition: all 0.15s;
+}
+.view-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+/* Grid view */
+.note-list.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.note-list.grid .note-item { margin-bottom: 0; }
+
+/* Word count highlight */
+.wc { font-family: var(--font-mono); }
+
+.pin-icon { color: var(--accent); }
+
+/* Heading styles in editor */
+#editor h1 { font-family: var(--font-display); font-size: 1.6rem; margin: 12px 0 6px; }
+#editor h2 { font-family: var(--font-display); font-size: 1.3rem; margin: 10px 0 5px; }
+#editor h3 { font-size: 1.1rem; margin: 8px 0 4px; }
+#editor blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text2); margin: 8px 0; }
+#editor code { background: var(--bg3); padding: 1px 5px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85em; }
+#editor pre { background: var(--bg3); padding: 12px; border-radius: 8px; overflow-x: auto; font-family: var(--font-mono); font-size: 0.82rem; }
+#editor ul, #editor ol { padding-left: 20px; }
+#editor table { border-collapse: collapse; width: 100%; margin: 8px 0; }
+#editor td, #editor th { border: 1px solid var(--border); padding: 6px 10px; font-size: 0.85rem; }
+#editor th { background: var(--bg3); font-weight: 600; }
+#editor a { color: var(--accent); }
+#editor hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
+
+.note-item.pinned .note-item-title::before { content: '📌 '; font-size: 0.7rem; }
+
+/* Import area */
+.import-area {
+  border: 2px dashed var(--border); border-radius: 10px;
+  padding: 30px; text-align: center; cursor: pointer;
+  color: var(--text3); transition: all 0.15s; margin: 10px 0;
+}
+.import-area:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-light); }
+</style>
+</head>
+<body data-theme="lite">
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Overlay for modals -->
+<div class="overlay" id="overlay" onclick="closeAllModals(event)">
+  <!-- Export Modal -->
+  <div class="modal" id="modal-export" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-export')">✕</button>
+    <h2>Export Note</h2>
+    <p style="font-size:0.82rem;color:var(--text2)">Choose your export format:</p>
+    <div class="export-grid">
+      <div class="export-opt" onclick="exportNote('md')"><div class="ext">.MD</div><div class="desc">Markdown</div></div>
+      <div class="export-opt" onclick="exportNote('pdf')"><div class="ext">.PDF</div><div class="desc">PDF Document</div></div>
+      <div class="export-opt" onclick="exportNote('docx')"><div class="ext">.DOCX</div><div class="desc">Word Document</div></div>
+      <div class="export-opt" onclick="exportNote('xlsx')"><div class="ext">.XLSX</div><div class="desc">Excel Spreadsheet</div></div>
+      <div class="export-opt" onclick="exportNote('txt')"><div class="ext">.TXT</div><div class="desc">Plain Text</div></div>
+      <div class="export-opt" onclick="exportNote('html')"><div class="ext">.HTML</div><div class="desc">HTML Page</div></div>
+    </div>
+  </div>
+
+  <!-- Import Modal -->
+  <div class="modal" id="modal-import" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-import')">✕</button>
+    <h2>Import Notes</h2>
+    <div class="import-area" id="importDropArea" onclick="document.getElementById('importFile').click()">
+      <div style="font-size:2rem;margin-bottom:8px">📁</div>
+      <p>Click or drop .json export file here</p>
+      <p style="font-size:0.72rem;margin-top:4px">Supports NoteForge .json backup files</p>
+    </div>
+    <input type="file" id="importFile" accept=".json,.md,.txt" style="display:none" onchange="importNotes(this)">
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeModal('modal-import')">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Recycle Bin Modal -->
+  <div class="modal" id="modal-bin" onclick="event.stopPropagation()" style="width:520px;max-height:80vh;display:flex;flex-direction:column">
+    <button class="modal-close" onclick="closeModal('modal-bin')">✕</button>
+    <h2>🗑️ Recycle Bin</h2>
+    <div id="bin-list" style="flex:1;overflow-y:auto;margin-top:10px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-danger" onclick="emptyBin()">Empty Bin</button>
+      <button class="btn btn-secondary" onclick="closeModal('modal-bin')">Close</button>
+    </div>
+  </div>
+
+  <!-- Archive Modal -->
+  <div class="modal" id="modal-archive" onclick="event.stopPropagation()" style="width:520px;max-height:80vh;display:flex;flex-direction:column">
+    <button class="modal-close" onclick="closeModal('modal-archive')">✕</button>
+    <h2>📦 Archive</h2>
+    <div id="archive-list" style="flex:1;overflow-y:auto;margin-top:10px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeModal('modal-archive')">Close</button>
+    </div>
+  </div>
+
+  <!-- Tag Manager Modal -->
+  <div class="modal" id="modal-tags" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModal('modal-tags')">✕</button>
+    <h2>🏷️ Manage Tags</h2>
+    <div id="tags-manager-content" style="margin-top:10px"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeModal('modal-tags')">Close</button>
+    </div>
+  </div>
+
+  <!-- Insert Table Modal -->
+  <div class="modal" id="modal-table" onclick="event.stopPropagation()" style="width:340px">
+    <button class="modal-close" onclick="closeModal('modal-table')">✕</button>
+    <h2>Insert Table</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px">
+      <div>
+        <label style="font-size:0.78rem;color:var(--text2);display:block;margin-bottom:4px">Columns</label>
+        <input type="number" id="tbl-cols" value="3" min="1" max="10" class="font-size-input" style="width:100%">
+      </div>
+      <div>
+        <label style="font-size:0.78rem;color:var(--text2);display:block;margin-bottom:4px">Rows</label>
+        <input type="number" id="tbl-rows" value="3" min="1" max="20" class="font-size-input" style="width:100%">
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-secondary" onclick="closeModal('modal-table')">Cancel</button>
+      <button class="btn btn-primary" onclick="insertTable()">Insert</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main App -->
+<div class="app-wrapper">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <h1>NoteForge</h1>
+      <span>v2.0 — Feature Rich</span>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">
+        <div class="nav-section-label">Notes</div>
+        <button class="nav-btn active" data-view="all" onclick="setView('all',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <span>All Notes</span>
+          <span class="nav-count" id="count-all">0</span>
+        </button>
+        <button class="nav-btn" data-view="pinned" onclick="setView('pinned',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>Pinned</span>
+          <span class="nav-count" id="count-pinned">0</span>
+        </button>
+        <button class="nav-btn" data-view="todo" onclick="setView('todo',this)">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span>To-Do</span>
+          <span class="nav-count" id="count-todo">0</span>
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Organize</div>
+        <button class="nav-btn" onclick="openModal('modal-archive');renderArchive()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="21 8 21 21 3 21 3 8"/><rect x="1" y="3" width="22" height="5"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+          <span>Archive</span>
+        </button>
+        <button class="nav-btn" onclick="openModal('modal-bin');renderBin()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          <span>Recycle Bin</span>
+        </button>
+        <button class="nav-btn" onclick="openModal('modal-tags');renderTagsManager()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <span>Tags</span>
+        </button>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Tags</div>
+        <div class="tag-list-sidebar" id="sidebar-tags">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+      <div class="nav-section">
+        <div class="nav-section-label">Data</div>
+        <button class="nav-btn" onclick="openModal('modal-export')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>Export</span>
+        </button>
+        <button class="nav-btn" onclick="openModal('modal-import')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Import</span>
+        </button>
+        <button class="nav-btn" onclick="exportAllNotes()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>Backup All</span>
+        </button>
+      </div>
+    </div>
+    <div class="theme-bar">
+      <button class="theme-btn active" data-t="lite" title="Light Theme" onclick="setTheme('lite',this)"></button>
+      <button class="theme-btn" data-t="dark" title="Dark Theme" onclick="setTheme('dark',this)"></button>
+      <button class="theme-btn" data-t="hacker" title="Hacker Theme" onclick="setTheme('hacker',this)"></button>
+      <button class="theme-btn" data-t="lavender" title="Lavender Theme" onclick="setTheme('lavender',this)"></button>
+    </div>
+  </div>
+
+  <!-- NOTES PANEL -->
+  <div class="notes-panel">
+    <div class="notes-toolbar">
+      <div style="display:flex;gap:6px;align-items:center">
+        <div class="search-box" style="flex:1">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" id="searchInput" placeholder="Search notes…" oninput="renderNoteList()">
+        </div>
+        <button class="icon-btn" onclick="createNewNote()" title="New Note">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+      </div>
+      <div class="sort-row">
+        <select class="sort-select" id="sortSelect" onchange="renderNoteList()">
+          <option value="modified">By Modified</option>
+          <option value="created">By Created</option>
+          <option value="name">By Name</option>
+          <option value="manual">Manual</option>
+        </select>
+        <div class="view-toggle-btn">
+          <button class="view-btn active" id="viewList" onclick="setListView('list')" title="List view">☰</button>
+          <button class="view-btn" id="viewGrid" onclick="setListView('grid')" title="Grid view">⊞</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="note-list" id="noteList">
+      <!-- Note items rendered by JS -->
+    </div>
+  </div>
+
+  <!-- EDITOR AREA -->
+  <div class="editor-area" id="editorArea">
+    <!-- Empty state shown when no note selected -->
+    <div class="empty-state" id="emptyState">
+      <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <p>Select a note to start editing<br>or create a new one</p>
+      <button class="btn btn-primary" onclick="createNewNote()">+ New Note</button>
+    </div>
+
+    <!-- Note Editor (hidden until a note is selected) -->
+    <div id="noteEditor" style="display:none;flex-direction:column;flex:1;overflow:hidden">
+      <!-- Top action bar -->
+      <div class="editor-topbar">
+        <button class="icon-btn" id="btnPin" title="Pin note" onclick="togglePin()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </button>
+        <button class="icon-btn" title="Toggle To-Do mode" onclick="toggleTodo()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+        </button>
+        <span style="flex:1"></span>
+        <div class="dropdown">
+          <button class="icon-btn" id="moreBtn" onclick="toggleDropdown('moreMenu')" title="More options">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+          </button>
+          <div class="dropdown-menu" id="moreMenu">
+            <button class="dropdown-item" onclick="archiveCurrentNote();closeDropdowns()">📦 Archive</button>
+            <button class="dropdown-item" onclick="duplicateNote();closeDropdowns()">⧉ Duplicate</button>
+            <button class="dropdown-item" onclick="openModal('modal-export');closeDropdowns()">⬇ Export</button>
+            <hr style="border:none;border-top:1px solid var(--border);margin:4px 0">
+            <button class="dropdown-item danger" onclick="deleteCurrentNote();closeDropdowns()">🗑 Move to Bin</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Title -->
+      <input class="note-title-input" id="noteTitle" type="text" placeholder="Note title…" oninput="autoSave()">
+
+      <!-- Tag editor row -->
+      <div class="tag-editor-row" id="tagEditorRow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+        <div id="tagChips"></div>
+        <input class="tag-input" id="tagInput" placeholder="Add tag…" onkeydown="handleTagKey(event)">
+      </div>
+
+      <!-- Formatting toolbar -->
+      <div class="fmt-toolbar" id="fmtToolbar">
+        <!-- Font family & size -->
+        <select class="font-select" onchange="applyFont(this.value)">
+          <option value="DM Sans">DM Sans</option>
+          <option value="Georgia">Georgia</option>
+          <option value="JetBrains Mono">Mono</option>
+          <option value="Playfair Display">Playfair</option>
+          <option value="Arial">Arial</option>
+          <option value="Times New Roman">Times</option>
+          <option value="Courier New">Courier</option>
+          <option value="Verdana">Verdana</option>
+        </select>
+        <input class="font-size-input" type="number" value="16" min="8" max="72" onchange="applyFontSize(this.value)" title="Font size">
+
+        <div class="fmt-sep"></div>
+
+        <!-- Basic formatting -->
+        <button class="fmt-btn" onclick="fmt('bold')" title="Bold"><b>B</b></button>
+        <button class="fmt-btn" onclick="fmt('italic')" title="Italic"><i>I</i></button>
+        <button class="fmt-btn" onclick="fmt('underline')" title="Underline" style="text-decoration:underline">U</button>
+        <button class="fmt-btn" onclick="fmt('strikeThrough')" title="Strikethrough" style="text-decoration:line-through">S</button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Headings -->
+        <button class="fmt-btn" onclick="fmtBlock('h1')" title="Heading 1">H1</button>
+        <button class="fmt-btn" onclick="fmtBlock('h2')" title="Heading 2">H2</button>
+        <button class="fmt-btn" onclick="fmtBlock('h3')" title="Heading 3">H3</button>
+        <button class="fmt-btn" onclick="fmtBlock('p')" title="Paragraph">P</button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Lists -->
+        <button class="fmt-btn" onclick="fmt('insertUnorderedList')" title="Bullet list">• List</button>
+        <button class="fmt-btn" onclick="fmt('insertOrderedList')" title="Numbered list">1. List</button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Alignment -->
+        <button class="fmt-btn" onclick="fmt('justifyLeft')" title="Align left">⫷</button>
+        <button class="fmt-btn" onclick="fmt('justifyCenter')" title="Center">☰</button>
+        <button class="fmt-btn" onclick="fmt('justifyRight')" title="Align right">⫸</button>
+        <button class="fmt-btn" onclick="fmt('justifyFull')" title="Justify">⬛</button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Special -->
+        <button class="fmt-btn" onclick="insertBlockquote()" title="Blockquote">" "</button>
+        <button class="fmt-btn" onclick="insertCode()" title="Inline code">&lt;/&gt;</button>
+        <button class="fmt-btn" onclick="insertHR()" title="Divider">——</button>
+        <button class="fmt-btn" onclick="openModal('modal-table')" title="Insert table">⊞ Table</button>
+        <button class="fmt-btn" onclick="insertLink()" title="Insert link">🔗</button>
+        <button class="fmt-btn" onclick="insertImage()" title="Insert image">🖼</button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Color -->
+        <button class="fmt-btn color-btn" title="Text color">
+          <span>A</span>
+          <input type="color" class="color-picker-input" onchange="applyColor(this.value,'foreColor')" value="#c0392b">
+        </button>
+        <button class="fmt-btn color-btn" title="Highlight color" style="background:var(--warn);color:#fff">
+          <span>⬛</span>
+          <input type="color" class="color-picker-input" onchange="applyColor(this.value,'hiliteColor')" value="#f1c40f">
+        </button>
+
+        <div class="fmt-sep"></div>
+
+        <!-- Clear -->
+        <button class="fmt-btn" onclick="fmt('removeFormat')" title="Clear formatting">✕ fmt</button>
+        <button class="fmt-btn" onclick="document.execCommand('undo')" title="Undo">↩</button>
+        <button class="fmt-btn" onclick="document.execCommand('redo')" title="Redo">↪</button>
+      </div>
+
+      <!-- Content -->
+      <div class="editor-content-wrap">
+        <div id="editor" contenteditable="true" data-placeholder="Start writing your note…" oninput="autoSave()" spellcheck="true"></div>
+        <div id="todoContainer" class="todo-list" style="display:none"></div>
+        <button class="add-todo-btn" id="addTodoBtn" style="display:none" onclick="addTodoItem()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add item
+        </button>
+      </div>
+
+      <!-- Status bar -->
+      <div class="status-bar">
+        <span id="statusSaved">✓ Saved</span>
+        <span class="fmt-sep" style="height:12px"></span>
+        <span class="wc" id="wordCount">0 words</span>
+        <span class="wc" id="charCount">0 chars</span>
+        <span class="spacer"></span>
+        <span id="noteModifiedDate"></span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ===== STATE =====
+let notes = JSON.parse(localStorage.getItem('nf_notes') || '[]');
+let bin = JSON.parse(localStorage.getItem('nf_bin') || '[]');
+let archived = JSON.parse(localStorage.getItem('nf_archived') || '[]');
+let currentId = null;
+let currentView = 'all';
+let currentTag = null;
+let saveTimer = null;
+let listViewMode = 'list';
+
+// ===== UTILITY =====
+const uid = () => Math.random().toString(36).substr(2,9) + Date.now().toString(36);
+const now = () => new Date().toISOString();
+const fmt_date = d => new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'});
+const fmt_time = d => new Date(d).toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+
+function save() {
+  localStorage.setItem('nf_notes', JSON.stringify(notes));
+  localStorage.setItem('nf_bin', JSON.stringify(bin));
+  localStorage.setItem('nf_archived', JSON.stringify(archived));
+}
+
+function toast(msg, dur=2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function getCurrentNote() { return notes.find(n => n.id === currentId); }
+
+// ===== THEMES =====
+function setTheme(t, btn) {
+  document.body.dataset.theme = t === 'lite' ? 'lite' : t;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  localStorage.setItem('nf_theme', t);
+}
+
+// ===== VIEWS =====
+function setView(v, btn) {
+  currentView = v; currentTag = null;
+  document.querySelectorAll('.nav-btn[data-view]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.tag-chip-sidebar').forEach(c => c.classList.remove('active'));
+  renderNoteList();
+}
+
+function setTagView(tag, el) {
+  currentView = 'tag'; currentTag = tag;
+  document.querySelectorAll('.nav-btn[data-view]').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tag-chip-sidebar').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  renderNoteList();
+}
+
+function setListView(mode) {
+  listViewMode = mode;
+  document.getElementById('viewList').classList.toggle('active', mode === 'list');
+  document.getElementById('viewGrid').classList.toggle('active', mode === 'grid');
+  const nl = document.getElementById('noteList');
+  nl.className = 'note-list' + (mode === 'grid' ? ' grid' : '');
+  renderNoteList();
+}
+
+// ===== NOTE CRUD =====
+function createNewNote() {
+  const note = {
+    id: uid(),
+    title: '',
+    content: '',
+    todos: [],
+    isTodo: false,
+    tags: [],
+    pinned: false,
+    created: now(),
+    modified: now(),
+    color: null,
+    manualOrder: notes.length
+  };
+  notes.unshift(note);
+  save();
+  selectNote(note.id);
+  renderNoteList(); renderSidebar();
+  document.getElementById('noteTitle').focus();
+}
+
+function selectNote(id) {
+  currentId = id;
+  const note = getCurrentNote();
+  if (!note) return;
+  document.getElementById('emptyState').style.display = 'none';
+  const ed = document.getElementById('noteEditor');
+  ed.style.display = 'flex';
+  document.getElementById('noteTitle').value = note.title;
+  document.getElementById('editor').innerHTML = note.content;
+  renderTagChips();
+  toggleTodoDisplay(note.isTodo, false);
+  if (note.isTodo) renderTodos();
+  document.getElementById('noteModifiedDate').textContent = 'Modified ' + fmt_date(note.modified) + ' ' + fmt_time(note.modified);
+  updateWordCount();
+  updatePinBtn();
+  renderNoteList();
+}
+
+function autoSave() {
+  clearTimeout(saveTimer);
+  document.getElementById('statusSaved').textContent = '● Unsaved';
+  saveTimer = setTimeout(() => {
+    const note = getCurrentNote();
+    if (!note) return;
+    note.title = document.getElementById('noteTitle').value || 'Untitled';
+    if (!note.isTodo) note.content = document.getElementById('editor').innerHTML;
+    note.modified = now();
+    save();
+    renderNoteList(); renderSidebar();
+    document.getElementById('statusSaved').textContent = '✓ Saved';
+    updateWordCount();
+    document.getElementById('noteModifiedDate').textContent = 'Modified ' + fmt_date(note.modified) + ' ' + fmt_time(note.modified);
+  }, 600);
+}
+
+function deleteCurrentNote() {
+  const note = getCurrentNote();
+  if (!note) return;
+  bin.unshift({...note, deletedAt: now()});
+  notes = notes.filter(n => n.id !== currentId);
+  currentId = null;
+  save();
+  document.getElementById('emptyState').style.display = '';
+  document.getElementById('noteEditor').style.display = 'none';
+  renderNoteList(); renderSidebar();
+  toast('Moved to recycle bin');
+}
+
+function archiveCurrentNote() {
+  const note = getCurrentNote();
+  if (!note) return;
+  archived.unshift({...note, archivedAt: now()});
+  notes = notes.filter(n => n.id !== currentId);
+  currentId = null;
+  save();
+  document.getElementById('emptyState').style.display = '';
+  document.getElementById('noteEditor').style.display = 'none';
+  renderNoteList(); renderSidebar();
+  toast('Note archived');
+}
+
+function duplicateNote() {
+  const note = getCurrentNote();
+  if (!note) return;
+  const dup = {...note, id: uid(), title: note.title + ' (copy)', created: now(), modified: now()};
+  notes.unshift(dup);
+  save(); renderNoteList(); renderSidebar();
+  toast('Note duplicated');
+}
+
+function togglePin() {
+  const note = getCurrentNote();
+  if (!note) return;
+  note.pinned = !note.pinned;
+  note.modified = now();
+  save(); renderNoteList(); renderSidebar(); updatePinBtn();
+  toast(note.pinned ? 'Note pinned 📌' : 'Note unpinned');
+}
+
+function updatePinBtn() {
+  const note = getCurrentNote();
+  const btn = document.getElementById('btnPin');
+  if (!note) return;
+  btn.style.color = note.pinned ? 'var(--accent)' : '';
+}
+
+// ===== RENDER NOTE LIST =====
+function getFilteredNotes() {
+  let list = [...notes];
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  if (q) list = list.filter(n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q) || (n.todos||[]).some(t=>t.text.toLowerCase().includes(q)));
+  if (currentView === 'pinned') list = list.filter(n => n.pinned);
+  if (currentView === 'todo') list = list.filter(n => n.isTodo);
+  if (currentView === 'tag') list = list.filter(n => n.tags && n.tags.includes(currentTag));
+  return list;
+}
+
+function getSortedNotes(list) {
+  const sort = document.getElementById('sortSelect').value;
+  const pinned = list.filter(n=>n.pinned);
+  const rest = list.filter(n=>!n.pinned);
+  const sortFn = {
+    modified: (a,b) => new Date(b.modified)-new Date(a.modified),
+    created: (a,b) => new Date(b.created)-new Date(a.created),
+    name: (a,b) => (a.title||'').localeCompare(b.title||''),
+    manual: (a,b) => (a.manualOrder||0)-(b.manualOrder||0)
+  }[sort];
+  return [...pinned.sort(sortFn), ...rest.sort(sortFn)];
+}
+
+function renderNoteList() {
+  const nl = document.getElementById('noteList');
+  const filtered = getSortedNotes(getFilteredNotes());
+  updateCounts();
+
+  if (!filtered.length) {
+    nl.innerHTML = `<div style="padding:30px;text-align:center;color:var(--text3);font-size:0.82rem">No notes found</div>`;
+    return;
+  }
+
+  nl.innerHTML = filtered.map(note => {
+    const preview = note.isTodo
+      ? (note.todos||[]).map(t=>`${t.done?'✓':'-'} ${t.text}`).join(' · ').substring(0,80)
+      : (note.content||'').replace(/<[^>]*>/g,'').substring(0,100);
+    const tags = (note.tags||[]).map(t=>`<span class="note-tag">${t}</span>`).join('');
+    return `<div class="note-item${note.id===currentId?' active':''}${note.pinned?' pinned':''}" 
+        onclick="selectNote('${note.id}')" draggable="true"
+        ondragstart="dragStart(event,'${note.id}')" ondragover="dragOver(event)" ondrop="dropNote(event,'${note.id}')">
+      <div class="note-item-title">${note.title || 'Untitled'}</div>
+      <div class="note-item-preview">${preview||'<em>Empty note</em>'}</div>
+      <div class="note-item-meta">
+        <span class="note-item-date">${fmt_date(note.modified)}</span>
+        <span class="note-item-tags">${tags}${note.isTodo?'<span class="note-todo-badge">Todo</span>':''}</span>
+      </div>
+      <div class="note-item-actions">
+        <button class="icon-btn" style="width:22px;height:22px" title="Archive" onclick="event.stopPropagation();archiveNote('${note.id}')">📦</button>
+        <button class="icon-btn" style="width:22px;height:22px" title="Delete" onclick="event.stopPropagation();binNote('${note.id}')">🗑</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateCounts() {
+  document.getElementById('count-all').textContent = notes.length;
+  document.getElementById('count-pinned').textContent = notes.filter(n=>n.pinned).length;
+  document.getElementById('count-todo').textContent = notes.filter(n=>n.isTodo).length;
+}
+
+function archiveNote(id) {
+  const note = notes.find(n=>n.id===id);
+  if (!note) return;
+  archived.unshift({...note, archivedAt: now()});
+  notes = notes.filter(n=>n.id!==id);
+  if (currentId===id) { currentId=null; document.getElementById('emptyState').style.display=''; document.getElementById('noteEditor').style.display='none'; }
+  save(); renderNoteList(); renderSidebar(); toast('Archived');
+}
+
+function binNote(id) {
+  const note = notes.find(n=>n.id===id);
+  if (!note) return;
+  bin.unshift({...note, deletedAt: now()});
+  notes = notes.filter(n=>n.id!==id);
+  if (currentId===id) { currentId=null; document.getElementById('emptyState').style.display=''; document.getElementById('noteEditor').style.display='none'; }
+  save(); renderNoteList(); renderSidebar(); toast('Moved to bin');
+}
+
+// ===== DRAG AND DROP (manual sort) =====
+let dragId = null;
+function dragStart(e, id) { dragId = id; e.dataTransfer.effectAllowed='move'; }
+function dragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect='move'; }
+function dropNote(e, targetId) {
+  e.preventDefault();
+  if (dragId === targetId) return;
+  const from = notes.findIndex(n=>n.id===dragId);
+  const to = notes.findIndex(n=>n.id===targetId);
+  if (from<0||to<0) return;
+  const [item] = notes.splice(from,1);
+  notes.splice(to,0,item);
+  notes.forEach((n,i)=>n.manualOrder=i);
+  save(); renderNoteList();
+}
+
+// ===== SIDEBAR =====
+function renderSidebar() {
+  updateCounts();
+  const allTags = [...new Set(notes.flatMap(n=>n.tags||[]))].sort();
+  const st = document.getElementById('sidebar-tags');
+  st.innerHTML = allTags.map(tag => {
+    const active = currentView==='tag' && currentTag===tag ? ' active':'';
+    return `<span class="tag-chip-sidebar${active}" onclick="setTagView('${tag}',this)">
+      # ${tag} <small style="opacity:0.6">${notes.filter(n=>n.tags&&n.tags.includes(tag)).length}</small>
+    </span>`;
+  }).join('');
+}
+
+// ===== TAGS =====
+function renderTagChips() {
+  const note = getCurrentNote(); if (!note) return;
+  const tc = document.getElementById('tagChips');
+  tc.innerHTML = (note.tags||[]).map(t =>
+    `<span class="note-tag">${t} <span class="rm-tag" onclick="removeTag('${t}')">✕</span></span>`
+  ).join('');
+}
+
+function handleTagKey(e) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const val = e.target.value.trim().replace(/,/g,'').toLowerCase();
+    if (!val) return;
+    const note = getCurrentNote(); if (!note) return;
+    if (!note.tags) note.tags = [];
+    if (!note.tags.includes(val)) { note.tags.push(val); }
+    e.target.value = '';
+    note.modified = now();
+    save(); renderTagChips(); renderSidebar(); renderNoteList();
+  }
+}
+
+function removeTag(tag) {
+  const note = getCurrentNote(); if (!note) return;
+  note.tags = (note.tags||[]).filter(t=>t!==tag);
+  note.modified = now();
+  save(); renderTagChips(); renderSidebar(); renderNoteList();
+}
+
+// ===== TODO =====
+function toggleTodo() {
+  const note = getCurrentNote(); if (!note) return;
+  note.isTodo = !note.isTodo;
+  if (note.isTodo && (!note.todos||!note.todos.length)) {
+    note.todos = [{id:uid(),text:'',done:false}];
+  }
+  note.modified = now();
+  save(); toggleTodoDisplay(note.isTodo, true); renderNoteList();
+  toast(note.isTodo ? 'Switched to To-Do mode' : 'Switched to Note mode');
+}
+
+function toggleTodoDisplay(isTodo, update) {
+  const editor = document.getElementById('editor');
+  const todoContainer = document.getElementById('todoContainer');
+  const addBtn = document.getElementById('addTodoBtn');
+  const toolbar = document.getElementById('fmtToolbar');
+  editor.style.display = isTodo ? 'none' : '';
+  todoContainer.style.display = isTodo ? '' : 'none';
+  addBtn.style.display = isTodo ? '' : 'none';
+  if (update) renderTodos();
+}
+
+function renderTodos() {
+  const note = getCurrentNote(); if (!note) return;
+  const tc = document.getElementById('todoContainer');
+  tc.innerHTML = (note.todos||[]).map((todo,idx) => `
+    <div class="todo-item">
+      <input type="checkbox" class="todo-checkbox" ${todo.done?'checked':''} onchange="toggleTodoItem(${idx},this.checked)">
+      <textarea class="todo-text${todo.done?' done':''}" rows="1" 
+        oninput="updateTodoText(${idx},this.value);autoResize(this)" 
+        onkeydown="todoKeydown(event,${idx})"
+        placeholder="To-do item...">${todo.text}</textarea>
+      <button class="todo-del-btn" onclick="deleteTodoItem(${idx})">✕</button>
+    </div>
+  `).join('');
+  tc.querySelectorAll('textarea').forEach(autoResize);
+}
+
+function autoResize(el) { el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
+
+function addTodoItem(text='') {
+  const note = getCurrentNote(); if (!note) return;
+  if (!note.todos) note.todos = [];
+  note.todos.push({id:uid(),text,done:false});
+  note.modified = now();
+  save(); renderTodos(); renderNoteList();
+  const items = document.querySelectorAll('.todo-text');
+  if (items.length) items[items.length-1].focus();
+}
+
+function toggleTodoItem(idx, done) {
+  const note = getCurrentNote(); if (!note||!note.todos[idx]) return;
+  note.todos[idx].done = done;
+  note.modified = now();
+  save(); renderTodos(); renderNoteList();
+}
+
+function updateTodoText(idx, val) {
+  const note = getCurrentNote(); if (!note||!note.todos[idx]) return;
+  note.todos[idx].text = val;
+  note.modified = now();
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>{save();renderNoteList();document.getElementById('statusSaved').textContent='✓ Saved';},600);
+}
+
+function deleteTodoItem(idx) {
+  const note = getCurrentNote(); if (!note) return;
+  note.todos.splice(idx,1);
+  note.modified = now();
+  save(); renderTodos(); renderNoteList();
+}
+
+function todoKeydown(e, idx) {
+  if (e.key === 'Enter') { e.preventDefault(); addTodoItem(); }
+  if (e.key === 'Backspace' && e.target.value === '') {
+    e.preventDefault();
+    const note = getCurrentNote();
+    if (note && note.todos.length > 1) { deleteTodoItem(idx); }
+  }
+}
+
+// ===== FORMATTING =====
+function fmt(cmd) {
+  document.getElementById('editor').focus();
+  document.execCommand(cmd, false, null);
+  autoSave();
+}
+
+function fmtBlock(tag) {
+  document.getElementById('editor').focus();
+  document.execCommand('formatBlock', false, tag);
+  autoSave();
+}
+
+function applyFont(font) {
+  document.getElementById('editor').focus();
+  document.execCommand('fontName', false, font);
+  autoSave();
+}
+
+function applyFontSize(size) {
+  // Use CSS style approach
+  const editor = document.getElementById('editor');
+  editor.focus();
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const span = document.createElement('span');
+    span.style.fontSize = size + 'px';
+    range.surroundContents(span);
+  } else {
+    editor.style.fontSize = size + 'px';
+  }
+  autoSave();
+}
+
+function applyColor(val, cmd) {
+  document.getElementById('editor').focus();
+  document.execCommand(cmd, false, val);
+  autoSave();
+}
+
+function insertBlockquote() {
+  document.getElementById('editor').focus();
+  document.execCommand('formatBlock', false, 'blockquote');
+  autoSave();
+}
+
+function insertCode() {
+  const sel = window.getSelection();
+  if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+    const range = sel.getRangeAt(0);
+    const code = document.createElement('code');
+    range.surroundContents(code);
+  } else {
+    document.execCommand('insertHTML', false, '<code>code</code>');
+  }
+  autoSave();
+}
+
+function insertHR() {
+  document.execCommand('insertHorizontalRule', false, null);
+  autoSave();
+}
+
+function insertLink() {
+  const url = prompt('Enter URL:', 'https://');
+  if (url) { document.getElementById('editor').focus(); document.execCommand('createLink', false, url); autoSave(); }
+}
+
+function insertImage() {
+  const url = prompt('Enter image URL:');
+  if (url) { document.getElementById('editor').focus(); document.execCommand('insertImage', false, url); autoSave(); }
+}
+
+function insertTable() {
+  const cols = parseInt(document.getElementById('tbl-cols').value)||3;
+  const rows = parseInt(document.getElementById('tbl-rows').value)||3;
+  let html = '<table><thead><tr>' + Array(cols).fill('<th>Header</th>').join('') + '</tr></thead><tbody>';
+  for (let r=0;r<rows-1;r++) html += '<tr>' + Array(cols).fill('<td>Cell</td>').join('') + '</tr>';
+  html += '</tbody></table><p><br></p>';
+  document.getElementById('editor').focus();
+  document.execCommand('insertHTML', false, html);
+  closeModal('modal-table');
+  autoSave();
+}
+
+function updateWordCount() {
+  const editor = document.getElementById('editor');
+  const note = getCurrentNote();
+  let text = '';
+  if (note && note.isTodo) text = (note.todos||[]).map(t=>t.text).join(' ');
+  else text = editor.innerText || '';
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  document.getElementById('wordCount').textContent = words + ' words';
+  document.getElementById('charCount').textContent = text.length + ' chars';
+}
+
+// ===== MODALS =====
+function openModal(id) {
+  document.getElementById('overlay').classList.add('show');
+  document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+  const m = document.getElementById(id);
+  m.style.display='flex';
+  m.style.flexDirection='column';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display='none';
+  const anyVisible = [...document.querySelectorAll('.modal')].some(m=>m.style.display&&m.style.display!=='none');
+  if (!anyVisible) document.getElementById('overlay').classList.remove('show');
+}
+
+function closeAllModals(e) {
+  document.getElementById('overlay').classList.remove('show');
+  document.querySelectorAll('.modal').forEach(m => m.style.display='none');
+}
+
+function toggleDropdown(id) {
+  const m = document.getElementById(id);
+  const wasOpen = m.classList.contains('show');
+  closeDropdowns();
+  if (!wasOpen) m.classList.add('show');
+}
+function closeDropdowns() { document.querySelectorAll('.dropdown-menu').forEach(d=>d.classList.remove('show')); }
+document.addEventListener('click', e => { if (!e.target.closest('.dropdown')) closeDropdowns(); });
+
+// ===== RECYCLE BIN =====
+function renderBin() {
+  const bl = document.getElementById('bin-list');
+  if (!bin.length) { bl.innerHTML='<div style="color:var(--text3);text-align:center;padding:20px;font-size:0.82rem">Recycle bin is empty</div>'; return; }
+  bl.innerHTML = bin.map((n,i) => `
+    <div class="bin-item">
+      <div class="bin-item-title">${n.title||'Untitled'}</div>
+      <div class="bin-item-date">${fmt_date(n.deletedAt||n.modified)}</div>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.72rem" onclick="restoreFromBin(${i})">Restore</button>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:0.72rem" onclick="permDelete(${i})">Delete</button>
+    </div>
+  `).join('');
+}
+
+function restoreFromBin(i) {
+  const note = {...bin[i]};
+  delete note.deletedAt;
+  note.modified = now();
+  notes.unshift(note);
+  bin.splice(i,1);
+  save(); renderBin(); renderNoteList(); renderSidebar(); toast('Note restored!');
+}
+
+function permDelete(i) {
+  if (!confirm('Permanently delete this note?')) return;
+  bin.splice(i,1);
+  save(); renderBin(); toast('Permanently deleted');
+}
+
+function emptyBin() {
+  if (!confirm('Empty entire recycle bin? This cannot be undone.')) return;
+  bin = [];
+  save(); renderBin(); toast('Bin emptied');
+}
+
+// ===== ARCHIVE =====
+function renderArchive() {
+  const al = document.getElementById('archive-list');
+  if (!archived.length) { al.innerHTML='<div style="color:var(--text3);text-align:center;padding:20px;font-size:0.82rem">Archive is empty</div>'; return; }
+  al.innerHTML = archived.map((n,i) => `
+    <div class="bin-item">
+      <div class="bin-item-title">${n.title||'Untitled'}</div>
+      <div class="bin-item-date">${fmt_date(n.archivedAt||n.modified)}</div>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.72rem" onclick="restoreFromArchive(${i})">Restore</button>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:0.72rem" onclick="deleteFromArchive(${i})">Delete</button>
+    </div>
+  `).join('');
+}
+
+function restoreFromArchive(i) {
+  const note = {...archived[i]};
+  delete note.archivedAt;
+  note.modified = now();
+  notes.unshift(note);
+  archived.splice(i,1);
+  save(); renderArchive(); renderNoteList(); renderSidebar(); toast('Note restored!');
+}
+
+function deleteFromArchive(i) {
+  bin.unshift({...archived[i], deletedAt: now()});
+  archived.splice(i,1);
+  save(); renderArchive(); toast('Moved to bin');
+}
+
+// ===== TAGS MANAGER =====
+function renderTagsManager() {
+  const allTags = [...new Set(notes.flatMap(n=>n.tags||[]))].sort();
+  const c = document.getElementById('tags-manager-content');
+  if (!allTags.length) { c.innerHTML='<div style="color:var(--text3);font-size:0.82rem">No tags yet. Add tags while editing a note.</div>'; return; }
+  c.innerHTML = allTags.map(tag => {
+    const count = notes.filter(n=>n.tags&&n.tags.includes(tag)).length;
+    return `<div class="bin-item">
+      <div class="bin-item-title"># ${tag}</div>
+      <div class="bin-item-date">${count} note${count!==1?'s':''}</div>
+      <button class="btn btn-secondary" style="padding:4px 10px;font-size:0.72rem" onclick="setTagView('${tag}',document.createElement('span'));closeModal('modal-tags')">View</button>
+      <button class="btn btn-danger" style="padding:4px 10px;font-size:0.72rem" onclick="deleteTag('${tag}')">Remove All</button>
+    </div>`;
+  }).join('');
+}
+
+function deleteTag(tag) {
+  if (!confirm(`Remove tag "${tag}" from all notes?`)) return;
+  notes.forEach(n => { if (n.tags) n.tags = n.tags.filter(t=>t!==tag); });
+  save(); renderTagsManager(); renderSidebar(); toast(`Tag "${tag}" removed`);
+}
+
+// ===== EXPORT =====
+function getPlainText(note) {
+  let text = `# ${note.title||'Untitled'}\n\n`;
+  if (note.isTodo) {
+    text += (note.todos||[]).map(t=>`${t.done?'[x]':'[ ]'} ${t.text}`).join('\n');
+  } else {
+    const div = document.createElement('div');
+    div.innerHTML = note.content || '';
+    text += div.innerText;
+  }
+  if (note.tags&&note.tags.length) text += `\n\nTags: ${note.tags.join(', ')}`;
+  return text;
+}
+
+function getMarkdown(note) {
+  let md = `# ${note.title||'Untitled'}\n\n`;
+  md += `> Created: ${new Date(note.created).toLocaleString()} | Modified: ${new Date(note.modified).toLocaleString()}\n\n`;
+  if (note.isTodo) {
+    md += (note.todos||[]).map(t=>`- [${t.done?'x':' '}] ${t.text}`).join('\n');
+  } else {
+    // Basic HTML to MD conversion
+    const div = document.createElement('div');
+    div.innerHTML = note.content||'';
+    md += htmlToMd(div);
+  }
+  if (note.tags&&note.tags.length) md += `\n\n---\n**Tags:** ${note.tags.map(t=>`\`${t}\``).join(', ')}`;
+  return md;
+}
+
+function htmlToMd(el) {
+  let out = '';
+  el.childNodes.forEach(node => {
+    if (node.nodeType===3) { out += node.textContent; return; }
+    const tag = (node.tagName||'').toLowerCase();
+    const inner = node.innerText || '';
+    if (tag==='h1') out += `\n# ${inner}\n`;
+    else if (tag==='h2') out += `\n## ${inner}\n`;
+    else if (tag==='h3') out += `\n### ${inner}\n`;
+    else if (tag==='p'||tag==='div') out += `\n${htmlToMd(node)}\n`;
+    else if (tag==='b'||tag==='strong') out += `**${inner}**`;
+    else if (tag==='i'||tag==='em') out += `*${inner}*`;
+    else if (tag==='u') out += `_${inner}_`;
+    else if (tag==='s'||tag==='strike') out += `~~${inner}~~`;
+    else if (tag==='code') out += `\`${inner}\``;
+    else if (tag==='blockquote') out += `\n> ${inner}\n`;
+    else if (tag==='hr') out += '\n---\n';
+    else if (tag==='li') out += `\n- ${inner}`;
+    else if (tag==='br') out += '\n';
+    else out += htmlToMd(node);
+  });
+  return out;
+}
+
+function downloadFile(content, filename, type) {
+  const a = document.createElement('a');
+  const blob = new Blob([content], {type});
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  a.click();
+}
+
+function exportNote(format) {
+  const note = getCurrentNote();
+  if (!note) { toast('No note selected'); return; }
+  const name = (note.title||'untitled').replace(/[^a-z0-9]/gi,'_');
+  closeModal('modal-export');
+  switch(format) {
+    case 'md':
+      downloadFile(getMarkdown(note), name+'.md', 'text/markdown');
+      break;
+    case 'txt':
+      downloadFile(getPlainText(note), name+'.txt', 'text/plain');
+      break;
+    case 'html': {
+      const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${note.title||'Note'}</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.7;color:#333;padding:0 20px}h1{border-bottom:2px solid #c0392b;padding-bottom:10px}blockquote{border-left:3px solid #c0392b;padding-left:15px;color:#666}code{background:#f5f5f5;padding:2px 6px;border-radius:3px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:8px}</style></head><body><h1>${note.title||'Note'}</h1><p style="color:#999;font-size:0.85em">Modified: ${new Date(note.modified).toLocaleString()}</p>${note.isTodo?'<ul>'+((note.todos||[]).map(t=>`<li style="${t.done?'text-decoration:line-through;opacity:0.5':''}">${t.text}</li>`).join(''))+'</ul>':note.content}</body></html>`;
+      downloadFile(html, name+'.html', 'text/html');
+      break;
+    }
+    case 'pdf': {
+      const w = window.open('','_blank');
+      w.document.write(`<!DOCTYPE html><html><head><title>${note.title||'Note'}</title><style>body{font-family:Georgia,serif;max-width:700px;margin:40px auto;line-height:1.7;color:#333}h1{border-bottom:2px solid #c0392b;padding-bottom:10px}blockquote{border-left:3px solid #c0392b;padding-left:15px;color:#666}code{background:#f5f5f5;padding:2px 6px;border-radius:3px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:8px}</style></head><body><h1>${note.title||'Note'}</h1><p style="color:#999;font-size:0.85em">Modified: ${new Date(note.modified).toLocaleString()}</p>${note.isTodo?'<ul>'+((note.todos||[]).map(t=>`<li style="${t.done?'text-decoration:line-through;opacity:0.5':''}">${t.text}</li>`).join(''))+'</ul>':note.content}</body></html>`);
+      w.document.close();
+      setTimeout(()=>{ w.print(); }, 500);
+      toast('PDF print dialog opened');
+      break;
+    }
+    case 'docx': {
+      // RTF format that Word can open
+      const text = getPlainText(note);
+      const rtf = `{\\rtf1\\ansi\\deff0{\\fonttbl{\\f0 Times New Roman;}}\\f0\\fs24 {\\b ${note.title||'Note'}}\\par\\par ${text.replace(/\n/g,'\\par ')}}`;
+      downloadFile(rtf, name+'.rtf', 'application/rtf');
+      toast('Saved as RTF (Word-compatible)');
+      break;
+    }
+    case 'xlsx': {
+      // CSV that Excel can open
+      let csv = `"Title","Content","Tags","Created","Modified"\n`;
+      const plain = getPlainText(note).replace(/"/g,'""');
+      csv += `"${(note.title||'').replace(/"/g,'""')}","${plain}","${(note.tags||[]).join(';')}","${new Date(note.created).toLocaleString()}","${new Date(note.modified).toLocaleString()}"`;
+      downloadFile(csv, name+'.csv', 'text/csv');
+      toast('Saved as CSV (Excel-compatible)');
+      break;
+    }
+  }
+  toast(`Exported as .${format}`);
+}
+
+function exportAllNotes() {
+  const data = {version:'2.0',exportDate:now(),notes,archived,bin};
+  downloadFile(JSON.stringify(data,null,2), 'noteforge-backup-'+new Date().toISOString().split('T')[0]+'.json', 'application/json');
+  toast('All notes backed up!');
+}
+
+// ===== IMPORT =====
+function importNotes(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      if (file.name.endsWith('.json')) {
+        const data = JSON.parse(e.target.result);
+        const imported = data.notes || data;
+        if (Array.isArray(imported)) {
+          const newNotes = imported.filter(n=>n.id&&!notes.find(x=>x.id===n.id));
+          notes = [...newNotes, ...notes];
+          if (data.archived) archived = [...(data.archived.filter(n=>!archived.find(x=>x.id===n.id))), ...archived];
+          save(); renderNoteList(); renderSidebar(); closeModal('modal-import');
+          toast(`Imported ${newNotes.length} notes`);
+        } else throw new Error('Invalid format');
+      } else if (file.name.endsWith('.md')||file.name.endsWith('.txt')) {
+        const note = {
+          id: uid(), title: file.name.replace(/\.[^.]+$/,''),
+          content: `<pre>${e.target.result.replace(/</g,'&lt;')}</pre>`,
+          todos:[], isTodo:false, tags:[], pinned:false, created:now(), modified:now()
+        };
+        notes.unshift(note);
+        save(); renderNoteList(); renderSidebar(); closeModal('modal-import');
+        selectNote(note.id);
+        toast('File imported as note');
+      }
+    } catch(err) { toast('Import failed: ' + err.message); }
+  };
+  reader.readAsText(file);
+  input.value = '';
+}
+
+// Drag & drop import
+document.getElementById('importDropArea').addEventListener('dragover', e=>{e.preventDefault();});
+document.getElementById('importDropArea').addEventListener('drop', e=>{
+  e.preventDefault();
+  const f = e.dataTransfer.files[0];
+  if (f) { const inp = document.getElementById('importFile'); const dt = new DataTransfer(); dt.items.add(f); inp.files=dt.files; importNotes(inp); }
+});
+
+// ===== KEYBOARD SHORTCUTS =====
+document.addEventListener('keydown', e => {
+  if (e.ctrlKey || e.metaKey) {
+    switch(e.key) {
+      case 'n': e.preventDefault(); createNewNote(); break;
+      case 's': e.preventDefault(); toast('✓ Auto-saved'); break;
+      case 'f': e.preventDefault(); document.getElementById('searchInput').focus(); break;
+      case 'e': e.preventDefault(); openModal('modal-export'); break;
+    }
+  }
+});
+
+// ===== INIT =====
+function init() {
+  // Load theme
+  const theme = localStorage.getItem('nf_theme') || 'lite';
+  document.body.dataset.theme = theme;
+  document.querySelectorAll('.theme-btn').forEach(b => b.classList.toggle('active', b.dataset.t===theme));
+
+  // Load sample notes if empty
+  if (!notes.length) {
+    notes = [
+      {
+        id: uid(), title: 'Welcome to NoteForge! 🎉',
+        content: `<h2>Welcome to NoteForge</h2><p>A <strong>feature-rich</strong> notes application with everything you need.</p><h3>Key Features</h3><ul><li>Rich text formatting (Bold, Italic, Headings, Tables, and more)</li><li>To-Do mode — convert any note to a checklist</li><li>Tags and smart filtering</li><li>Archive and Recycle Bin</li><li>Multiple themes: Light, Dark, Hacker, Lavender</li><li>Export to MD, PDF, DOCX, XLSX, HTML</li><li>Import backup files</li><li>Search, sort, and manually reorder notes</li></ul><blockquote>Press Ctrl+N to create a new note, Ctrl+F to search</blockquote>`,
+        todos:[], isTodo:false, tags:['welcome','getting-started'], pinned:true, created:now(), modified:now(), manualOrder:0
+      },
+      {
+        id: uid(), title: 'Shopping List',
+        content: '', isTodo: true,
+        todos: [
+          {id:uid(),text:'Milk',done:true},
+          {id:uid(),text:'Eggs',done:false},
+          {id:uid(),text:'Bread',done:false},
+          {id:uid(),text:'Coffee',done:false},
+        ],
+        tags:['personal','shopping'], pinned:false, created:now(), modified:now(), manualOrder:1
+      },
+      {
+        id: uid(), title: 'Meeting Notes',
+        content: `<h3>Q1 Strategy Meeting</h3><p>Date: Today</p><p>Attendees: Team Alpha</p><hr><p><strong>Action Items:</strong></p><ul><li>Review quarterly report</li><li>Schedule follow-up</li><li>Update project timeline</li></ul>`,
+        todos:[], isTodo:false, tags:['work','meetings'], pinned:false, created:now(), modified:now(), manualOrder:2
+      }
+    ];
+    save();
+  }
+
+  renderNoteList();
+  renderSidebar();
+}
+
+init();
+</script>
+</body>
+</html>

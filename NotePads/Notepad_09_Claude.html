@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keep — Notes</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #202124;
+    --surface: #2d2e30;
+    --surface2: #35363a;
+    --border: #5f6368;
+    --border-light: #3c4043;
+    --text: #e8eaed;
+    --text-muted: #9aa0a6;
+    --accent: #8ab4f8;
+    --accent-hover: #aecbfa;
+    --danger: #f28b82;
+    --sidebar-w: 280px;
+    --nav-h: 64px;
+    --radius: 8px;
+    --shadow: 0 1px 3px rgba(0,0,0,.4), 0 4px 8px rgba(0,0,0,.3);
+    --shadow-hover: 0 4px 8px rgba(0,0,0,.5), 0 8px 24px rgba(0,0,0,.4);
+    --transition: .15s cubic-bezier(.4,0,.2,1);
+
+    /* Note colors (Google Keep dark palette) */
+    --c-default: #2d2e30;
+    --c-red:     #5c2b29;
+    --c-pink:    #4a2033;
+    --c-purple:  #2d2b54;
+    --c-blue:    #1e3a5f;
+    --c-teal:    #0d3b2e;
+    --c-green:   #1e3a1e;
+    --c-yellow:  #3d3000;
+    --c-orange:  #442600;
+    --c-brown:   #3e2723;
+    --c-gray:    #3c3f43;
+  }
+
+  html { font-size: 14px; }
+  body {
+    font-family: 'Roboto', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0;
+    height: var(--nav-h);
+    background: var(--bg);
+    border-bottom: 1px solid var(--border-light);
+    display: flex; align-items: center;
+    padding: 0 16px;
+    z-index: 200;
+    gap: 12px;
+  }
+  .nav-menu-btn {
+    width: 40px; height: 40px;
+    border: none; background: transparent; cursor: pointer;
+    border-radius: 50%; color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; transition: background var(--transition);
+    flex-shrink: 0;
+  }
+  .nav-menu-btn:hover { background: var(--surface2); }
+  .nav-logo {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Google Sans', sans-serif;
+    font-size: 22px; color: var(--text-muted);
+    user-select: none;
+    min-width: 160px;
+  }
+  .nav-logo svg { color: #fbbc04; }
+  .nav-search {
+    flex: 1; max-width: 680px; margin: 0 auto;
+    position: relative;
+  }
+  .nav-search input {
+    width: 100%; height: 46px;
+    background: var(--surface2);
+    border: 1px solid transparent;
+    border-radius: 24px;
+    padding: 0 48px 0 56px;
+    font-size: 16px; color: var(--text);
+    outline: none; transition: all var(--transition);
+    font-family: 'Roboto', sans-serif;
+  }
+  .nav-search input:focus {
+    background: var(--bg);
+    border-color: var(--border);
+    box-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .nav-search input::placeholder { color: var(--text-muted); }
+  .search-icon {
+    position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+    color: var(--text-muted); pointer-events: none;
+  }
+  .search-clear {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; color: var(--text-muted);
+    cursor: pointer; padding: 4px; border-radius: 50%;
+    display: none; align-items: center; justify-content: center;
+  }
+  .search-clear:hover { background: var(--surface2); }
+  .search-clear.visible { display: flex; }
+
+  /* ── SIDEBAR ── */
+  aside {
+    position: fixed; left: 0; top: var(--nav-h); bottom: 0;
+    width: var(--sidebar-w);
+    padding: 8px 0;
+    overflow-y: auto;
+    transition: transform var(--transition), width var(--transition);
+    z-index: 100;
+  }
+  aside.collapsed { width: 72px; }
+  .sidebar-item {
+    display: flex; align-items: center;
+    height: 48px; padding: 0 24px;
+    border-radius: 0 24px 24px 0;
+    cursor: pointer; user-select: none;
+    gap: 16px; color: var(--text-muted);
+    font-size: 14px; font-weight: 500;
+    transition: all var(--transition);
+    white-space: nowrap; overflow: hidden;
+    margin-right: 16px;
+  }
+  .sidebar-item:hover { background: var(--surface2); color: var(--text); }
+  .sidebar-item.active { background: var(--surface2); color: var(--accent); }
+  .sidebar-item .icon { font-size: 20px; flex-shrink: 0; width: 24px; text-align: center; }
+  .sidebar-item .label { transition: opacity var(--transition); }
+  aside.collapsed .sidebar-item .label { opacity: 0; pointer-events: none; }
+  .sidebar-divider {
+    height: 1px; background: var(--border-light);
+    margin: 8px 16px; flex-shrink: 0;
+  }
+
+  /* ── MAIN ── */
+  main {
+    margin-left: var(--sidebar-w);
+    padding-top: calc(var(--nav-h) + 24px);
+    padding-bottom: 64px;
+    transition: margin-left var(--transition);
+    min-height: 100vh;
+  }
+  main.collapsed { margin-left: 72px; }
+
+  /* ── CREATE NOTE ── */
+  .create-area {
+    max-width: 600px;
+    margin: 0 auto 32px;
+    padding: 0 16px;
+  }
+  .create-box {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    transition: box-shadow var(--transition);
+  }
+  .create-box:hover { box-shadow: var(--shadow-hover); }
+  .create-placeholder {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px;
+    cursor: pointer;
+  }
+  .create-placeholder span {
+    color: var(--text-muted); font-size: 15px;
+  }
+  .create-placeholder-icons {
+    display: flex; gap: 8px;
+  }
+  .create-placeholder-icons button {
+    width: 36px; height: 36px;
+    border: none; background: transparent;
+    color: var(--text-muted); cursor: pointer;
+    border-radius: 50%; font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition), color var(--transition);
+  }
+  .create-placeholder-icons button:hover { background: var(--surface2); color: var(--text); }
+
+  .create-expanded { display: none; }
+  .create-box.expanded .create-placeholder { display: none; }
+  .create-box.expanded .create-expanded { display: block; }
+
+  .create-title-input {
+    width: 100%; padding: 16px 20px 4px;
+    background: transparent; border: none;
+    font-size: 16px; font-weight: 500;
+    color: var(--text); outline: none;
+    font-family: 'Roboto', sans-serif;
+    resize: none;
+  }
+  .create-title-input::placeholder { color: var(--text-muted); }
+  .create-body-input {
+    width: 100%; padding: 4px 20px 16px;
+    background: transparent; border: none;
+    font-size: 14px; color: var(--text);
+    outline: none; resize: none;
+    min-height: 80px;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+  }
+  .create-body-input::placeholder { color: var(--text-muted); }
+  .create-footer {
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-light);
+    gap: 8px;
+  }
+  .btn {
+    padding: 8px 20px; border: none; border-radius: 4px;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: background var(--transition);
+    font-family: 'Roboto', sans-serif;
+  }
+  .btn-ghost {
+    background: transparent; color: var(--text-muted);
+  }
+  .btn-ghost:hover { background: var(--surface2); color: var(--text); }
+  .btn-primary {
+    background: transparent; color: var(--accent);
+  }
+  .btn-primary:hover { background: rgba(138,180,248,.1); }
+
+  /* ── NOTES GRID ── */
+  .notes-section { padding: 0 16px; }
+  .notes-section-label {
+    font-size: 11px; font-weight: 500; letter-spacing: 1px;
+    text-transform: uppercase; color: var(--text-muted);
+    padding: 0 0 12px 4px;
+    max-width: 880px; margin: 0 auto 0;
+  }
+  .notes-grid {
+    max-width: 880px; margin: 0 auto;
+    columns: 4; column-gap: 12px;
+  }
+  @media (max-width: 1100px) { .notes-grid { columns: 3; } }
+  @media (max-width: 800px)  { .notes-grid { columns: 2; } }
+  @media (max-width: 540px)  { .notes-grid { columns: 1; } }
+
+  .note-card {
+    break-inside: avoid;
+    background: var(--c-default);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    position: relative;
+    cursor: pointer;
+    transition: box-shadow var(--transition), border-color var(--transition), transform var(--transition);
+    animation: fadeIn .2s ease;
+  }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(8px); } to { opacity:1; transform: translateY(0); } }
+
+  .note-card:hover {
+    box-shadow: var(--shadow-hover);
+    border-color: var(--border);
+  }
+  .note-card:hover .note-actions { opacity: 1; }
+
+  .note-title {
+    font-size: 15px; font-weight: 500;
+    margin-bottom: 8px; word-break: break-word;
+    line-height: 1.4;
+  }
+  .note-body {
+    font-size: 13px; color: var(--text-muted);
+    word-break: break-word; white-space: pre-wrap;
+    line-height: 1.6;
+    max-height: 300px; overflow: hidden;
+  }
+  .note-date {
+    font-size: 11px; color: var(--text-muted);
+    margin-top: 12px; opacity: .6;
+  }
+  .note-actions {
+    display: flex; gap: 4px;
+    margin-top: 8px;
+    opacity: 0;
+    transition: opacity var(--transition);
+  }
+  .note-action-btn {
+    width: 32px; height: 32px;
+    border: none; background: transparent;
+    color: var(--text-muted); cursor: pointer;
+    border-radius: 50%; font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transition), color var(--transition);
+    position: relative;
+  }
+  .note-action-btn:hover { background: rgba(255,255,255,.1); color: var(--text); }
+  .note-action-btn[data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute; bottom: calc(100% + 4px); left: 50%;
+    transform: translateX(-50%);
+    background: #3c4043; color: var(--text);
+    font-size: 11px; padding: 4px 8px;
+    border-radius: 4px; white-space: nowrap;
+    pointer-events: none; z-index: 10;
+  }
+
+  .note-card.color-red    { background: var(--c-red); }
+  .note-card.color-pink   { background: var(--c-pink); }
+  .note-card.color-purple { background: var(--c-purple); }
+  .note-card.color-blue   { background: var(--c-blue); }
+  .note-card.color-teal   { background: var(--c-teal); }
+  .note-card.color-green  { background: var(--c-green); }
+  .note-card.color-yellow { background: var(--c-yellow); }
+  .note-card.color-orange { background: var(--c-orange); }
+  .note-card.color-brown  { background: var(--c-brown); }
+  .note-card.color-gray   { background: var(--c-gray); }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center; padding: 80px 20px;
+    color: var(--text-muted);
+  }
+  .empty-state svg {
+    width: 120px; height: 120px;
+    opacity: .15; margin-bottom: 16px;
+  }
+  .empty-state h3 { font-size: 22px; font-weight: 400; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ── MODAL (Edit Note) ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 300;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    width: 100%; max-width: 560px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,.6);
+    transform: scale(.95) translateY(8px);
+    transition: transform .2s ease;
+  }
+  .modal-overlay.open .modal { transform: scale(1) translateY(0); }
+
+  .modal-title-input {
+    width: 100%; padding: 20px 20px 8px;
+    background: transparent; border: none;
+    font-size: 17px; font-weight: 500;
+    color: var(--text); outline: none;
+    font-family: 'Roboto', sans-serif;
+    resize: none;
+  }
+  .modal-title-input::placeholder { color: var(--text-muted); }
+  .modal-body-input {
+    width: 100%; padding: 8px 20px 20px;
+    background: transparent; border: none;
+    font-size: 14px; color: var(--text);
+    outline: none; resize: none;
+    min-height: 120px;
+    font-family: 'Roboto', sans-serif;
+    line-height: 1.6;
+  }
+  .modal-body-input::placeholder { color: var(--text-muted); }
+
+  .modal-footer {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-light);
+  }
+  .modal-footer-left { display: flex; gap: 4px; align-items: center; }
+
+  /* Color Picker */
+  .color-picker {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    padding: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    position: absolute;
+    bottom: calc(100% + 8px); left: 0;
+    z-index: 10;
+    box-shadow: var(--shadow);
+    display: none;
+  }
+  .color-picker.open { display: flex; }
+  .color-swatch {
+    width: 24px; height: 24px; border-radius: 50%;
+    cursor: pointer; border: 2px solid transparent;
+    transition: transform var(--transition), border-color var(--transition);
+    flex-shrink: 0;
+  }
+  .color-swatch:hover { transform: scale(1.2); }
+  .color-swatch.active { border-color: var(--text); }
+  .color-picker-wrap { position: relative; }
+
+  /* ── DELETE CONFIRM ── */
+  .confirm-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.6);
+    z-index: 400;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+    opacity: 0; pointer-events: none;
+    transition: opacity .2s ease;
+  }
+  .confirm-overlay.open { opacity: 1; pointer-events: all; }
+  .confirm-box {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 24px;
+    max-width: 340px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,.6);
+  }
+  .confirm-box h3 { font-size: 16px; margin-bottom: 8px; }
+  .confirm-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 20px; }
+  .confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-danger:hover { background: #e57373; }
+
+  /* ── SEARCH HIGHLIGHT ── */
+  mark { background: rgba(251,188,4,.3); color: inherit; border-radius: 2px; }
+
+  /* ── TOAST ── */
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--surface2); color: var(--text);
+    padding: 12px 20px; border-radius: 8px;
+    font-size: 14px; z-index: 500;
+    box-shadow: var(--shadow-hover);
+    opacity: 0; transition: opacity .3s, transform .3s;
+    pointer-events: none;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 8px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border-light); }
+
+  /* ── NO RESULTS ── */
+  .no-results {
+    text-align: center; padding: 60px 20px;
+    color: var(--text-muted); font-size: 15px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <button class="nav-menu-btn" id="menuBtn" title="Main menu">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+  </button>
+  <div class="nav-logo">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z" fill="#fbbc04"/></svg>
+    Keep
+  </div>
+  <div class="nav-search">
+    <span class="search-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+    </span>
+    <input type="text" id="searchInput" placeholder="Search" autocomplete="off" spellcheck="false">
+    <button class="search-clear" id="searchClear">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>
+  </div>
+</nav>
+
+<!-- SIDEBAR -->
+<aside id="sidebar">
+  <div class="sidebar-item active" id="nav-notes">
+    <span class="icon">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+    </span>
+    <span class="label">Notes</span>
+  </div>
+  <div class="sidebar-divider"></div>
+  <div class="sidebar-item" id="nav-count" style="cursor:default;font-size:12px;color:var(--text-muted);height:36px;">
+    <span class="icon" style="font-size:14px;">📋</span>
+    <span class="label" id="noteCountLabel">0 notes</span>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main id="main">
+  <!-- CREATE NOTE -->
+  <div class="create-area">
+    <div class="create-box" id="createBox">
+      <!-- Collapsed state -->
+      <div class="create-placeholder" id="createPlaceholder">
+        <span>Take a note…</span>
+        <div class="create-placeholder-icons">
+          <button title="New checklist" onclick="openCreate()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+          </button>
+          <button title="New note with drawing" onclick="openCreate()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+          </button>
+        </div>
+      </div>
+      <!-- Expanded state -->
+      <div class="create-expanded" id="createExpanded">
+        <textarea class="create-title-input" id="createTitle" placeholder="Title" rows="1" oninput="autoResize(this)"></textarea>
+        <textarea class="create-body-input" id="createBody" placeholder="Take a note…" oninput="autoResize(this)"></textarea>
+        <div class="create-footer">
+          <div style="position:relative">
+            <div class="color-picker" id="createColorPicker">
+              <div class="color-swatch active" data-color="" style="background:#5f6368" title="Default"></div>
+              <div class="color-swatch" data-color="red"    style="background:#5c2b29" title="Red"></div>
+              <div class="color-swatch" data-color="pink"   style="background:#4a2033" title="Pink"></div>
+              <div class="color-swatch" data-color="purple" style="background:#2d2b54" title="Purple"></div>
+              <div class="color-swatch" data-color="blue"   style="background:#1e3a5f" title="Blue"></div>
+              <div class="color-swatch" data-color="teal"   style="background:#0d3b2e" title="Teal"></div>
+              <div class="color-swatch" data-color="green"  style="background:#1e3a1e" title="Green"></div>
+              <div class="color-swatch" data-color="yellow" style="background:#3d3000" title="Yellow"></div>
+              <div class="color-swatch" data-color="orange" style="background:#442600" title="Orange"></div>
+              <div class="color-swatch" data-color="brown"  style="background:#3e2723" title="Brown"></div>
+              <div class="color-swatch" data-color="gray"   style="background:#3c3f43" title="Gray"></div>
+            </div>
+            <button class="note-action-btn" data-tip="Background options" onclick="toggleColorPicker('createColorPicker')" title="Background options">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+            </button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost" onclick="closeCreate()">Close</button>
+            <button class="btn btn-primary" onclick="saveNewNote()">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NOTES GRID -->
+  <div class="notes-section" id="notesSection">
+    <div class="notes-grid" id="notesGrid"></div>
+  </div>
+  <div id="emptyState" class="empty-state" style="display:none;">
+    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9v1zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></svg>
+    <h3>Notes you add appear here</h3>
+    <p>Click "Take a note…" above to get started</p>
+  </div>
+  <div id="noResults" class="no-results" style="display:none;">
+    No matching notes found
+  </div>
+</main>
+
+<!-- EDIT MODAL -->
+<div class="modal-overlay" id="editModal">
+  <div class="modal" id="modalBox" onclick="event.stopPropagation()">
+    <textarea class="modal-title-input" id="editTitle" placeholder="Title" rows="1" oninput="autoResize(this)"></textarea>
+    <textarea class="modal-body-input"  id="editBody"  placeholder="Take a note…" oninput="autoResize(this)"></textarea>
+    <div class="modal-footer">
+      <div class="modal-footer-left">
+        <div class="color-picker-wrap">
+          <div class="color-picker" id="editColorPicker">
+            <div class="color-swatch active" data-color="" style="background:#5f6368" title="Default"></div>
+            <div class="color-swatch" data-color="red"    style="background:#5c2b29" title="Red"></div>
+            <div class="color-swatch" data-color="pink"   style="background:#4a2033" title="Pink"></div>
+            <div class="color-swatch" data-color="purple" style="background:#2d2b54" title="Purple"></div>
+            <div class="color-swatch" data-color="blue"   style="background:#1e3a5f" title="Blue"></div>
+            <div class="color-swatch" data-color="teal"   style="background:#0d3b2e" title="Teal"></div>
+            <div class="color-swatch" data-color="green"  style="background:#1e3a1e" title="Green"></div>
+            <div class="color-swatch" data-color="yellow" style="background:#3d3000" title="Yellow"></div>
+            <div class="color-swatch" data-color="orange" style="background:#442600" title="Orange"></div>
+            <div class="color-swatch" data-color="brown"  style="background:#3e2723" title="Brown"></div>
+            <div class="color-swatch" data-color="gray"   style="background:#3c3f43" title="Gray"></div>
+          </div>
+          <button class="note-action-btn" data-tip="Background options" onclick="toggleColorPicker('editColorPicker')" title="Background options">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span id="editTimestamp" style="font-size:11px;color:var(--text-muted);margin-right:8px;"></span>
+        <button class="btn btn-ghost" onclick="closeModal()">Close</button>
+        <button class="btn btn-primary" onclick="saveEdit()">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM -->
+<div class="confirm-overlay" id="confirmOverlay" onclick="closeConfirm()">
+  <div class="confirm-box" onclick="event.stopPropagation()">
+    <h3>Delete note?</h3>
+    <p>This note will be permanently deleted and cannot be recovered.</p>
+    <div class="confirm-actions">
+      <button class="btn btn-ghost" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let notes = [];
+let editingId = null;
+let deletingId = null;
+let createColor = '';
+let editColor = '';
+let sidebarOpen = true;
+let searchQuery = '';
+
+const STORAGE_KEY = 'keep_clone_notes';
+
+// ─────────────────────────────────────────────
+//  PERSISTENCE
+// ─────────────────────────────────────────────
+function loadNotes() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    notes = raw ? JSON.parse(raw) : [];
+  } catch(e) { notes = []; }
+}
+
+function saveNotes() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(notes));
+}
+
+// ─────────────────────────────────────────────
+//  UTILS
+// ─────────────────────────────────────────────
+function generateId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
+
+function formatDate(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const diffDays = Math.floor((now - d) / 86400000);
+  if (diffDays === 0) {
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  } else if (diffDays === 1) {
+    return 'Yesterday';
+  } else if (diffDays < 7) {
+    return d.toLocaleDateString([], { weekday: 'long' });
+  }
+  return d.toLocaleDateString([], { month: 'short', day: 'numeric', year: diffDays > 365 ? 'numeric' : undefined });
+}
+
+function highlight(text, query) {
+  if (!query) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return escaped.replace(new RegExp(escapedQuery, 'gi'), m => `<mark>${m}</mark>`);
+}
+
+function escapeHtml(str) {
+  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ─────────────────────────────────────────────
+//  SIDEBAR
+// ─────────────────────────────────────────────
+document.getElementById('menuBtn').addEventListener('click', () => {
+  sidebarOpen = !sidebarOpen;
+  document.getElementById('sidebar').classList.toggle('collapsed', !sidebarOpen);
+  document.getElementById('main').classList.toggle('collapsed', !sidebarOpen);
+});
+
+// ─────────────────────────────────────────────
+//  SEARCH
+// ─────────────────────────────────────────────
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchQuery = this.value.trim().toLowerCase();
+  document.getElementById('searchClear').classList.toggle('visible', !!this.value);
+  renderNotes();
+});
+document.getElementById('searchClear').addEventListener('click', () => {
+  document.getElementById('searchInput').value = '';
+  searchQuery = '';
+  document.getElementById('searchClear').classList.remove('visible');
+  renderNotes();
+});
+
+// ─────────────────────────────────────────────
+//  CREATE NOTE
+// ─────────────────────────────────────────────
+function openCreate() {
+  document.getElementById('createBox').classList.add('expanded');
+  document.getElementById('createBody').focus();
+  createColor = '';
+  updateSwatches('createColorPicker', '');
+}
+
+document.getElementById('createPlaceholder').addEventListener('click', openCreate);
+
+function closeCreate() {
+  document.getElementById('createBox').classList.remove('expanded');
+  document.getElementById('createTitle').value = '';
+  document.getElementById('createBody').value = '';
+  createColor = '';
+  document.getElementById('createColorPicker').classList.remove('open');
+  updateSwatches('createColorPicker', '');
+}
+
+function saveNewNote() {
+  const title = document.getElementById('createTitle').value.trim();
+  const body  = document.getElementById('createBody').value.trim();
+  if (!title && !body) { closeCreate(); return; }
+
+  const note = {
+    id: generateId(),
+    title,
+    body,
+    color: createColor,
+    createdAt: Date.now(),
+    updatedAt: Date.now(),
+  };
+  notes.unshift(note);
+  saveNotes();
+  closeCreate();
+  renderNotes();
+  showToast('Note saved');
+}
+
+// Allow Ctrl+Enter / Cmd+Enter to save
+document.addEventListener('keydown', e => {
+  const box = document.getElementById('createBox');
+  if (box.classList.contains('expanded') && (e.ctrlKey||e.metaKey) && e.key==='Enter') saveNewNote();
+  if (e.key === 'Escape') {
+    if (document.getElementById('editModal').classList.contains('open')) closeModal();
+    else if (document.getElementById('confirmOverlay').classList.contains('open')) closeConfirm();
+    else if (box.classList.contains('expanded')) closeCreate();
+    closeAllColorPickers();
+  }
+});
+
+// Close create on outside click
+document.addEventListener('click', e => {
+  const box = document.getElementById('createBox');
+  if (box.classList.contains('expanded') && !box.contains(e.target)) {
+    saveNewNote();
+  }
+  // Close color pickers
+  if (!e.target.closest('.color-picker-wrap') && !e.target.closest('.note-action-btn[data-tip="Background options"]')) {
+    closeAllColorPickers();
+  }
+});
+
+// ─────────────────────────────────────────────
+//  COLOR PICKER
+// ─────────────────────────────────────────────
+function toggleColorPicker(pickerId) {
+  const picker = document.getElementById(pickerId);
+  const wasOpen = picker.classList.contains('open');
+  closeAllColorPickers();
+  if (!wasOpen) picker.classList.add('open');
+}
+
+function closeAllColorPickers() {
+  document.querySelectorAll('.color-picker.open').forEach(p => p.classList.remove('open'));
+}
+
+function updateSwatches(pickerId, color) {
+  document.querySelectorAll(`#${pickerId} .color-swatch`).forEach(s => {
+    s.classList.toggle('active', s.dataset.color === color);
+  });
+}
+
+// Delegate swatch clicks
+document.addEventListener('click', e => {
+  const swatch = e.target.closest('.color-swatch');
+  if (!swatch) return;
+  const picker = swatch.closest('.color-picker');
+  if (!picker) return;
+  const color = swatch.dataset.color;
+  picker.classList.remove('open');
+
+  if (picker.id === 'createColorPicker') {
+    createColor = color;
+    updateSwatches('createColorPicker', color);
+  } else if (picker.id === 'editColorPicker') {
+    editColor = color;
+    updateSwatches('editColorPicker', color);
+    // Live-preview on modal
+    const modal = document.getElementById('modalBox');
+    modal.style.background = color ? `var(--c-${color})` : '';
+  }
+});
+
+// ─────────────────────────────────────────────
+//  RENDER
+// ─────────────────────────────────────────────
+function renderNotes() {
+  const grid = document.getElementById('notesGrid');
+  const empty = document.getElementById('emptyState');
+  const noResults = document.getElementById('noResults');
+
+  const filtered = notes.filter(n => {
+    if (!searchQuery) return true;
+    return (n.title||'').toLowerCase().includes(searchQuery) ||
+           (n.body||'').toLowerCase().includes(searchQuery);
+  });
+
+  // Update count
+  document.getElementById('noteCountLabel').textContent =
+    notes.length === 1 ? '1 note' : `${notes.length} notes`;
+
+  if (notes.length === 0) {
+    grid.innerHTML = '';
+    empty.style.display = 'block';
+    noResults.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    noResults.style.display = 'block';
+    return;
+  }
+  noResults.style.display = 'none';
+
+  grid.innerHTML = filtered.map(n => `
+    <div class="note-card${n.color ? ' color-'+n.color : ''}"
+         data-id="${n.id}" onclick="openEdit('${n.id}')">
+      ${n.title ? `<div class="note-title">${highlight(n.title, searchQuery)}</div>` : ''}
+      ${n.body  ? `<div class="note-body">${highlight(n.body, searchQuery)}</div>` : ''}
+      <div class="note-date">${formatDate(n.updatedAt)}</div>
+      <div class="note-actions" onclick="event.stopPropagation()">
+        <button class="note-action-btn" data-tip="Edit note"
+          onclick="openEdit('${n.id}')" title="Edit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>
+        </button>
+        <button class="note-action-btn" data-tip="Delete note"
+          onclick="askDelete('${n.id}')" title="Delete" style="color:var(--danger)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────
+//  EDIT MODAL
+// ─────────────────────────────────────────────
+function openEdit(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  editingId = id;
+  editColor = note.color || '';
+
+  const titleEl = document.getElementById('editTitle');
+  const bodyEl  = document.getElementById('editBody');
+  const modal   = document.getElementById('modalBox');
+
+  titleEl.value = note.title || '';
+  bodyEl.value  = note.body  || '';
+  document.getElementById('editTimestamp').textContent = 'Edited ' + formatDate(note.updatedAt);
+
+  // Apply color to modal bg
+  modal.style.background = editColor ? `var(--c-${editColor})` : '';
+
+  updateSwatches('editColorPicker', editColor);
+
+  document.getElementById('editModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => { autoResize(titleEl); autoResize(bodyEl); titleEl.focus(); }, 50);
+}
+
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function closeModal() {
+  document.getElementById('editModal').classList.remove('open');
+  document.body.style.overflow = '';
+  editingId = null;
+  closeAllColorPickers();
+}
+
+function saveEdit() {
+  const title = document.getElementById('editTitle').value.trim();
+  const body  = document.getElementById('editBody').value.trim();
+  const idx   = notes.findIndex(n => n.id === editingId);
+  if (idx === -1) { closeModal(); return; }
+
+  if (!title && !body) {
+    askDelete(editingId);
+    closeModal();
+    return;
+  }
+
+  notes[idx] = { ...notes[idx], title, body, color: editColor, updatedAt: Date.now() };
+  saveNotes();
+  closeModal();
+  renderNotes();
+  showToast('Note updated');
+}
+
+// ─────────────────────────────────────────────
+//  DELETE
+// ─────────────────────────────────────────────
+function askDelete(id) {
+  deletingId = id;
+  document.getElementById('confirmOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  deletingId = null;
+}
+
+function confirmDelete() {
+  notes = notes.filter(n => n.id !== deletingId);
+  saveNotes();
+  closeConfirm();
+  renderNotes();
+  showToast('Note deleted');
+}
+
+// ─────────────────────────────────────────────
+//  BOOT
+// ─────────────────────────────────────────────
+loadNotes();
+renderNotes();
+</script>
+</body>
+</html>

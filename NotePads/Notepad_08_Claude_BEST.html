@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KeepIt — Your Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+  <style>
+/* ===========================
+   KEEPIT - CSS
+   Google Keep Clone (Local)
+=========================== */
+
+:root {
+  --bg: #f8f9fa;
+  --surface: #ffffff;
+  --surface2: #f1f3f4;
+  --border: #e0e0e0;
+  --text-primary: #202124;
+  --text-secondary: #5f6368;
+  --text-hint: #80868b;
+  --accent: #fbbc04;
+  --accent2: #1a73e8;
+  --hover: rgba(0,0,0,0.06);
+  --nav-w: 260px;
+  --nav-collapsed: 72px;
+  --topbar-h: 64px;
+  --radius: 12px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.06);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+  --font: 'DM Sans', sans-serif;
+  --transition: 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+body.dark {
+  --bg: #202124;
+  --surface: #2d2e30;
+  --surface2: #3c3f41;
+  --border: #3c3f41;
+  --text-primary: #e8eaed;
+  --text-secondary: #9aa0a6;
+  --text-hint: #80868b;
+  --hover: rgba(255,255,255,0.08);
+  --shadow: 0 2px 8px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08);
+  --shadow-hover: 0 4px 16px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background var(--transition), color var(--transition);
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ===== NAVBAR ===== */
+.navbar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--topbar-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 8px;
+  z-index: 100;
+  transition: background var(--transition);
+}
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: var(--nav-collapsed);
+  flex-shrink: 0;
+}
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  padding: 0 8px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.logo-icon { font-size: 24px; }
+.logo-text {
+  font-family: 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: -0.3px;
+}
+.nav-center { flex: 1; max-width: 720px; margin: 0 auto; }
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: var(--surface2);
+  border-radius: 24px;
+  padding: 8px 16px;
+  gap: 12px;
+  transition: all var(--transition);
+  border: 1px solid transparent;
+}
+.search-bar:focus-within {
+  background: var(--surface);
+  border-color: var(--border);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.search-icon { color: var(--text-secondary); font-size: 20px; }
+.search-bar input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 16px;
+  color: var(--text-primary);
+  outline: none;
+}
+.search-bar input::placeholder { color: var(--text-secondary); }
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+}
+.avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fbbc04, #ea4335);
+  color: white;
+  font-weight: 700;
+  font-size: 14px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* ===== ICON BUTTON ===== */
+.icon-btn {
+  width: 40px; height: 40px;
+  border: none;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-secondary);
+  transition: background var(--transition), color var(--transition);
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: var(--hover); color: var(--text-primary); }
+.icon-btn .material-icons-round { font-size: 22px; }
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: var(--topbar-h);
+  bottom: 0;
+  width: var(--nav-w);
+  background: var(--surface);
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width var(--transition);
+  z-index: 90;
+  padding-top: 8px;
+}
+body.sidebar-collapsed .sidebar { width: var(--nav-collapsed); }
+body.sidebar-collapsed .nav-item span:last-child { opacity: 0; pointer-events: none; }
+body.sidebar-collapsed .nav-section-label span:last-child,
+body.sidebar-collapsed .nav-section-label .nav-arrow { opacity: 0; }
+body.sidebar-collapsed .labels-list { display: none; }
+.sidebar-nav { padding: 8px 0; }
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px 12px 26px;
+  text-decoration: none;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 500;
+  border-radius: 0 24px 24px 0;
+  margin-right: 16px;
+  white-space: nowrap;
+  transition: background var(--transition);
+  cursor: pointer;
+}
+.nav-item:hover { background: var(--hover); }
+.nav-item.active { background: #fef0b7; color: #202124; }
+body.dark .nav-item.active { background: #41331a; color: #fde293; }
+.nav-item .material-icons-round { font-size: 20px; flex-shrink: 0; }
+.nav-section-label {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px 4px 26px;
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  user-select: none;
+  gap: 8px;
+}
+.nav-section-label .nav-arrow { font-size: 16px; margin-left: auto; transition: transform var(--transition); }
+.nav-section-label.open .nav-arrow { transform: rotate(180deg); }
+.labels-list { padding: 0; }
+.label-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 16px 10px 26px;
+  border-radius: 0 24px 24px 0;
+  margin-right: 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-primary);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background var(--transition);
+}
+.label-nav-item:hover { background: var(--hover); }
+.label-nav-item .material-icons-round { font-size: 18px; }
+
+/* ===== MAIN CONTENT ===== */
+.main-content {
+  margin-left: var(--nav-w);
+  margin-top: var(--topbar-h);
+  padding: 24px 24px 48px;
+  transition: margin-left var(--transition);
+  min-height: calc(100vh - var(--topbar-h));
+}
+body.sidebar-collapsed .main-content { margin-left: var(--nav-collapsed); }
+
+/* ===== CREATE NOTE ===== */
+.create-note-container {
+  max-width: 600px;
+  margin: 0 auto 24px;
+  position: relative;
+}
+.create-note-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  transition: box-shadow var(--transition);
+}
+.create-note-box:hover { box-shadow: var(--shadow-hover); }
+.create-note-collapsed {
+  display: flex;
+  align-items: center;
+  padding: 14px 16px;
+  cursor: text;
+  gap: 8px;
+}
+.placeholder-text {
+  flex: 1;
+  color: var(--text-secondary);
+  font-size: 15px;
+  font-weight: 500;
+}
+.create-note-icons { display: flex; gap: 4px; }
+.create-note-expanded { padding: 12px 16px 0; }
+.new-note-title {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+  outline: none;
+  padding: 4px 0 8px;
+}
+.new-note-title::placeholder { color: var(--text-hint); }
+.new-note-body {
+  width: 100%;
+  min-height: 48px;
+  max-height: 300px;
+  overflow-y: auto;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  padding: 4px 0;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.new-note-body:empty::before {
+  content: attr(placeholder);
+  color: var(--text-hint);
+  pointer-events: none;
+}
+
+/* ===== CHECKLIST ===== */
+.checklist-items { list-style: none; padding: 4px 0; }
+.checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+.checklist-item input[type="checkbox"] {
+  width: 16px; height: 16px;
+  cursor: pointer;
+  accent-color: var(--text-secondary);
+  flex-shrink: 0;
+}
+.checklist-item .item-text {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  padding: 2px 0;
+  min-width: 0;
+}
+.checklist-item.checked .item-text {
+  text-decoration: line-through;
+  color: var(--text-hint);
+}
+.checklist-item .delete-item-btn {
+  width: 28px; height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-hint);
+  opacity: 0;
+  transition: opacity var(--transition), background var(--transition);
+}
+.checklist-item:hover .delete-item-btn { opacity: 1; }
+.checklist-item .delete-item-btn:hover { background: var(--hover); color: var(--text-secondary); }
+.checklist-item .delete-item-btn .material-icons-round { font-size: 16px; }
+.add-checklist-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 0 8px;
+  color: var(--text-hint);
+  font-size: 14px;
+  cursor: pointer;
+}
+.add-checklist-item:hover { color: var(--text-secondary); }
+.add-checklist-item .material-icons-round { font-size: 16px; }
+
+/* ===== NOTE FOOTER ===== */
+.note-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0 4px;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+.note-actions-left { display: flex; gap: 2px; }
+.note-actions-right { display: flex; align-items: center; gap: 8px; }
+.action-btn { width: 36px; height: 36px; }
+.action-btn .material-icons-round { font-size: 18px; }
+.close-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 6px;
+  transition: background var(--transition);
+}
+.close-btn:hover { background: var(--hover); }
+
+/* ===== IMAGE PREVIEW ===== */
+.image-preview-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 0;
+}
+.image-thumb-wrapper {
+  position: relative;
+  display: inline-block;
+}
+.image-thumb {
+  width: 80px; height: 80px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.remove-image-btn {
+  position: absolute;
+  top: -6px; right: -6px;
+  width: 20px; height: 20px;
+  background: rgba(0,0,0,0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* ===== COLOR PICKER ===== */
+.color-picker-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-hover);
+  padding: 10px 12px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  z-index: 200;
+  width: 280px;
+}
+.color-option {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: transform var(--transition), box-shadow var(--transition);
+  flex-shrink: 0;
+}
+.color-option:hover { transform: scale(1.2); }
+.color-option.selected { box-shadow: 0 0 0 3px var(--accent2); }
+
+/* ===== REMINDER POPUP ===== */
+.reminder-popup {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-hover);
+  z-index: 200;
+  width: 240px;
+  overflow: hidden;
+}
+.reminder-popup-header {
+  padding: 12px 16px 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.reminder-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: background var(--transition);
+}
+.reminder-option:hover { background: var(--hover); }
+.reminder-option .material-icons-round { font-size: 20px; color: var(--text-secondary); }
+.reminder-sub { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.reminder-divider { height: 1px; background: var(--border); margin: 4px 0; }
+.custom-dt-inputs {
+  padding: 8px 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.custom-dt-inputs input {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-primary);
+  width: 100%;
+}
+.save-reminder-btn {
+  background: var(--accent2);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.save-reminder-btn:hover { opacity: 0.9; }
+
+/* ===== NOTES GRID ===== */
+.notes-section { margin-bottom: 24px; }
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--text-secondary);
+  padding: 0 4px 12px;
+  text-transform: uppercase;
+}
+.notes-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+}
+body.view-list .notes-grid {
+  grid-template-columns: 1fr;
+  max-width: 600px;
+}
+body.compact .notes-grid { gap: 10px; }
+
+/* ===== NOTE CARD ===== */
+.note-card {
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 0 0 1px var(--border);
+  cursor: pointer;
+  transition: box-shadow var(--transition), transform var(--transition);
+  position: relative;
+  overflow: visible;
+  animation: noteIn 0.2s ease;
+}
+@keyframes noteIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+.note-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+.note-card:hover .note-card-actions { opacity: 1; }
+.note-card:hover .pin-btn { opacity: 1; }
+.note-card-image {
+  width: 100%;
+  border-radius: var(--radius) var(--radius) 0 0;
+  max-height: 200px;
+  object-fit: cover;
+  display: block;
+}
+.note-card-body { padding: 12px 14px; }
+.note-card-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+  word-break: break-word;
+}
+.note-card-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.55;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 8;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+body.compact .note-card-text { -webkit-line-clamp: 4; }
+.note-card-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 14px 10px;
+}
+.note-label-chip {
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+}
+.note-reminder-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 14px 6px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  width: fit-content;
+}
+.note-reminder-chip .material-icons-round { font-size: 13px; }
+.note-reminder-chip.overdue { color: #d93025; background: #fce8e6; }
+body.dark .note-reminder-chip.overdue { background: #4a1c19; color: #f28b82; }
+.note-checklist-preview { padding: 0 14px 8px; }
+.note-checklist-preview .checklist-prev-item {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 2px 0;
+}
+.note-checklist-preview .checklist-prev-item .material-icons-round { font-size: 15px; }
+.note-checklist-preview .checklist-prev-item.done { text-decoration: line-through; opacity: 0.6; }
+.note-card-actions {
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  right: 8px;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  opacity: 0;
+  transition: opacity var(--transition);
+  pointer-events: none;
+  background: var(--surface);
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 4px 0;
+}
+.note-card:hover .note-card-actions { pointer-events: all; }
+.note-card-actions .icon-btn { width: 32px; height: 32px; }
+.note-card-actions .icon-btn .material-icons-round { font-size: 17px; }
+.pin-btn {
+  position: absolute;
+  top: 8px; right: 8px;
+  opacity: 0;
+  transition: opacity var(--transition);
+  background: var(--surface) !important;
+}
+.note-card.pinned .pin-btn { opacity: 1; }
+.note-card-inner-pad { padding-bottom: 44px; }
+
+/* ===== MORE MENU ===== */
+.more-menu {
+  position: absolute;
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-hover);
+  z-index: 300;
+  min-width: 200px;
+  overflow: hidden;
+}
+.more-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-primary);
+  transition: background var(--transition);
+}
+.more-item:hover { background: var(--hover); }
+.more-item .material-icons-round { font-size: 18px; color: var(--text-secondary); }
+.card-more-menu { position: absolute; bottom: 36px; right: 0; }
+
+/* ===== EMPTY STATE ===== */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  text-align: center;
+  color: var(--text-secondary);
+}
+.empty-icon { font-size: 96px !important; color: var(--border); margin-bottom: 16px; }
+.empty-state p { font-size: 18px; font-weight: 500; }
+
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: fadeIn 0.15s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.modal-note {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 580px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  animation: slideUp 0.2s ease;
+  position: relative;
+}
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+.modal-title {
+  width: 100%;
+  border: none;
+  background: transparent;
+  font-family: var(--font);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-primary);
+  outline: none;
+  padding: 16px 16px 8px;
+}
+.modal-title::placeholder { color: var(--text-hint); }
+.modal-body {
+  padding: 0 16px 8px;
+  min-height: 60px;
+  max-height: 320px;
+  overflow-y: auto;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  outline: none;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.modal-body:empty::before {
+  content: attr(placeholder);
+  color: var(--text-hint);
+  pointer-events: none;
+}
+.modal-checklist { padding: 0 16px 8px; }
+.modal-footer { padding: 0 8px 8px; border-top: 1px solid var(--border); margin-top: 8px; }
+.modal-edited-time { font-size: 12px; color: var(--text-hint); }
+.modal-reminder-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 16px 8px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 4px 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  width: fit-content;
+  cursor: pointer;
+}
+.modal-reminder-badge .material-icons-round { font-size: 14px; }
+.modal-reminder-badge.overdue { background: #fce8e6; color: #d93025; }
+body.dark .modal-reminder-badge.overdue { background: #4a1c19; color: #f28b82; }
+.modal-labels-area {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0 16px 8px;
+}
+.modal-label-chip {
+  display: flex; align-items: center; gap: 4px;
+  background: var(--surface2);
+  border-radius: 12px;
+  padding: 3px 10px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+.modal-label-chip .material-icons-round { font-size: 13px; }
+.modal-color-picker { top: auto; bottom: 48px; left: 0; transform: none; }
+.modal-reminder-popup { top: auto; bottom: 48px; left: 0; transform: none; }
+
+/* ===== LABEL PICKER ===== */
+.label-picker {
+  position: absolute;
+  bottom: 48px; left: 0;
+  background: var(--surface);
+  border-radius: 8px;
+  box-shadow: var(--shadow-hover);
+  z-index: 300;
+  width: 240px;
+  overflow: hidden;
+}
+.label-picker-header {
+  padding: 10px 16px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.label-picker-search {
+  width: calc(100% - 32px);
+  margin: 0 16px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-primary);
+  outline: none;
+  display: block;
+}
+.label-picker-list { max-height: 180px; overflow-y: auto; }
+.label-picker-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text-primary);
+  transition: background var(--transition);
+}
+.label-picker-row:hover { background: var(--hover); }
+.label-picker-row .material-icons-round { font-size: 18px; color: var(--text-secondary); }
+.label-picker-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--accent2);
+  border-top: 1px solid var(--border);
+  transition: background var(--transition);
+}
+.label-picker-create:hover { background: var(--hover); }
+.label-picker-create .material-icons-round { font-size: 18px; }
+
+/* ===== SETTINGS MODAL ===== */
+.settings-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.settings-modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  width: 100%;
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  font-size: 18px;
+  font-weight: 700;
+}
+.settings-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+}
+.settings-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 12px;
+}
+.settings-row {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.settings-row label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+.manage-label-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+}
+.manage-label-input {
+  flex: 1;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-family: var(--font);
+  font-size: 14px;
+  background: var(--bg);
+  color: var(--text-primary);
+  outline: none;
+}
+.add-label-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--accent2);
+  padding: 6px 0;
+}
+.add-label-btn .material-icons-round { font-size: 18px; }
+.add-label-btn:hover { text-decoration: underline; }
+.danger-zone { display: flex; flex-direction: column; gap: 8px; }
+.danger-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 14px;
+  color: var(--text-primary);
+  padding: 8px 14px;
+  border-radius: 8px;
+  transition: background var(--transition);
+}
+.danger-btn:hover { background: var(--hover); }
+.danger-btn .material-icons-round { font-size: 18px; }
+.red-btn { color: #d93025; border-color: #d93025; }
+.red-btn:hover { background: #fce8e6; }
+body.dark .red-btn:hover { background: #4a1c19; }
+
+/* ===== CONFIRM MODAL ===== */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.confirm-modal {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 380px;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+}
+.confirm-modal p { font-size: 15px; color: var(--text-primary); margin-bottom: 20px; line-height: 1.5; }
+.confirm-actions { display: flex; justify-content: flex-end; gap: 12px; }
+.danger-confirm-btn {
+  background: #d93025;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.danger-confirm-btn:hover { background: #b52b23; }
+
+/* ===== TOAST ===== */
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(80px);
+  background: #323232;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 9999;
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+}
+.toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+/* ===== SEARCH HIGHLIGHT ===== */
+.search-match {
+  background: rgba(251,188,4,0.4);
+  border-radius: 2px;
+}
+
+/* ===== TRASH BANNER ===== */
+.trash-banner {
+  background: var(--surface2);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  font-size: 14px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.trash-banner button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent2);
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+.trash-banner button:hover { background: var(--hover); }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--nav-w) !important;
+    box-shadow: 4px 0 16px rgba(0,0,0,0.15);
+  }
+  body.sidebar-open .sidebar { transform: translateX(0); }
+  .main-content { margin-left: 0 !important; }
+  .notes-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  .color-picker-popup { width: 220px; }
+}
+@media (max-width: 480px) {
+  .nav-center { display: none; }
+  .notes-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .create-note-container { margin: 0 0 16px; }
+}
+  </style>
+</head>
+<body>
+
+<!-- TOP NAVBAR -->
+<header class="navbar" id="navbar">
+  <div class="nav-left">
+    <button class="icon-btn" id="menuToggleBtn" title="Main menu">
+      <span class="material-icons-round">menu</span>
+    </button>
+    <div class="logo">
+      <span class="logo-icon">📒</span>
+      <span class="logo-text">KeepIt</span>
+    </div>
+  </div>
+  <div class="nav-center">
+    <div class="search-bar" id="searchBar">
+      <span class="material-icons-round search-icon">search</span>
+      <input type="text" id="searchInput" placeholder="Search your notes" autocomplete="off" />
+      <button class="icon-btn search-clear" id="searchClear" style="display:none" title="Clear search">
+        <span class="material-icons-round">close</span>
+      </button>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="icon-btn" id="refreshBtn" title="Refresh">
+      <span class="material-icons-round">refresh</span>
+    </button>
+    <button class="icon-btn" id="viewToggleBtn" title="Toggle view">
+      <span class="material-icons-round" id="viewIcon">view_agenda</span>
+    </button>
+    <button class="icon-btn" id="settingsBtn" title="Settings">
+      <span class="material-icons-round">settings</span>
+    </button>
+    <div class="avatar" title="You (Local)">Y</div>
+  </div>
+</header>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-view="notes" href="#">
+      <span class="material-icons-round">lightbulb</span>
+      <span>Notes</span>
+    </a>
+    <a class="nav-item" data-view="reminders" href="#">
+      <span class="material-icons-round">notifications</span>
+      <span>Reminders</span>
+    </a>
+    <div class="nav-section-label" id="labelsToggle">
+      <span>Labels</span>
+      <span class="material-icons-round nav-arrow">expand_more</span>
+    </div>
+    <div id="labelsList" class="labels-list"></div>
+    <a class="nav-item" data-view="archive" href="#">
+      <span class="material-icons-round">archive</span>
+      <span>Archive</span>
+    </a>
+    <a class="nav-item" data-view="trash" href="#">
+      <span class="material-icons-round">delete</span>
+      <span>Trash</span>
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main-content" id="mainContent">
+  <div class="create-note-container" id="createNoteContainer">
+    <div class="create-note-box" id="createNoteBox">
+      <div class="create-note-collapsed" id="createNoteCollapsed">
+        <span class="placeholder-text">Take a note...</span>
+        <div class="create-note-icons">
+          <button class="icon-btn" id="newChecklistBtn" title="New list"><span class="material-icons-round">check_box</span></button>
+          <button class="icon-btn" id="newDrawingBtn" title="New note with drawing"><span class="material-icons-round">brush</span></button>
+          <button class="icon-btn" id="newImageBtn" title="New note with image"><span class="material-icons-round">image</span></button>
+        </div>
+      </div>
+      <div class="create-note-expanded" id="createNoteExpanded" style="display:none">
+        <input type="text" id="newNoteTitle" placeholder="Title" class="new-note-title" autocomplete="off" />
+        <div id="newNoteBody" class="new-note-body" contenteditable="true" placeholder="Take a note..."></div>
+        <ul class="checklist-items" id="newChecklist" style="display:none"></ul>
+        <div class="image-preview-container" id="newImagePreview"></div>
+        <div class="note-footer">
+          <div class="note-actions-left">
+            <button class="icon-btn action-btn" id="addReminderBtn" title="Remind me"><span class="material-icons-round">add_alert</span></button>
+            <button class="icon-btn action-btn" id="addColorBtn" title="Background options"><span class="material-icons-round">palette</span></button>
+            <button class="icon-btn action-btn" id="addImageInputBtn" title="Add image"><span class="material-icons-round">image</span></button>
+            <input type="file" id="imageFileInput" accept="image/*" style="display:none" />
+            <button class="icon-btn action-btn" id="addChecklistToNoteBtn" title="Add checklist"><span class="material-icons-round">check_box</span></button>
+          </div>
+          <div class="note-actions-right">
+            <button class="close-btn" id="closeNewNoteBtn">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="color-picker-popup" id="colorPickerPopup" style="display:none">
+      <div class="color-option" data-color="default" title="Default" style="background:#fff;border:2px solid #ccc"></div>
+      <div class="color-option" data-color="#faafa8" title="Flamingo" style="background:#faafa8"></div>
+      <div class="color-option" data-color="#f39f76" title="Tangerine" style="background:#f39f76"></div>
+      <div class="color-option" data-color="#fff8b8" title="Banana" style="background:#fff8b8"></div>
+      <div class="color-option" data-color="#e2f6d3" title="Sage" style="background:#e2f6d3"></div>
+      <div class="color-option" data-color="#b4ddd3" title="Teal" style="background:#b4ddd3"></div>
+      <div class="color-option" data-color="#d4e4ed" title="Denim" style="background:#d4e4ed"></div>
+      <div class="color-option" data-color="#aeccdc" title="Cerulean" style="background:#aeccdc"></div>
+      <div class="color-option" data-color="#d3bfdb" title="Grape" style="background:#d3bfdb"></div>
+      <div class="color-option" data-color="#f6e2dd" title="Blush" style="background:#f6e2dd"></div>
+      <div class="color-option" data-color="#e9e3d4" title="Sand" style="background:#e9e3d4"></div>
+      <div class="color-option" data-color="#efeff1" title="Fog" style="background:#efeff1"></div>
+    </div>
+    <div class="reminder-popup" id="reminderPopup" style="display:none">
+      <div class="reminder-popup-header">Remind me</div>
+      <div class="reminder-option" data-preset="later-today"><span class="material-icons-round">wb_sunny</span><div><div>Later today</div><div class="reminder-sub" id="laterTodaySub"></div></div></div>
+      <div class="reminder-option" data-preset="tomorrow"><span class="material-icons-round">nights_stay</span><div><div>Tomorrow</div><div class="reminder-sub" id="tomorrowSub"></div></div></div>
+      <div class="reminder-option" data-preset="next-week"><span class="material-icons-round">next_week</span><div><div>Next week</div><div class="reminder-sub" id="nextWeekSub"></div></div></div>
+      <div class="reminder-divider"></div>
+      <div class="reminder-option custom-reminder"><span class="material-icons-round">calendar_today</span><div>Pick date &amp; time</div></div>
+      <div class="custom-dt-inputs" id="customDtInputs" style="display:none">
+        <input type="date" id="reminderDate" />
+        <input type="time" id="reminderTime" />
+        <button class="save-reminder-btn" id="saveReminderBtn">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="notes-section" id="pinnedSection" style="display:none">
+    <div class="section-label">PINNED</div>
+    <div class="notes-grid" id="pinnedGrid"></div>
+  </div>
+  <div class="notes-section" id="othersSection">
+    <div class="section-label" id="othersSectionLabel" style="display:none">OTHERS</div>
+    <div class="notes-grid" id="notesGrid"></div>
+  </div>
+  <div class="empty-state" id="emptyState" style="display:none"><span class="material-icons-round empty-icon">lightbulb</span><p>Notes you add appear here</p></div>
+  <div class="empty-state" id="emptyArchiveState" style="display:none"><span class="material-icons-round empty-icon">archive</span><p>Your archived notes appear here</p></div>
+  <div class="empty-state" id="emptyTrashState" style="display:none"><span class="material-icons-round empty-icon">delete</span><p>No notes in Trash</p></div>
+  <div class="notes-section" id="remindersSection" style="display:none"><div class="notes-grid" id="remindersGrid"></div></div>
+  <div class="empty-state" id="emptyRemindersState" style="display:none"><span class="material-icons-round empty-icon">notifications</span><p>Notes with upcoming reminders appear here</p></div>
+</main>
+
+<!-- NOTE EDIT MODAL -->
+<div class="modal-overlay" id="modalOverlay" style="display:none">
+  <div class="modal-note" id="modalNote">
+    <input type="text" id="modalTitle" placeholder="Title" class="modal-title" autocomplete="off" />
+    <div id="modalBody" class="modal-body" contenteditable="true" placeholder="Note..."></div>
+    <ul class="checklist-items modal-checklist" id="modalChecklist" style="display:none"></ul>
+    <div class="image-preview-container" id="modalImagePreview"></div>
+    <div class="modal-reminder-badge" id="modalReminderBadge" style="display:none"></div>
+    <div class="modal-labels-area" id="modalLabelsArea"></div>
+    <div class="note-footer modal-footer">
+      <div class="note-actions-left">
+        <button class="icon-btn action-btn" id="modalReminderBtn" title="Remind me"><span class="material-icons-round">add_alert</span></button>
+        <button class="icon-btn action-btn" id="modalColorBtn" title="Background options"><span class="material-icons-round">palette</span></button>
+        <button class="icon-btn action-btn" id="modalAddImageBtn" title="Add image"><span class="material-icons-round">image</span></button>
+        <input type="file" id="modalImageInput" accept="image/*" style="display:none" />
+        <button class="icon-btn action-btn" id="modalChecklistBtn" title="Toggle checklist"><span class="material-icons-round">check_box</span></button>
+        <button class="icon-btn action-btn" id="modalLabelBtn" title="Add label"><span class="material-icons-round">label</span></button>
+        <button class="icon-btn action-btn" id="modalArchiveBtn" title="Archive"><span class="material-icons-round">archive</span></button>
+        <button class="icon-btn action-btn" id="modalMoreBtn" title="More"><span class="material-icons-round">more_vert</span></button>
+      </div>
+      <div class="note-actions-right">
+        <span class="modal-edited-time" id="modalEditedTime"></span>
+        <button class="close-btn" id="modalCloseBtn">Close</button>
+      </div>
+    </div>
+    <div class="color-picker-popup modal-color-picker" id="modalColorPicker" style="display:none">
+      <div class="color-option" data-color="default" title="Default" style="background:#fff;border:2px solid #ccc"></div>
+      <div class="color-option" data-color="#faafa8" title="Flamingo" style="background:#faafa8"></div>
+      <div class="color-option" data-color="#f39f76" title="Tangerine" style="background:#f39f76"></div>
+      <div class="color-option" data-color="#fff8b8" title="Banana" style="background:#fff8b8"></div>
+      <div class="color-option" data-color="#e2f6d3" title="Sage" style="background:#e2f6d3"></div>
+      <div class="color-option" data-color="#b4ddd3" title="Teal" style="background:#b4ddd3"></div>
+      <div class="color-option" data-color="#d4e4ed" title="Denim" style="background:#d4e4ed"></div>
+      <div class="color-option" data-color="#aeccdc" title="Cerulean" style="background:#aeccdc"></div>
+      <div class="color-option" data-color="#d3bfdb" title="Grape" style="background:#d3bfdb"></div>
+      <div class="color-option" data-color="#f6e2dd" title="Blush" style="background:#f6e2dd"></div>
+      <div class="color-option" data-color="#e9e3d4" title="Sand" style="background:#e9e3d4"></div>
+      <div class="color-option" data-color="#efeff1" title="Fog" style="background:#efeff1"></div>
+    </div>
+    <div class="more-menu" id="modalMoreMenu" style="display:none">
+      <div class="more-item" id="modalDeleteBtn"><span class="material-icons-round">delete</span> Delete note</div>
+      <div class="more-item" id="modalAddLabelMenuBtn"><span class="material-icons-round">label</span> Add label</div>
+      <div class="more-item" id="modalDuplicateBtn"><span class="material-icons-round">file_copy</span> Make a copy</div>
+      <div class="more-item" id="modalCopyTxtBtn"><span class="material-icons-round">content_copy</span> Copy to clipboard</div>
+    </div>
+    <div class="reminder-popup modal-reminder-popup" id="modalReminderPopup" style="display:none">
+      <div class="reminder-popup-header">Remind me</div>
+      <div class="reminder-option" data-preset="later-today"><span class="material-icons-round">wb_sunny</span><div><div>Later today</div><div class="reminder-sub" id="mLaterTodaySub"></div></div></div>
+      <div class="reminder-option" data-preset="tomorrow"><span class="material-icons-round">nights_stay</span><div><div>Tomorrow</div><div class="reminder-sub" id="mTomorrowSub"></div></div></div>
+      <div class="reminder-option" data-preset="next-week"><span class="material-icons-round">next_week</span><div><div>Next week</div><div class="reminder-sub" id="mNextWeekSub"></div></div></div>
+      <div class="reminder-divider"></div>
+      <div class="reminder-option custom-reminder" id="mCustomReminder"><span class="material-icons-round">calendar_today</span><div>Pick date &amp; time</div></div>
+      <div class="reminder-option remove-reminder" id="mRemoveReminder" style="display:none"><span class="material-icons-round">notifications_off</span><div>Remove reminder</div></div>
+      <div class="custom-dt-inputs" id="mCustomDtInputs" style="display:none">
+        <input type="date" id="mReminderDate" />
+        <input type="time" id="mReminderTime" />
+        <button class="save-reminder-btn" id="mSaveReminderBtn">Save</button>
+      </div>
+    </div>
+    <div class="label-picker" id="modalLabelPicker" style="display:none">
+      <div class="label-picker-header">Label note</div>
+      <input type="text" class="label-picker-search" id="labelPickerSearch" placeholder="Enter label name" autocomplete="off" />
+      <div class="label-picker-list" id="labelPickerList"></div>
+      <div class="label-picker-create" id="labelPickerCreate" style="display:none">
+        <span class="material-icons-round">add</span> Create "<span id="labelPickerCreateName"></span>"
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="settings-modal-overlay" id="settingsOverlay" style="display:none">
+  <div class="settings-modal">
+    <div class="settings-header">
+      <span>Settings</span>
+      <button class="icon-btn" id="settingsCloseBtn"><span class="material-icons-round">close</span></button>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">Display density</div>
+      <div class="settings-row">
+        <label><input type="radio" name="density" value="comfortable" id="densityComfortable"> Comfortable</label>
+        <label><input type="radio" name="density" value="compact" id="densityCompact"> Compact</label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">Theme</div>
+      <div class="settings-row">
+        <label><input type="radio" name="theme" value="light" id="themeLight"> Light</label>
+        <label><input type="radio" name="theme" value="dark" id="themeDark"> Dark</label>
+        <label><input type="radio" name="theme" value="system" id="themeSystem"> System default</label>
+      </div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-label">Manage labels</div>
+      <div id="manageLabels"></div>
+      <button class="add-label-btn" id="addNewLabelBtn"><span class="material-icons-round">add</span> Create new label</button>
+    </div>
+    <div class="settings-section danger-zone">
+      <div class="settings-label">Data</div>
+      <button class="danger-btn" id="exportNotesBtn"><span class="material-icons-round">download</span> Export all notes (JSON)</button>
+      <button class="danger-btn" id="importNotesBtn"><span class="material-icons-round">upload</span> Import notes (JSON)</button>
+      <input type="file" id="importFileInput" accept=".json" style="display:none" />
+      <button class="danger-btn red-btn" id="clearAllBtn"><span class="material-icons-round">delete_forever</span> Clear all data</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="confirm-overlay" id="confirmOverlay" style="display:none">
+  <div class="confirm-modal">
+    <p id="confirmText">Are you sure?</p>
+    <div class="confirm-actions">
+      <button class="close-btn" id="confirmCancel">Cancel</button>
+      <button class="danger-confirm-btn" id="confirmOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ===========================
+// KEEPIT - script.js
+// Google Keep Clone (Local)
+// ===========================
+
+let notes = [];
+let labels = [];
+let currentView = 'notes';
+let isListView = false;
+let currentEditingId = null;
+let newNoteColor = 'default';
+let newNoteImages = [];
+let newNoteReminder = null;
+let pendingConfirmCallback = null;
+let searchQuery = '';
+let labelsExpanded = true;
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function now() { return new Date().toISOString(); }
+function fmtDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  const today = new Date();
+  const tomorrow = new Date(today); tomorrow.setDate(today.getDate() + 1);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if (d.toDateString() === today.toDateString()) return `Today ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+  if (d.toDateString() === tomorrow.toDateString()) return `Tomorrow ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+  return `${days[d.getDay()]} ${d.getDate()} ${months[d.getMonth()]} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}`;
+}
+function isOverdue(iso) { return iso && new Date(iso) < new Date(); }
+function sanitize(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+function highlightText(text, query) {
+  if (!query) return sanitize(text);
+  const safe = sanitize(text);
+  const esc = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  return safe.replace(new RegExp(esc, 'gi'), m => `<mark class="search-match">${m}</mark>`);
+}
+
+function save() {
+  localStorage.setItem('keepit_notes', JSON.stringify(notes));
+  localStorage.setItem('keepit_labels', JSON.stringify(labels));
+  checkReminders();
+}
+function load() {
+  try { notes = JSON.parse(localStorage.getItem('keepit_notes')) || []; } catch { notes = []; }
+  try { labels = JSON.parse(localStorage.getItem('keepit_labels')) || []; } catch { labels = []; }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  load();
+  autoCleanTrash();
+  applyTheme();
+  applyDensity();
+  renderAll();
+  bindEvents();
+  setReminderPresetTimes();
+  scheduleReminderCheck();
+});
+
+function applyTheme() {
+  const t = localStorage.getItem('keepit_theme') || 'system';
+  document.getElementById('themeLight').checked = t === 'light';
+  document.getElementById('themeDark').checked = t === 'dark';
+  document.getElementById('themeSystem').checked = t === 'system';
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  document.body.classList.toggle('dark', t === 'dark' || (t === 'system' && prefersDark));
+}
+function applyDensity() {
+  const d = localStorage.getItem('keepit_density') || 'comfortable';
+  document.getElementById('densityComfortable').checked = d === 'comfortable';
+  document.getElementById('densityCompact').checked = d === 'compact';
+  document.body.classList.toggle('compact', d === 'compact');
+}
+
+function renderAll() { renderSidebarLabels(); renderNotes(); renderManageLabels(); }
+
+function renderSidebarLabels() {
+  const list = document.getElementById('labelsList');
+  list.innerHTML = '';
+  labels.forEach(l => {
+    const a = document.createElement('div');
+    a.className = 'label-nav-item nav-item';
+    a.dataset.view = `label:${l}`;
+    a.innerHTML = `<span class="material-icons-round">label</span><span>${sanitize(l)}</span>`;
+    a.addEventListener('click', e => { e.preventDefault(); setView(`label:${l}`); });
+    list.appendChild(a);
+  });
+}
+
+function renderNotes() {
+  const pinnedGrid = document.getElementById('pinnedGrid');
+  const notesGrid = document.getElementById('notesGrid');
+  const pinnedSection = document.getElementById('pinnedSection');
+  const othersSection = document.getElementById('othersSection');
+  const othersSectionLabel = document.getElementById('othersSectionLabel');
+  const emptyState = document.getElementById('emptyState');
+  const emptyArchiveState = document.getElementById('emptyArchiveState');
+  const emptyTrashState = document.getElementById('emptyTrashState');
+  const emptyRemindersState = document.getElementById('emptyRemindersState');
+  const createNoteContainer = document.getElementById('createNoteContainer');
+  const remindersSection = document.getElementById('remindersSection');
+  const remindersGrid = document.getElementById('remindersGrid');
+
+  [emptyState, emptyArchiveState, emptyTrashState, emptyRemindersState].forEach(e => e.style.display = 'none');
+  pinnedSection.style.display = 'none';
+  othersSection.style.display = 'none';
+  remindersSection.style.display = 'none';
+  createNoteContainer.style.display = 'none';
+  const oldBanner = document.querySelector('.trash-banner');
+  if (oldBanner) oldBanner.remove();
+
+  if (currentView === 'notes') {
+    createNoteContainer.style.display = '';
+    let filtered = notes.filter(n => !n.archived && !n.trashed);
+    if (searchQuery) filtered = filtered.filter(n => matchesSearch(n));
+    const pinned = filtered.filter(n => n.pinned);
+    const others = filtered.filter(n => !n.pinned);
+    pinnedGrid.innerHTML = ''; notesGrid.innerHTML = '';
+    if (pinned.length) { pinnedSection.style.display = ''; pinned.forEach(n => pinnedGrid.appendChild(createNoteCard(n))); }
+    othersSection.style.display = '';
+    othersSectionLabel.style.display = pinned.length ? '' : 'none';
+    others.forEach(n => notesGrid.appendChild(createNoteCard(n)));
+    if (!filtered.length) emptyState.style.display = '';
+
+  } else if (currentView === 'archive') {
+    let filtered = notes.filter(n => n.archived && !n.trashed);
+    if (searchQuery) filtered = filtered.filter(n => matchesSearch(n));
+    notesGrid.innerHTML = ''; othersSection.style.display = ''; othersSectionLabel.style.display = 'none';
+    filtered.forEach(n => notesGrid.appendChild(createNoteCard(n)));
+    if (!filtered.length) emptyArchiveState.style.display = '';
+
+  } else if (currentView === 'trash') {
+    const filtered = notes.filter(n => n.trashed);
+    notesGrid.innerHTML = ''; othersSection.style.display = ''; othersSectionLabel.style.display = 'none';
+    if (filtered.length) {
+      const banner = document.createElement('div');
+      banner.className = 'trash-banner';
+      banner.innerHTML = `<span>Notes in Trash are deleted after 7 days</span><button id="emptyTrashBtn">Empty Trash</button>`;
+      othersSection.insertBefore(banner, notesGrid);
+      document.getElementById('emptyTrashBtn').addEventListener('click', confirmEmptyTrash);
+    }
+    filtered.forEach(n => notesGrid.appendChild(createNoteCard(n)));
+    if (!filtered.length) emptyTrashState.style.display = '';
+
+  } else if (currentView === 'reminders') {
+    let filtered = notes.filter(n => !n.archived && !n.trashed && n.reminder);
+    if (searchQuery) filtered = filtered.filter(n => matchesSearch(n));
+    remindersGrid.innerHTML = ''; remindersSection.style.display = '';
+    filtered.forEach(n => remindersGrid.appendChild(createNoteCard(n)));
+    if (!filtered.length) emptyRemindersState.style.display = '';
+
+  } else if (currentView.startsWith('label:')) {
+    const lbl = currentView.slice(6);
+    createNoteContainer.style.display = '';
+    let filtered = notes.filter(n => !n.archived && !n.trashed && n.labels && n.labels.includes(lbl));
+    if (searchQuery) filtered = filtered.filter(n => matchesSearch(n));
+    notesGrid.innerHTML = ''; othersSection.style.display = ''; othersSectionLabel.style.display = 'none';
+    filtered.forEach(n => notesGrid.appendChild(createNoteCard(n)));
+    if (!filtered.length) emptyState.style.display = '';
+  }
+}
+
+function matchesSearch(note) {
+  const q = searchQuery.toLowerCase();
+  if ((note.title || '').toLowerCase().includes(q)) return true;
+  if ((note.body || '').toLowerCase().includes(q)) return true;
+  if (note.checklist && note.checklist.some(i => i.text.toLowerCase().includes(q))) return true;
+  if (note.labels && note.labels.some(l => l.toLowerCase().includes(q))) return true;
+  return false;
+}
+
+function createNoteCard(note) {
+  const card = document.createElement('div');
+  card.className = `note-card${note.pinned ? ' pinned' : ''}`;
+  card.dataset.id = note.id;
+  if (note.color && note.color !== 'default') card.style.background = note.color;
+
+  let html = '';
+  if (note.images && note.images.length) html += `<img class="note-card-image" src="${note.images[0]}" alt="Note image" />`;
+  html += `<div class="note-card-inner-pad">`;
+  if (note.reminder) {
+    const overdue = isOverdue(note.reminder);
+    html += `<div class="note-reminder-chip${overdue ? ' overdue' : ''}"><span class="material-icons-round">${overdue ? 'notifications_off' : 'notifications'}</span>${fmtDate(note.reminder)}</div>`;
+  }
+  html += `<div class="note-card-body">`;
+  if (note.title) html += `<div class="note-card-title">${highlightText(note.title, searchQuery)}</div>`;
+  if (note.checklist && note.checklist.length) {
+    const shown = note.checklist.slice(0, 6);
+    const rest = note.checklist.length - shown.length;
+    html += `</div><div class="note-checklist-preview">`;
+    shown.forEach(item => {
+      html += `<div class="checklist-prev-item${item.checked ? ' done' : ''}"><span class="material-icons-round">${item.checked ? 'check_box' : 'check_box_outline_blank'}</span>${highlightText(item.text, searchQuery)}</div>`;
+    });
+    if (rest > 0) html += `<div class="checklist-prev-item" style="color:var(--text-hint)">+${rest} more items</div>`;
+    html += `</div>`;
+  } else {
+    if (note.body) html += `<div class="note-card-text">${highlightText(note.body, searchQuery)}</div>`;
+    html += `</div>`;
+  }
+  if (note.labels && note.labels.length) {
+    html += `<div class="note-card-labels">`;
+    note.labels.forEach(l => html += `<div class="note-label-chip">${sanitize(l)}</div>`);
+    html += `</div>`;
+  }
+  if (note.images && note.images.length > 1) html += `<div style="padding:0 14px 8px;font-size:12px;color:var(--text-secondary)">+${note.images.length-1} more image${note.images.length-1>1?'s':''}</div>`;
+  html += `</div>`;
+
+  html += `<div class="note-card-actions">`;
+  if (!note.trashed) {
+    if (note.archived) {
+      html += `<button class="icon-btn action-btn" data-action="unarchive" title="Unarchive"><span class="material-icons-round">unarchive</span></button>`;
+    } else {
+      html += `<button class="icon-btn action-btn" data-action="remind" title="Remind me"><span class="material-icons-round">add_alert</span></button>`;
+      html += `<button class="icon-btn action-btn" data-action="color" title="Background options"><span class="material-icons-round">palette</span></button>`;
+      html += `<button class="icon-btn action-btn" data-action="archive" title="Archive"><span class="material-icons-round">archive</span></button>`;
+    }
+    html += `<button class="icon-btn action-btn" data-action="more" title="More"><span class="material-icons-round">more_vert</span></button>`;
+  } else {
+    html += `<button class="icon-btn action-btn" data-action="restore" title="Restore"><span class="material-icons-round">restore_from_trash</span></button>`;
+    html += `<button class="icon-btn action-btn" data-action="delete-forever" title="Delete forever"><span class="material-icons-round">delete_forever</span></button>`;
+  }
+  html += `</div>`;
+  if (!note.trashed && !note.archived) {
+    html += `<button class="icon-btn pin-btn" data-action="pin" title="${note.pinned ? 'Unpin' : 'Pin note'}"><span class="material-icons-round">push_pin</span></button>`;
+  }
+
+  card.innerHTML = html;
+  card.addEventListener('click', e => {
+    const action = e.target.closest('[data-action]');
+    if (action) { e.stopPropagation(); handleCardAction(note.id, action.dataset.action, action, e); return; }
+    if (!note.trashed) openModal(note.id);
+  });
+  return card;
+}
+
+function handleCardAction(id, action, btn, e) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  closeAllPopups();
+  if (action === 'pin') { note.pinned = !note.pinned; save(); renderNotes(); showToast(note.pinned ? 'Note pinned' : 'Note unpinned'); }
+  else if (action === 'archive') { note.archived = true; note.pinned = false; save(); renderNotes(); showToast('Note archived'); }
+  else if (action === 'unarchive') { note.archived = false; save(); renderNotes(); showToast('Note unarchived'); }
+  else if (action === 'restore') { note.trashed = false; save(); renderNotes(); showToast('Note restored'); }
+  else if (action === 'delete-forever') {
+    pendingConfirmCallback = () => { notes = notes.filter(n => n.id !== id); save(); renderNotes(); showToast('Note deleted forever'); };
+    document.getElementById('confirmText').textContent = 'Delete this note forever?';
+    document.getElementById('confirmOverlay').style.display = 'flex';
+  } else if (action === 'color') { showCardColorPicker(id, btn); }
+  else if (action === 'remind') { showCardReminderPopup(id, btn); }
+  else if (action === 'more') { showCardMoreMenu(id, btn); }
+}
+
+function showCardColorPicker(id, btn) {
+  closeAllPopups();
+  const picker = document.createElement('div');
+  picker.className = 'color-picker-popup card-color-picker-popup';
+  Object.assign(picker.style, { position:'absolute', zIndex:'400', bottom:'44px', left:'0', top:'auto', transform:'none', width:'280px' });
+  const colors = [
+    {c:'default',bg:'#fff',border:'2px solid #ccc',title:'Default'},
+    {c:'#faafa8',bg:'#faafa8',title:'Flamingo'},{c:'#f39f76',bg:'#f39f76',title:'Tangerine'},
+    {c:'#fff8b8',bg:'#fff8b8',title:'Banana'},{c:'#e2f6d3',bg:'#e2f6d3',title:'Sage'},
+    {c:'#b4ddd3',bg:'#b4ddd3',title:'Teal'},{c:'#d4e4ed',bg:'#d4e4ed',title:'Denim'},
+    {c:'#aeccdc',bg:'#aeccdc',title:'Cerulean'},{c:'#d3bfdb',bg:'#d3bfdb',title:'Grape'},
+    {c:'#f6e2dd',bg:'#f6e2dd',title:'Blush'},{c:'#e9e3d4',bg:'#e9e3d4',title:'Sand'},
+    {c:'#efeff1',bg:'#efeff1',title:'Fog'},
+  ];
+  colors.forEach(({c,bg,border,title}) => {
+    const opt = document.createElement('div');
+    opt.className = 'color-option'; opt.style.background = bg; opt.title = title;
+    if (border) opt.style.border = border;
+    opt.addEventListener('click', () => { const n = notes.find(x => x.id === id); if (n) { n.color = c; save(); renderNotes(); } closeAllPopups(); });
+    picker.appendChild(opt);
+  });
+  const card = btn.closest('.note-card');
+  card.style.position = 'relative';
+  card.appendChild(picker);
+  setTimeout(() => document.addEventListener('click', closeAllPopups, {once:true}), 50);
+}
+
+function showCardReminderPopup(id, btn) {
+  closeAllPopups();
+  const card = btn.closest('.note-card');
+  const popup = buildReminderPopupEl(dt => {
+    const n = notes.find(x => x.id === id);
+    if (n) { n.reminder = dt; save(); renderNotes(); }
+    closeAllPopups();
+    if (dt) showToast('Reminder set');
+  }, false);
+  Object.assign(popup.style, { position:'absolute', bottom:'44px', left:'0', zIndex:'400' });
+  card.appendChild(popup);
+  setTimeout(() => document.addEventListener('click', closeAllPopups, {once:true}), 50);
+}
+
+function buildReminderPopupEl(onSave, showRemove) {
+  const popup = document.createElement('div');
+  popup.className = 'reminder-popup';
+  const n2 = new Date();
+  const later = new Date(n2); later.setHours(later.getHours()+3,0,0,0);
+  const tmr = new Date(n2); tmr.setDate(tmr.getDate()+1); tmr.setHours(8,0,0,0);
+  const nxtWk = new Date(n2); nxtWk.setDate(nxtWk.getDate()+(8-nxtWk.getDay())%7||7); nxtWk.setHours(8,0,0,0);
+  const fmt = d => d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})+', '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  popup.innerHTML = `
+    <div class="reminder-popup-header">Remind me</div>
+    <div class="reminder-option" data-p="later"><span class="material-icons-round">wb_sunny</span><div><div>Later today</div><div class="reminder-sub">${fmt(later)}</div></div></div>
+    <div class="reminder-option" data-p="tomorrow"><span class="material-icons-round">nights_stay</span><div><div>Tomorrow</div><div class="reminder-sub">${fmt(tmr)}</div></div></div>
+    <div class="reminder-option" data-p="nextweek"><span class="material-icons-round">next_week</span><div><div>Next week</div><div class="reminder-sub">${fmt(nxtWk)}</div></div></div>
+    <div class="reminder-divider"></div>
+    <div class="reminder-option" data-p="custom"><span class="material-icons-round">calendar_today</span><div>Pick date &amp; time</div></div>
+    ${showRemove ? `<div class="reminder-option" data-p="remove"><span class="material-icons-round">notifications_off</span><div>Remove reminder</div></div>` : ''}
+    <div class="custom-dt-inputs" style="display:none">
+      <input type="date" /><input type="time" />
+      <button class="save-reminder-btn">Save</button>
+    </div>`;
+  const map = {later, tomorrow:tmr, nextweek:nxtWk};
+  popup.querySelectorAll('[data-p]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const p = el.dataset.p;
+      if (p==='custom') { const cd=popup.querySelector('.custom-dt-inputs'); cd.style.display=cd.style.display==='none'?'':'none'; }
+      else if (p==='remove') { onSave(null); }
+      else if (map[p]) { onSave(map[p].toISOString()); }
+    });
+  });
+  popup.querySelector('.save-reminder-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    const d=popup.querySelector('input[type=date]').value;
+    const t=popup.querySelector('input[type=time]').value||'08:00';
+    if (d) onSave(new Date(`${d}T${t}`).toISOString());
+  });
+  return popup;
+}
+
+function showCardMoreMenu(id, btn) {
+  closeAllPopups();
+  const note = notes.find(n => n.id === id);
+  const card = btn.closest('.note-card');
+  const menu = document.createElement('div');
+  menu.className = 'more-menu card-more-menu';
+  Object.assign(menu.style, { position:'absolute', bottom:'44px', right:'0', zIndex:'400' });
+  const items = [
+    {icon:'delete', label:'Delete note', action:'trash'},
+    {icon:'file_copy', label:'Make a copy', action:'copy'},
+    {icon:'content_copy', label:'Copy to clipboard', action:'clipboard'},
+  ];
+  items.forEach(({icon,label,action}) => {
+    const div = document.createElement('div');
+    div.className = 'more-item';
+    div.innerHTML = `<span class="material-icons-round">${icon}</span>${label}`;
+    div.addEventListener('click', e => {
+      e.stopPropagation(); closeAllPopups();
+      if (action==='trash') { note.trashed=true; note.pinned=false; save(); renderNotes(); showToast('Note moved to Trash'); }
+      else if (action==='copy') { const copy={...JSON.parse(JSON.stringify(note)),id:uid(),pinned:false,created:now(),updated:now()}; notes.push(copy); save(); renderNotes(); showToast('Note copied'); }
+      else if (action==='clipboard') { const text=[note.title,note.body,...(note.checklist||[]).map(i=>i.text)].filter(Boolean).join('\n'); navigator.clipboard?.writeText(text); showToast('Copied to clipboard'); }
+    });
+    menu.appendChild(div);
+  });
+  card.appendChild(menu);
+  setTimeout(() => document.addEventListener('click', closeAllPopups, {once:true}), 50);
+}
+
+function closeAllPopups() {
+  document.querySelectorAll('.card-color-picker-popup, .card-more-menu').forEach(el => el.remove());
+  document.querySelectorAll('.reminder-popup[style*="absolute"]').forEach(el => el.remove());
+  ['colorPickerPopup','reminderPopup','modalColorPicker','modalReminderPopup','modalMoreMenu','modalLabelPicker'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.style.display = 'none';
+  });
+}
+
+function openModal(id) {
+  const note = notes.find(n => n.id === id);
+  if (!note) return;
+  currentEditingId = id;
+  const modal = document.getElementById('modalNote');
+  modal.style.background = note.color && note.color !== 'default' ? note.color : '';
+  document.getElementById('modalTitle').value = note.title || '';
+  document.getElementById('modalBody').textContent = note.body || '';
+  document.getElementById('modalBody').style.display = (note.checklist && note.checklist.length) ? 'none' : '';
+  renderModalChecklist(note);
+  renderImagePreviews(note.images || [], 'modalImagePreview', id);
+  updateModalReminderBadge(note);
+  renderModalLabels(note);
+  document.getElementById('modalEditedTime').textContent = note.updated ? `Edited ${fmtDate(note.updated)}` : '';
+  document.getElementById('modalArchiveBtn').querySelector('.material-icons-round').textContent = note.archived ? 'unarchive' : 'archive';
+  document.getElementById('modalArchiveBtn').title = note.archived ? 'Unarchive' : 'Archive';
+  document.getElementById('modalOverlay').style.display = 'flex';
+  closeAllPopups();
+}
+
+function renderModalChecklist(note) {
+  const ul = document.getElementById('modalChecklist');
+  ul.innerHTML = '';
+  if (note.checklist && note.checklist.length) {
+    ul.style.display = ''; document.getElementById('modalBody').style.display = 'none';
+    note.checklist.forEach((item, i) => {
+      ul.appendChild(createChecklistItem(item, i,
+        (idx, val) => { note.checklist[idx].text = val; note.updated = now(); save(); },
+        (idx, checked) => { note.checklist[idx].checked = checked; note.updated = now(); save(); renderNotes(); },
+        (idx) => { note.checklist.splice(idx, 1); note.updated = now(); save(); renderModalChecklist(note); renderNotes(); }
+      ));
+    });
+    const addDiv = document.createElement('div');
+    addDiv.className = 'add-checklist-item';
+    addDiv.innerHTML = `<span class="material-icons-round">add</span><span>List item</span>`;
+    addDiv.addEventListener('click', () => {
+      note.checklist.push({id:uid(), text:'', checked:false}); note.updated = now(); save();
+      renderModalChecklist(note);
+      setTimeout(() => { const inputs = ul.querySelectorAll('.item-text'); inputs[inputs.length-1]?.focus(); }, 50);
+    });
+    ul.appendChild(addDiv);
+  } else {
+    ul.style.display = 'none'; document.getElementById('modalBody').style.display = '';
+  }
+}
+
+function createChecklistItem(item, idx, onChange, onCheck, onDelete) {
+  const li = document.createElement('li');
+  li.className = `checklist-item${item.checked ? ' checked' : ''}`;
+  li.innerHTML = `<input type="checkbox" ${item.checked?'checked':''} /><input type="text" class="item-text" value="${sanitize(item.text)}" placeholder="List item" /><button class="delete-item-btn"><span class="material-icons-round">close</span></button>`;
+  const cb = li.querySelector('input[type=checkbox]');
+  cb.addEventListener('change', () => { li.classList.toggle('checked', cb.checked); onCheck(idx, cb.checked); });
+  const txt = li.querySelector('.item-text');
+  txt.addEventListener('input', () => onChange(idx, txt.value));
+  txt.addEventListener('keydown', e => {
+    if (e.key==='Enter') { e.preventDefault(); li.nextSibling?.querySelector('.item-text')?.focus(); }
+    if (e.key==='Backspace' && txt.value==='') { e.preventDefault(); onDelete(idx); }
+  });
+  li.querySelector('.delete-item-btn').addEventListener('click', () => onDelete(idx));
+  return li;
+}
+
+function updateModalReminderBadge(note) {
+  const badge = document.getElementById('modalReminderBadge');
+  if (note.reminder) {
+    badge.style.display = 'flex';
+    badge.innerHTML = `<span class="material-icons-round">alarm</span>${fmtDate(note.reminder)}`;
+    badge.className = `modal-reminder-badge${isOverdue(note.reminder) ? ' overdue' : ''}`;
+    badge.onclick = () => document.getElementById('modalReminderPopup').style.display === 'none' ? showModalReminderPopup() : closeAllPopups();
+  } else {
+    badge.style.display = 'none';
+  }
+}
+
+function renderModalLabels(note) {
+  const area = document.getElementById('modalLabelsArea');
+  area.innerHTML = '';
+  if (note.labels && note.labels.length) {
+    note.labels.forEach(l => {
+      const chip = document.createElement('div');
+      chip.className = 'modal-label-chip';
+      chip.innerHTML = `<span class="material-icons-round">label</span>${sanitize(l)}<span class="material-icons-round" style="font-size:14px;cursor:pointer" data-remove-label="${l}">close</span>`;
+      chip.querySelector('[data-remove-label]').addEventListener('click', e => {
+        e.stopPropagation();
+        const n = notes.find(x => x.id === currentEditingId);
+        if (n) { n.labels = (n.labels||[]).filter(x => x !== l); n.updated = now(); save(); renderModalLabels(n); renderNotes(); }
+      });
+      area.appendChild(chip);
+    });
+  }
+}
+
+function renderImagePreviews(images, containerId, noteId) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = '';
+  images.forEach((src, i) => {
+    const wrap = document.createElement('div'); wrap.className = 'image-thumb-wrapper';
+    const img = document.createElement('img'); img.className = 'image-thumb'; img.src = src;
+    const btn = document.createElement('button'); btn.className = 'remove-image-btn'; btn.textContent = '×';
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (noteId) {
+        const n = notes.find(x => x.id === noteId);
+        if (n) { n.images.splice(i, 1); n.updated = now(); save(); renderImagePreviews(n.images, containerId, noteId); renderNotes(); }
+      } else { newNoteImages.splice(i, 1); renderNewNoteImages(); }
+    });
+    wrap.appendChild(img); wrap.appendChild(btn); container.appendChild(wrap);
+  });
+}
+function renderNewNoteImages() { renderImagePreviews(newNoteImages, 'newImagePreview', null); }
+
+function closeModal() {
+  if (currentEditingId === null) return;
+  const note = notes.find(n => n.id === currentEditingId);
+  if (note) {
+    note.title = document.getElementById('modalTitle').value.trim();
+    if (!(note.checklist && note.checklist.length)) note.body = document.getElementById('modalBody').textContent.trim();
+    note.updated = now();
+    if (note.checklist) note.checklist = note.checklist.filter(i => i.text.trim());
+    if (!note.title && !note.body && !(note.checklist && note.checklist.length) && !(note.images && note.images.length)) {
+      notes = notes.filter(n => n.id !== note.id);
+    }
+    save(); renderNotes();
+  }
+  document.getElementById('modalOverlay').style.display = 'none';
+  currentEditingId = null;
+  closeAllPopups();
+}
+
+function showModalReminderPopup() {
+  closeAllPopups();
+  const popup = document.getElementById('modalReminderPopup');
+  const note = notes.find(n => n.id === currentEditingId);
+  setReminderPopupTimes(popup);
+  document.getElementById('mRemoveReminder').style.display = note && note.reminder ? '' : 'none';
+  popup.style.display = '';
+}
+
+function expandCreateNote() {
+  document.getElementById('createNoteCollapsed').style.display = 'none';
+  document.getElementById('createNoteExpanded').style.display = '';
+  document.getElementById('newNoteBody').focus();
+}
+
+function collapseCreateNote() {
+  saveNewNote();
+  document.getElementById('createNoteCollapsed').style.display = '';
+  document.getElementById('createNoteExpanded').style.display = 'none';
+  document.getElementById('newNoteTitle').value = '';
+  document.getElementById('newNoteBody').textContent = '';
+  document.getElementById('newChecklist').innerHTML = '';
+  document.getElementById('newChecklist').style.display = 'none';
+  document.getElementById('newNoteBody').style.display = '';
+  document.getElementById('newImagePreview').innerHTML = '';
+  document.getElementById('createNoteBox').style.background = '';
+  newNoteColor = 'default'; newNoteImages = []; newNoteReminder = null;
+  closeAllPopups();
+}
+
+function saveNewNote() {
+  const title = document.getElementById('newNoteTitle').value.trim();
+  const body = document.getElementById('newNoteBody').textContent.trim();
+  const checklistItems = Array.from(document.getElementById('newChecklist').querySelectorAll('.checklist-item'))
+    .map(li => ({id:uid(), text:li.querySelector('.item-text').value, checked:li.querySelector('input[type=checkbox]').checked}))
+    .filter(i => i.text.trim());
+  const hasChecklist = checklistItems.length > 0;
+  if (!title && !body && !hasChecklist && !newNoteImages.length) return;
+  const note = {
+    id:uid(), title, body:hasChecklist?'':body, checklist:hasChecklist?checklistItems:[],
+    color:newNoteColor, images:[...newNoteImages], reminder:newNoteReminder, labels:[],
+    pinned:false, archived:currentView==='archive', trashed:false, created:now(), updated:now()
+  };
+  notes.unshift(note); save(); renderNotes(); showToast('Note saved');
+}
+
+function startChecklist() {
+  expandCreateNote();
+  document.getElementById('newChecklist').style.display = '';
+  document.getElementById('newNoteBody').style.display = 'none';
+  addNewChecklistItemRow();
+}
+
+function addNewChecklistItemRow() {
+  const ul = document.getElementById('newChecklist');
+  const li = document.createElement('li');
+  li.className = 'checklist-item';
+  li.innerHTML = `<input type="checkbox" /><input type="text" class="item-text" placeholder="List item" /><button class="delete-item-btn"><span class="material-icons-round">close</span></button>`;
+  li.querySelector('input[type=checkbox]').addEventListener('change', function() { li.classList.toggle('checked', this.checked); });
+  li.querySelector('.item-text').addEventListener('keydown', e => { if (e.key==='Enter') { e.preventDefault(); addNewChecklistItemRow(); } });
+  li.querySelector('.delete-item-btn').addEventListener('click', () => li.remove());
+  ul.appendChild(li);
+  li.querySelector('.item-text').focus();
+}
+
+function setView(view) {
+  currentView = view; searchQuery = '';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchClear').style.display = 'none';
+  document.querySelectorAll('.nav-item, .label-nav-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+  renderNotes();
+}
+
+function bindEvents() {
+  document.getElementById('menuToggleBtn').addEventListener('click', () => {
+    document.body.classList.toggle('sidebar-collapsed');
+    document.body.classList.toggle('sidebar-open');
+  });
+  document.getElementById('viewToggleBtn').addEventListener('click', () => {
+    isListView = !isListView;
+    document.body.classList.toggle('view-list', isListView);
+    document.getElementById('viewIcon').textContent = isListView ? 'grid_view' : 'view_agenda';
+  });
+  document.getElementById('settingsBtn').addEventListener('click', () => { document.getElementById('settingsOverlay').style.display = 'flex'; renderManageLabels(); });
+  document.getElementById('settingsCloseBtn').addEventListener('click', () => document.getElementById('settingsOverlay').style.display = 'none');
+  document.getElementById('settingsOverlay').addEventListener('click', e => { if (e.target===document.getElementById('settingsOverlay')) document.getElementById('settingsOverlay').style.display='none'; });
+
+  document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', () => { localStorage.setItem('keepit_theme', r.value); applyTheme(); }));
+  document.querySelectorAll('input[name="density"]').forEach(r => r.addEventListener('change', () => { localStorage.setItem('keepit_density', r.value); applyDensity(); }));
+  document.getElementById('refreshBtn').addEventListener('click', () => { renderNotes(); showToast('Refreshed'); });
+
+  const searchInput = document.getElementById('searchInput');
+  const searchClear = document.getElementById('searchClear');
+  searchInput.addEventListener('input', () => {
+    searchQuery = searchInput.value.trim();
+    searchClear.style.display = searchQuery ? '' : 'none';
+    if (searchQuery && currentView !== 'notes') setView('notes');
+    renderNotes();
+  });
+  searchClear.addEventListener('click', () => { searchInput.value = ''; searchQuery = ''; searchClear.style.display = 'none'; renderNotes(); });
+
+  document.getElementById('createNoteCollapsed').addEventListener('click', () => expandCreateNote());
+  document.getElementById('closeNewNoteBtn').addEventListener('click', () => collapseCreateNote());
+  document.getElementById('newChecklistBtn').addEventListener('click', e => { e.stopPropagation(); startChecklist(); });
+  document.getElementById('addChecklistToNoteBtn').addEventListener('click', () => {
+    document.getElementById('newChecklist').style.display = '';
+    document.getElementById('newNoteBody').style.display = 'none';
+    addNewChecklistItemRow();
+  });
+  document.getElementById('newImageBtn').addEventListener('click', e => { e.stopPropagation(); expandCreateNote(); document.getElementById('imageFileInput').click(); });
+
+  document.getElementById('addColorBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const p = document.getElementById('colorPickerPopup');
+    p.style.display = p.style.display === 'none' ? '' : 'none';
+    closeOtherPopups('colorPickerPopup');
+  });
+  document.getElementById('colorPickerPopup').querySelectorAll('.color-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      newNoteColor = opt.dataset.color;
+      document.getElementById('createNoteBox').style.background = newNoteColor === 'default' ? '' : newNoteColor;
+      document.getElementById('colorPickerPopup').style.display = 'none';
+    });
+  });
+
+  document.getElementById('addReminderBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const p = document.getElementById('reminderPopup');
+    p.style.display = p.style.display === 'none' ? '' : 'none';
+    closeOtherPopups('reminderPopup');
+    setReminderPopupTimes(document.getElementById('reminderPopup'));
+  });
+  bindReminderPopup();
+
+  document.getElementById('addImageInputBtn').addEventListener('click', () => document.getElementById('imageFileInput').click());
+  document.getElementById('imageFileInput').addEventListener('change', e => {
+    handleImageFile(e.target.files[0], b64 => { newNoteImages.push(b64); renderNewNoteImages(); }); e.target.value='';
+  });
+
+  document.addEventListener('click', e => {
+    const box = document.getElementById('createNoteBox');
+    const expanded = document.getElementById('createNoteExpanded');
+    if (expanded && expanded.style.display !== 'none' && !box.contains(e.target) &&
+        !document.getElementById('colorPickerPopup').contains(e.target) &&
+        !document.getElementById('reminderPopup').contains(e.target)) {
+      collapseCreateNote();
+    }
+  });
+
+  document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target===document.getElementById('modalOverlay')) closeModal(); });
+  document.getElementById('modalCloseBtn').addEventListener('click', closeModal);
+
+  document.getElementById('modalColorBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const p = document.getElementById('modalColorPicker');
+    p.style.display = p.style.display === 'none' ? '' : 'none';
+    closeOtherPopups('modalColorPicker');
+  });
+  document.getElementById('modalColorPicker').querySelectorAll('.color-option').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const note = notes.find(n => n.id === currentEditingId);
+      if (note) { note.color = opt.dataset.color; note.updated = now(); save(); renderNotes(); document.getElementById('modalNote').style.background = note.color === 'default' ? '' : note.color; }
+      document.getElementById('modalColorPicker').style.display = 'none';
+    });
+  });
+
+  document.getElementById('modalArchiveBtn').addEventListener('click', () => {
+    const note = notes.find(n => n.id === currentEditingId); if (!note) return;
+    note.archived = !note.archived; note.pinned = false; note.updated = now(); save(); renderNotes();
+    showToast(note.archived ? 'Note archived' : 'Note unarchived'); closeModal();
+  });
+
+  document.getElementById('modalReminderBtn').addEventListener('click', e => { e.stopPropagation(); showModalReminderPopup(); });
+  bindModalReminderPopup();
+
+  document.getElementById('modalAddImageBtn').addEventListener('click', () => document.getElementById('modalImageInput').click());
+  document.getElementById('modalImageInput').addEventListener('change', e => {
+    handleImageFile(e.target.files[0], b64 => {
+      const note = notes.find(n => n.id === currentEditingId);
+      if (note) { if (!note.images) note.images=[]; note.images.push(b64); note.updated=now(); save(); renderImagePreviews(note.images,'modalImagePreview',currentEditingId); renderNotes(); }
+    }); e.target.value='';
+  });
+
+  document.getElementById('modalChecklistBtn').addEventListener('click', () => {
+    const note = notes.find(n => n.id === currentEditingId); if (!note) return;
+    if (!note.checklist || !note.checklist.length) {
+      note.checklist = [];
+      const body = document.getElementById('modalBody').textContent.trim();
+      if (body) { body.split('\n').forEach(line => { if (line.trim()) note.checklist.push({id:uid(),text:line.trim(),checked:false}); }); note.body=''; }
+      else { note.checklist.push({id:uid(),text:'',checked:false}); }
+    } else { note.body = note.checklist.map(i=>i.text).join('\n'); note.checklist=[]; }
+    note.updated=now(); save(); renderModalChecklist(note); renderNotes();
+  });
+
+  document.getElementById('modalLabelBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const p = document.getElementById('modalLabelPicker');
+    p.style.display = p.style.display === 'none' ? '' : 'none';
+    if (p.style.display !== 'none') renderLabelPicker();
+    closeOtherPopups('modalLabelPicker');
+  });
+  document.getElementById('labelPickerSearch').addEventListener('input', () => renderLabelPicker());
+  document.getElementById('labelPickerCreate').addEventListener('click', () => {
+    const name = document.getElementById('labelPickerSearch').value.trim();
+    if (name && !labels.includes(name)) {
+      labels.push(name);
+      const note = notes.find(n => n.id === currentEditingId);
+      if (note) { if (!note.labels) note.labels=[]; note.labels.push(name); note.updated=now(); }
+      save(); renderAll(); document.getElementById('labelPickerSearch').value=''; renderLabelPicker();
+    }
+  });
+
+  document.getElementById('modalMoreBtn').addEventListener('click', e => {
+    e.stopPropagation();
+    const m = document.getElementById('modalMoreMenu');
+    m.style.display = m.style.display === 'none' ? '' : 'none';
+    closeOtherPopups('modalMoreMenu');
+  });
+  document.getElementById('modalDeleteBtn').addEventListener('click', () => {
+    const note = notes.find(n => n.id === currentEditingId);
+    if (note) { note.trashed=true; note.pinned=false; note.updated=now(); save(); renderNotes(); showToast('Note moved to Trash'); } closeModal();
+  });
+  document.getElementById('modalDuplicateBtn').addEventListener('click', () => {
+    const note = notes.find(n => n.id === currentEditingId);
+    if (note) { const copy={...JSON.parse(JSON.stringify(note)),id:uid(),pinned:false,created:now(),updated:now()}; notes.push(copy); save(); renderNotes(); showToast('Note copied'); } closeModal();
+  });
+  document.getElementById('modalCopyTxtBtn').addEventListener('click', () => {
+    const note = notes.find(n => n.id === currentEditingId);
+    if (note) { const text=[note.title,note.body,...(note.checklist||[]).map(i=>i.text)].filter(Boolean).join('\n'); navigator.clipboard?.writeText(text); showToast('Copied to clipboard'); }
+  });
+  document.getElementById('modalAddLabelMenuBtn').addEventListener('click', () => {
+    document.getElementById('modalMoreMenu').style.display='none';
+    const p=document.getElementById('modalLabelPicker'); p.style.display=''; renderLabelPicker();
+  });
+
+  document.getElementById('addNewLabelBtn').addEventListener('click', () => {
+    const name = prompt('New label name:');
+    if (name && name.trim() && !labels.includes(name.trim())) { labels.push(name.trim()); save(); renderAll(); }
+  });
+
+  document.getElementById('exportNotesBtn').addEventListener('click', () => {
+    const data = JSON.stringify({notes,labels},null,2);
+    const blob = new Blob([data],{type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download=`keepit-backup-${new Date().toISOString().slice(0,10)}.json`; a.click(); URL.revokeObjectURL(url);
+    showToast('Notes exported!');
+  });
+  document.getElementById('importNotesBtn').addEventListener('click', () => document.getElementById('importFileInput').click());
+  document.getElementById('importFileInput').addEventListener('change', e => {
+    const file = e.target.files[0]; if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try { const data=JSON.parse(ev.target.result); if(data.notes) notes=data.notes; if(data.labels) labels=data.labels; save(); renderAll(); showToast('Notes imported!'); }
+      catch { showToast('Invalid file!'); }
+    };
+    reader.readAsText(file); e.target.value='';
+  });
+  document.getElementById('clearAllBtn').addEventListener('click', () => {
+    pendingConfirmCallback = () => { notes=[]; labels=[]; save(); renderAll(); showToast('All data cleared'); document.getElementById('settingsOverlay').style.display='none'; };
+    document.getElementById('confirmText').textContent = 'Delete ALL notes and labels permanently?';
+    document.getElementById('confirmOverlay').style.display = 'flex';
+  });
+
+  document.getElementById('confirmOk').addEventListener('click', () => {
+    document.getElementById('confirmOverlay').style.display='none';
+    if (pendingConfirmCallback) { pendingConfirmCallback(); pendingConfirmCallback=null; }
+  });
+  document.getElementById('confirmCancel').addEventListener('click', () => { document.getElementById('confirmOverlay').style.display='none'; pendingConfirmCallback=null; });
+
+  document.querySelectorAll('.nav-item[data-view]').forEach(el => el.addEventListener('click', e => { e.preventDefault(); setView(el.dataset.view); }));
+
+  document.getElementById('labelsToggle').addEventListener('click', () => {
+    labelsExpanded = !labelsExpanded;
+    document.getElementById('labelsList').style.display = labelsExpanded ? '' : 'none';
+    document.getElementById('labelsToggle').classList.toggle('open', labelsExpanded);
+  });
+  document.getElementById('labelsToggle').classList.add('open');
+
+  document.addEventListener('keydown', e => { if (e.key==='Escape') { closeModal(); closeAllPopups(); } });
+}
+
+function renderLabelPicker() {
+  const note = notes.find(n => n.id === currentEditingId);
+  const search = document.getElementById('labelPickerSearch').value.toLowerCase().trim();
+  const list = document.getElementById('labelPickerList');
+  list.innerHTML = '';
+  const filtered = labels.filter(l => l.toLowerCase().includes(search));
+  filtered.forEach(l => {
+    const row = document.createElement('div'); row.className = 'label-picker-row';
+    const hasLabel = note && note.labels && note.labels.includes(l);
+    row.innerHTML = `<span class="material-icons-round">${hasLabel ? 'label' : 'label_off'}</span>${sanitize(l)}`;
+    row.addEventListener('click', () => {
+      if (!note) return; if (!note.labels) note.labels=[];
+      if (hasLabel) note.labels=note.labels.filter(x=>x!==l); else note.labels.push(l);
+      note.updated=now(); save(); renderLabelPicker(); renderModalLabels(note); renderNotes();
+    });
+    list.appendChild(row);
+  });
+  const createEl = document.getElementById('labelPickerCreate');
+  if (search && !labels.includes(search)) { createEl.style.display='flex'; document.getElementById('labelPickerCreateName').textContent=search; }
+  else { createEl.style.display='none'; }
+}
+
+function bindReminderPopup() {
+  const popup = document.getElementById('reminderPopup');
+  popup.querySelector('[data-preset="later-today"]').addEventListener('click', () => {
+    const d=new Date(); d.setHours(d.getHours()+3,0,0,0); newNoteReminder=d.toISOString(); popup.style.display='none'; showToast('Reminder set for new note');
+  });
+  popup.querySelector('[data-preset="tomorrow"]').addEventListener('click', () => {
+    const d=new Date(); d.setDate(d.getDate()+1); d.setHours(8,0,0,0); newNoteReminder=d.toISOString(); popup.style.display='none'; showToast('Reminder set for new note');
+  });
+  popup.querySelector('[data-preset="next-week"]').addEventListener('click', () => {
+    const d=new Date(); d.setDate(d.getDate()+(8-d.getDay())%7||7); d.setHours(8,0,0,0); newNoteReminder=d.toISOString(); popup.style.display='none'; showToast('Reminder set for new note');
+  });
+  popup.querySelector('.custom-reminder').addEventListener('click', () => {
+    const cd=document.getElementById('customDtInputs'); cd.style.display=cd.style.display==='none'?'':'none';
+  });
+  document.getElementById('saveReminderBtn').addEventListener('click', () => {
+    const d=document.getElementById('reminderDate').value; const t=document.getElementById('reminderTime').value||'08:00';
+    if (d) { newNoteReminder=new Date(`${d}T${t}`).toISOString(); popup.style.display='none'; showToast('Reminder set for new note'); }
+  });
+}
+
+function bindModalReminderPopup() {
+  const popup = document.getElementById('modalReminderPopup');
+  popup.querySelector('[data-preset="later-today"]').addEventListener('click', () => { const d=new Date(); d.setHours(d.getHours()+3,0,0,0); setModalReminder(d.toISOString()); });
+  popup.querySelector('[data-preset="tomorrow"]').addEventListener('click', () => { const d=new Date(); d.setDate(d.getDate()+1); d.setHours(8,0,0,0); setModalReminder(d.toISOString()); });
+  popup.querySelector('[data-preset="next-week"]').addEventListener('click', () => { const d=new Date(); d.setDate(d.getDate()+(8-d.getDay())%7||7); d.setHours(8,0,0,0); setModalReminder(d.toISOString()); });
+  document.getElementById('mCustomReminder').addEventListener('click', () => { const cd=document.getElementById('mCustomDtInputs'); cd.style.display=cd.style.display==='none'?'':'none'; });
+  document.getElementById('mSaveReminderBtn').addEventListener('click', () => {
+    const d=document.getElementById('mReminderDate').value; const t=document.getElementById('mReminderTime').value||'08:00';
+    if (d) setModalReminder(new Date(`${d}T${t}`).toISOString());
+  });
+  document.getElementById('mRemoveReminder').addEventListener('click', () => setModalReminder(null));
+}
+
+function setModalReminder(dt) {
+  const note = notes.find(n => n.id === currentEditingId);
+  if (note) { note.reminder=dt; note.updated=now(); save(); renderNotes(); updateModalReminderBadge(note); }
+  document.getElementById('modalReminderPopup').style.display='none';
+  showToast(dt ? 'Reminder set' : 'Reminder removed');
+}
+
+function setReminderPopupTimes(popup) {
+  const fmt = d => d.toLocaleDateString([],{weekday:'short',month:'short',day:'numeric'})+', '+d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  const n2=new Date();
+  const later=new Date(n2); later.setHours(later.getHours()+3,0,0,0);
+  const tmr=new Date(n2); tmr.setDate(tmr.getDate()+1); tmr.setHours(8,0,0,0);
+  const nxt=new Date(n2); nxt.setDate(nxt.getDate()+(8-nxt.getDay())%7||7); nxt.setHours(8,0,0,0);
+  const subs={laterTodaySub:later,tomorrowSub:tmr,nextWeekSub:nxt,mLaterTodaySub:later,mTomorrowSub:tmr,mNextWeekSub:nxt};
+  Object.entries(subs).forEach(([id,d]) => { const el=document.getElementById(id); if(el) el.textContent=fmt(d); });
+}
+function setReminderPresetTimes() { setReminderPopupTimes(null); }
+
+function checkReminders() {
+  notes.forEach(n => {
+    if (n.reminder && !n._reminderNotified && !n.archived && !n.trashed && new Date(n.reminder) <= new Date()) {
+      if ('Notification' in window && Notification.permission === 'granted') new Notification('KeepIt Reminder', {body:n.title||n.body||'You have a reminder!',icon:'📒'});
+      n._reminderNotified = true;
+    }
+  });
+}
+function scheduleReminderCheck() {
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  setInterval(() => { checkReminders(); renderNotes(); }, 60000);
+}
+
+function renderManageLabels() {
+  const container = document.getElementById('manageLabels');
+  container.innerHTML = '';
+  labels.forEach((l, i) => {
+    const row = document.createElement('div'); row.className = 'manage-label-row';
+    row.innerHTML = `<span class="material-icons-round" style="color:var(--text-secondary)">label</span><input type="text" class="manage-label-input" value="${sanitize(l)}" /><button class="icon-btn" title="Delete label"><span class="material-icons-round">delete</span></button>`;
+    row.querySelector('.manage-label-input').addEventListener('change', e => {
+      const newName=e.target.value.trim();
+      if (newName && newName !== l) { notes.forEach(n=>{if(n.labels){const idx=n.labels.indexOf(l);if(idx>-1)n.labels[idx]=newName;}}); labels[i]=newName; save(); renderAll(); }
+    });
+    row.querySelector('.icon-btn').addEventListener('click', () => {
+      notes.forEach(n=>{if(n.labels)n.labels=n.labels.filter(x=>x!==l);}); labels.splice(i,1); save(); renderAll(); renderManageLabels();
+    });
+    container.appendChild(row);
+  });
+}
+
+function handleImageFile(file, callback) {
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => callback(e.target.result);
+  reader.readAsDataURL(file);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timeout);
+  t._timeout = setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function confirmEmptyTrash() {
+  pendingConfirmCallback = () => { notes=notes.filter(n=>!n.trashed); save(); renderNotes(); showToast('Trash emptied'); };
+  document.getElementById('confirmText').textContent = 'Empty trash? All notes in Trash will be permanently deleted.';
+  document.getElementById('confirmOverlay').style.display = 'flex';
+}
+
+function closeOtherPopups(exceptId) {
+  ['colorPickerPopup','reminderPopup','modalColorPicker','modalReminderPopup','modalMoreMenu','modalLabelPicker']
+    .filter(id => id !== exceptId)
+    .forEach(id => { const el=document.getElementById(id); if(el) el.style.display='none'; });
+}
+
+function autoCleanTrash() {
+  const SEVEN_DAYS = 7*24*60*60*1000;
+  const before = notes.length;
+  notes = notes.filter(n => !n.trashed || (Date.now()-new Date(n.updated).getTime() < SEVEN_DAYS));
+  if (notes.length < before) save();
+}
+</script>
+</body>
+</html>
