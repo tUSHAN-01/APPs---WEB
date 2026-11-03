@@ -1,0 +1,2722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Patrol Report — Gopalpur Range</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23162c1e'/%3E%3Cpath d='M32 10c9 6 16 15 16 24a16 16 0 0 1-32 0c0-9 7-18 16-24z' fill='%232c7a50'/%3E%3Cpath d='M32 10c9 6 16 15 16 24a16 16 0 0 1-16 16z' fill='%233ec87a'/%3E%3Crect x='29.5' y='38' width='5' height='16' rx='2' fill='%23d4a832'/%3E%3C/svg%3E"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════ */
+:root {
+  --forest:   #162c1e;
+  --deep:     #0c1a11;
+  --canopy:   #1e4030;
+  --leaf:     #2c7a50;
+  --mint:     #3ec87a;
+  --gold:     #d4a832;
+  --amber:    #f0c040;
+  --cream:    #f4f0e6;
+  --paper:    #f8f6f1;
+  --white:    #ffffff;
+  --ink:      #18201c;
+  --muted:    #6b7d72;
+  --faint:    #9aac9f;
+  --border:   #dde4df;
+  --border2:  #c8d4cc;
+  --shadow-sm: 0 1px 4px rgba(12,26,17,0.07);
+  --shadow:   0 4px 24px rgba(12,26,17,0.10);
+  --shadow-lg: 0 12px 48px rgba(12,26,17,0.14);
+  --r-sm: 8px;
+  --r-md: 12px;
+  --r-lg: 16px;
+  --r-xl: 20px;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--paper);
+  color: var(--ink);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ══════════════════════════════════════════
+   SITE HEADER
+══════════════════════════════════════════ */
+.site-header {
+  background: var(--deep);
+  padding: 0 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  position: sticky; top: 0; z-index: 200;
+  border-bottom: 1px solid rgba(62,200,122,0.12);
+}
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--mint), transparent 60%);
+}
+.logo {
+  display: flex; align-items: center; gap: 14px;
+}
+.logo-mark {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--leaf) 0%, var(--mint) 100%);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-mark svg { width: 18px; height: 18px; }
+.logo-title {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.2px;
+  line-height: 1.2;
+}
+.logo-sub {
+  font-size: 10px;
+  color: var(--faint);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.header-right {
+  display: flex; align-items: center; gap: 12px;
+}
+.dept-badge {
+  background: rgba(62,200,122,0.10);
+  border: 1px solid rgba(62,200,122,0.22);
+  color: var(--mint);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: 20px;
+}
+.creator-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(212,168,50,0.10);
+  border: 1px solid rgba(212,168,50,0.25);
+  color: var(--amber);
+  font-size: 10.5px; font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 5px 13px;
+  border-radius: 20px;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+.creator-badge:hover {
+  background: rgba(212,168,50,0.18);
+}
+.creator-badge strong {
+  font-weight: 700;
+}
+@media (max-width: 700px) {
+  .creator-badge span.long { display: none; }
+}
+
+/* ══════════════════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════════════════ */
+.main {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 44px 28px 100px;
+}
+
+/* ══════════════════════════════════════════
+   UPLOAD ZONE
+══════════════════════════════════════════ */
+.upload-section { margin-bottom: 40px; }
+
+.upload-card {
+  background: var(--white);
+  border: 2px dashed var(--border2);
+  border-radius: var(--r-xl);
+  padding: 52px 40px 44px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.upload-card::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(62,200,122,0.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+.upload-card:hover,
+.upload-card.drag-over {
+  border-color: var(--mint);
+  box-shadow: 0 0 0 4px rgba(62,200,122,0.08), var(--shadow);
+  transform: translateY(-2px);
+}
+.upload-card.drag-over { background: rgba(62,200,122,0.02); }
+
+.upload-icon-wrap {
+  width: 72px; height: 72px;
+  background: var(--forest);
+  border-radius: 18px;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 20px;
+  box-shadow: 0 6px 24px rgba(22,44,30,0.25);
+}
+.upload-icon-wrap svg { width: 32px; height: 32px; }
+
+.upload-title {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--forest);
+  margin-bottom: 8px;
+}
+.upload-sub {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 24px;
+  line-height: 1.5;
+}
+.upload-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--forest);
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 12px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 12px 28px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.upload-btn:hover {
+  background: var(--leaf);
+  box-shadow: 0 4px 16px rgba(44,122,80,0.35);
+}
+#fileInput { display: none; }
+
+/* ══════════════════════════════════════════
+   FILE STRIP
+══════════════════════════════════════════ */
+.file-strip {
+  margin-top: 14px;
+  background: var(--forest);
+  border-radius: var(--r-md);
+  padding: 14px 20px;
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+}
+.file-strip.show { display: flex; }
+.file-info { display: flex; align-items: center; gap: 14px; }
+.file-icon {
+  width: 36px; height: 36px;
+  background: rgba(62,200,122,0.15);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.file-icon svg { width: 18px; height: 18px; }
+.fname {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--mint);
+}
+.fmeta {
+  font-size: 11px;
+  color: rgba(255,255,255,0.4);
+  margin-top: 2px;
+}
+.strip-clear {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.6);
+  width: 30px; height: 30px;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 13px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.strip-clear:hover { background: rgba(220,60,60,0.25); color: #ff6b6b; border-color: rgba(220,60,60,0.3); }
+
+/* ══════════════════════════════════════════
+   ERROR BAR
+══════════════════════════════════════════ */
+.error-bar {
+  background: rgba(220,60,60,0.07);
+  border: 1px solid rgba(220,60,60,0.18);
+  color: #b02424;
+  border-radius: var(--r-md);
+  padding: 14px 18px;
+  font-size: 13px;
+  margin-bottom: 20px;
+  display: none;
+}
+.error-bar.show { display: block; }
+
+/* ══════════════════════════════════════════
+   LOADER
+══════════════════════════════════════════ */
+.loader {
+  display: none;
+  text-align: center;
+  padding: 36px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.loader.show { display: block; }
+.spinner {
+  width: 32px; height: 32px;
+  border: 3px solid var(--border);
+  border-top-color: var(--mint);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+  margin: 0 auto 14px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════
+   STAT CARDS
+══════════════════════════════════════════ */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+  opacity: 0;
+  transform: translateY(14px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+.stats-row.show { opacity: 1; transform: translateY(0); }
+
+.stat-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 22px 26px;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.stat-card:hover {
+  box-shadow: var(--shadow);
+  transform: translateY(-2px);
+}
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.stat-card.c1::before { background: linear-gradient(90deg, var(--mint), #7ee8b0); }
+.stat-card.c2::before { background: linear-gradient(90deg, var(--gold), var(--amber)); }
+.stat-card.c3::before { background: linear-gradient(90deg, #e07a5f, #f4a682); }
+.stat-card.c4::before { background: linear-gradient(90deg, #6b8fa3, #a9c6d6); }
+.stat-card.c5::before { background: linear-gradient(90deg, #2c7a50, var(--mint)); }
+.stat-card.c6::before { background: linear-gradient(90deg, #d94b4b, #f4a3a3); }
+
+.stat-icon {
+  width: 44px; height: 44px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.stat-card.c1 .stat-icon { background: rgba(62,200,122,0.10); }
+.stat-card.c2 .stat-icon { background: rgba(212,168,50,0.10); }
+.stat-card.c3 .stat-icon { background: rgba(224,122,95,0.10); }
+.stat-card.c4 .stat-icon { background: rgba(107,143,163,0.12); }
+.stat-card.c5 .stat-icon { background: rgba(44,122,80,0.10); }
+.stat-card.c6 .stat-icon { background: rgba(217,75,75,0.10); }
+.stat-icon svg { width: 22px; height: 22px; }
+
+.stat-body { flex: 1; min-width: 0; }
+.stat-label {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.stat-val {
+  font-family: 'Fraunces', serif;
+  font-size: 38px;
+  font-weight: 900;
+  color: var(--forest);
+  line-height: 1;
+  letter-spacing: -1px;
+}
+.stat-unit {
+  font-size: 11px;
+  color: var(--faint);
+  margin-top: 5px;
+  font-weight: 400;
+}
+
+/* ══════════════════════════════════════════
+   TOOLBAR
+══════════════════════════════════════════ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  gap: 12px;
+  flex-wrap: wrap;
+  opacity: 0;
+  transition: opacity 0.4s 0.1s;
+}
+.toolbar.show { opacity: 1; }
+.toolbar-left { display: flex; gap: 14px; align-items: center; }
+.toolbar-right { display: flex; gap: 10px; }
+
+.tbl-title {
+  font-family: 'Fraunces', serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--forest);
+}
+
+.search-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 9px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.search-wrap:focus-within {
+  border-color: var(--leaf);
+  box-shadow: 0 0 0 3px rgba(44,122,80,0.10);
+}
+.search-wrap svg { width: 14px; height: 14px; flex-shrink: 0; }
+.search-wrap input {
+  border: none; outline: none;
+  background: transparent;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: var(--ink);
+  width: 190px;
+}
+.search-wrap input::placeholder { color: var(--faint); }
+
+.export-btn {
+  display: flex; align-items: center; gap: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 10px 18px;
+  border-radius: var(--r-sm);
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s, transform 0.15s;
+}
+.export-btn:active { transform: scale(0.97); }
+.export-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+.btn-excel {
+  background: #166534;
+  color: #fff;
+}
+.btn-excel:hover { background: #15803d; box-shadow: 0 4px 14px rgba(22,101,52,0.35); }
+
+.btn-pdf {
+  background: var(--forest);
+  color: #fff;
+}
+.btn-pdf:hover { background: var(--canopy); box-shadow: 0 4px 14px rgba(22,44,30,0.35); }
+
+/* ══════════════════════════════════════════
+   TABLE
+══════════════════════════════════════════ */
+.table-wrap {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+  opacity: 0;
+  transition: opacity 0.4s 0.2s;
+}
+.table-wrap.show { opacity: 1; }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead tr {
+  background: var(--forest);
+}
+thead th {
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 600;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.55);
+  padding: 16px 22px;
+  text-align: left;
+  white-space: nowrap;
+}
+thead th:first-child { color: var(--mint); }
+thead th.num { text-align: center; }
+thead th.right { text-align: right; }
+
+tbody tr {
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+}
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: rgba(62,200,122,0.04); }
+
+td {
+  padding: 15px 22px;
+  font-size: 14px;
+  color: var(--ink);
+  vertical-align: middle;
+}
+td.sl {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--faint);
+  text-align: center;
+  width: 54px;
+}
+td.name {
+  font-weight: 600;
+  color: var(--forest);
+}
+td.days { text-align: center; }
+.days-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(212,168,50,0.10);
+  color: #8a6400;
+  border: 1px solid rgba(212,168,50,0.28);
+  font-weight: 700;
+  font-size: 13px;
+  border-radius: 20px;
+  min-width: 42px;
+  padding: 4px 12px;
+}
+td.km { text-align: right; }
+.km-val {
+  font-family: 'Fraunces', serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--leaf);
+}
+.km-unit { font-size: 11px; color: var(--faint); margin-left: 2px; }
+
+/* ── TFOOT ── */
+tfoot .tfoot-row td {
+  background: var(--forest);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 16px 22px;
+  border-top: 2px solid var(--leaf);
+}
+tfoot .tfoot-row td.km-total {
+  text-align: right;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--mint);
+}
+tfoot .tfoot-row td.days-total {
+  text-align: center;
+  font-family: 'Fraunces', serif;
+  font-size: 18px;
+  color: var(--amber);
+}
+
+/* ── EMPTY STATE ── */
+.empty-state {
+  text-align: center;
+  padding: 70px 24px;
+}
+.empty-state-icon {
+  width: 64px; height: 64px;
+  background: rgba(62,200,122,0.08);
+  border-radius: 16px;
+  display: inline-flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+.empty-state-icon svg { width: 32px; height: 32px; }
+.empty-state p {
+  font-size: 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════
+   STATUS BADGES
+══════════════════════════════════════════ */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.status-badge .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.status-badge.st-approved { background: rgba(62,200,122,0.12); color: #1f7a45; border-color: rgba(62,200,122,0.3); }
+.status-badge.st-approved .dot { background: #3ec87a; }
+.status-badge.st-rejected { background: rgba(220,60,60,0.10); color: #b02424; border-color: rgba(220,60,60,0.25); }
+.status-badge.st-rejected .dot { background: #d94b4b; }
+.status-badge.st-provisional { background: rgba(212,168,50,0.12); color: #8a6400; border-color: rgba(212,168,50,0.3); }
+.status-badge.st-provisional .dot { background: #d4a832; }
+.status-badge.st-other { background: rgba(107,125,114,0.10); color: #566058; border-color: rgba(107,125,114,0.22); }
+.status-badge.st-other .dot { background: #9aac9f; }
+
+.status-breakdown { display: flex; flex-wrap: wrap; gap: 5px; max-width: 260px; }
+.status-mini {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+}
+.status-mini.st-approved { background: rgba(62,200,122,0.12); color: #1f7a45; }
+.status-mini.st-rejected { background: rgba(220,60,60,0.10); color: #b02424; }
+.status-mini.st-provisional { background: rgba(212,168,50,0.12); color: #8a6400; }
+.status-mini.st-other { background: rgba(107,125,114,0.10); color: #566058; }
+
+/* ══════════════════════════════════════════
+   STATUS FILTER BAR
+══════════════════════════════════════════ */
+.status-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+  opacity: 0;
+  transition: opacity 0.4s 0.05s;
+}
+.status-filter-bar.show { opacity: 1; }
+.status-filter-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--white);
+  border: 1.5px solid var(--border2);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 13px 6px 10px;
+  border-radius: 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.status-chip .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--faint); flex-shrink: 0; }
+.status-chip .cnt { opacity: 0.6; font-weight: 400; }
+.status-chip.active { border-color: var(--leaf); color: var(--forest); background: rgba(62,200,122,0.06); }
+.status-chip.active.st-approved { border-color: #3ec87a; }
+.status-chip.active.st-approved .dot { background: #3ec87a; }
+.status-chip.active.st-rejected { border-color: #d94b4b; }
+.status-chip.active.st-rejected .dot { background: #d94b4b; }
+.status-chip.active.st-provisional { border-color: #d4a832; }
+.status-chip.active.st-provisional .dot { background: #d4a832; }
+.status-chip.active.st-other { border-color: #9aac9f; }
+.status-chip.active.st-other .dot { background: #9aac9f; }
+.status-chip-reset {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--leaf);
+  cursor: pointer;
+  padding: 6px 8px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ══════════════════════════════════════════
+   EXPORT DROPDOWN
+══════════════════════════════════════════ */
+.export-group { position: relative; }
+.export-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 240px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg);
+  padding: 6px;
+  z-index: 300;
+}
+.export-menu.show { display: block; }
+.export-menu-item {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.export-menu-item:hover { background: rgba(62,200,122,0.07); }
+.export-menu-item .emi-title { font-size: 12.5px; font-weight: 700; color: var(--forest); }
+.export-menu-item .emi-sub { font-size: 10.5px; color: var(--muted); }
+
+/* ══════════════════════════════════════════
+   ROW ACTIONS / VIEW BUTTON
+══════════════════════════════════════════ */
+td.actions { text-align: center; width: 46px; }
+.row-view-btn {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  background: var(--paper);
+  color: var(--muted);
+  display: inline-flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.row-view-btn:hover { background: var(--forest); color: #fff; border-color: var(--forest); }
+.row-view-btn svg { width: 15px; height: 15px; }
+
+/* ══════════════════════════════════════════
+   INDIVIDUAL DETAIL MODAL
+══════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(12,26,17,0.55);
+  backdrop-filter: blur(2px);
+  z-index: 500;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.modal-overlay.show { display: flex; }
+.modal-card {
+  background: var(--white);
+  border-radius: var(--r-xl);
+  width: 100%;
+  max-width: 720px;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+.modal-head {
+  background: var(--forest);
+  padding: 22px 26px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-shrink: 0;
+}
+.modal-head-name {
+  font-family: 'Fraunces', serif;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+}
+.modal-head-stats { display: flex; gap: 18px; flex-wrap: wrap; }
+.modal-head-stat { font-size: 11px; color: rgba(255,255,255,0.55); }
+.modal-head-stat strong { display: block; font-family: 'Fraunces', serif; font-size: 16px; color: var(--mint); font-weight: 700; }
+.modal-close {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.7);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+.modal-close:hover { background: rgba(220,60,60,0.3); color: #fff; }
+.modal-body { padding: 18px 26px; overflow-y: auto; flex: 1; }
+.modal-body table { font-size: 12.5px; }
+.modal-body thead th { padding: 10px 12px; font-size: 9px; }
+.modal-body td { padding: 10px 12px; }
+.modal-body .mb-remarks { color: var(--muted); font-size: 11.5px; }
+.modal-foot {
+  padding: 14px 26px;
+  border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+  flex-shrink: 0;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .site-header { padding: 0 18px; }
+  .logo-sub { display: none; }
+  .dept-badge { display: none; }
+  .main { padding: 28px 16px 80px; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .toolbar { flex-direction: column; align-items: flex-start; }
+  .toolbar-left { flex-wrap: wrap; }
+  .search-wrap input { width: 140px; }
+  /* 6 stat cards now sit in an even 2-column grid on mobile */
+}
+
+/* ══════════════════════════════════════════
+   PRINT / PDF STYLES
+══════════════════════════════════════════ */
+#printable, #printableIndividuals { display: none; }
+
+/* ══════════════════════════════════════════
+   PRINTABLE CONTENT STYLES (rendered off-screen, then
+   captured to canvas for direct PDF download — not native browser print)
+══════════════════════════════════════════ */
+#printable, #printableIndividuals {
+  font-family: 'DM Sans', sans-serif;
+  color: #18201c;
+  width: 794px;
+  background: #fff;
+}
+
+/* ── Print Header ── */
+.pr-header {
+  background: #0c1a11 !important;
+  padding: 28px 32px 24px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  page-break-inside: avoid;
+}
+.pr-header-left {}
+.pr-org {
+  font-size: 8pt;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: #3ec87a !important;
+  margin-bottom: 6px;
+}
+.pr-title {
+  font-family: 'Fraunces', serif;
+  font-size: 22pt;
+  font-weight: 900;
+  color: #ffffff !important;
+  line-height: 1.1;
+  margin-bottom: 5px;
+}
+.pr-sub {
+  font-size: 9pt;
+  color: rgba(255,255,255,0.5) !important;
+}
+.pr-credit {
+  font-size: 8pt;
+  color: rgba(212,168,50,0.85) !important;
+  margin-top: 5px;
+  letter-spacing: 0.3px;
+}
+.pr-header-right {
+  text-align: right;
+  padding-top: 4px;
+}
+.pr-date-label {
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.4) !important;
+  margin-bottom: 3px;
+}
+.pr-date-val {
+  font-family: 'Fraunces', serif;
+  font-size: 11pt;
+  font-weight: 700;
+  color: #fff !important;
+}
+.pr-file-val {
+  font-size: 7.5pt;
+  color: rgba(255,255,255,0.35) !important;
+  margin-top: 4px;
+  max-width: 160px;
+  word-break: break-word;
+  text-align: right;
+}
+/* Accent bar */
+.pr-accent {
+  height: 3pt;
+  background: #3ec87a !important;
+}
+
+/* ── Print Stats ── */
+.pr-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10pt;
+  padding: 18pt 32pt;
+  background: #f8f6f1 !important;
+  border-bottom: 1pt solid #dde4df !important;
+  page-break-inside: avoid;
+}
+.pr-stat {
+  flex: 1 1 28%;
+  background: #fff !important;
+  border: 1pt solid #dde4df !important;
+  border-radius: 6pt;
+  padding: 12pt 14pt;
+  position: relative;
+  overflow: hidden;
+}
+.pr-stat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2.5pt;
+}
+.pr-stat.s1::before { background: #3ec87a !important; }
+.pr-stat.s2::before { background: #d4a832 !important; }
+.pr-stat.s3::before { background: #e07a5f !important; }
+.pr-stat.s4::before { background: #6b8fa3 !important; }
+.pr-stat.s5::before { background: #2c7a50 !important; }
+.pr-stat.s6::before { background: #d94b4b !important; }
+.pr-stat-label {
+  font-size: 6.5pt;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6b7d72 !important;
+  margin-bottom: 4pt;
+}
+.pr-stat-val {
+  font-family: 'Fraunces', serif;
+  font-size: 22pt;
+  font-weight: 900;
+  color: #162c1e !important;
+  line-height: 1;
+  margin-bottom: 2pt;
+}
+.pr-stat-unit {
+  font-size: 7.5pt;
+  color: #9aac9f !important;
+}
+
+/* ── Print Table wrapper ── */
+.pr-table-section {
+  padding: 16pt 32pt;
+}
+.pr-table-heading {
+  font-family: 'Fraunces', serif;
+  font-size: 12pt;
+  font-weight: 700;
+  color: #162c1e !important;
+  margin-bottom: 8pt;
+}
+
+/* ── Print Table ── */
+.pr-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9pt;
+}
+.pr-table thead tr {
+  background: #162c1e !important;
+}
+.pr-table thead th {
+  font-size: 7.5pt;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.65) !important;
+  padding: 10pt 12pt;
+  text-align: left;
+}
+.pr-table thead th:first-child { color: #3ec87a !important; }
+.pr-table thead th.num { text-align: center; }
+.pr-table thead th.right { text-align: right; }
+
+.pr-table tbody tr {
+  border-bottom: 0.5pt solid #dde4df !important;
+  page-break-inside: avoid;
+}
+.pr-table tbody tr:nth-child(even) {
+  background: #f6fbf8 !important;
+}
+.pr-table tbody td {
+  padding: 8.5pt 12pt;
+  color: #18201c !important;
+  vertical-align: middle;
+}
+.pr-table tbody td.sl {
+  font-size: 8pt;
+  font-weight: 600;
+  color: #9aac9f !important;
+  text-align: center;
+  width: 28pt;
+}
+.pr-table tbody td.name {
+  font-weight: 600;
+  color: #162c1e !important;
+}
+.pr-table tbody td.days {
+  text-align: center;
+  font-weight: 700;
+  color: #8a6400 !important;
+}
+.pr-table tbody td.km {
+  text-align: right;
+  font-weight: 700;
+  color: #2c7a50 !important;
+}
+
+/* ── Print Footer row ── */
+.pr-table tfoot tr {
+  background: #162c1e !important;
+}
+.pr-table tfoot td {
+  padding: 10pt 12pt;
+  font-weight: 700;
+  font-size: 9pt;
+  color: #fff !important;
+  border-top: 2pt solid #2c7a50 !important;
+}
+.pr-table tfoot td.days { text-align: center; color: #f0c040 !important; font-size: 11pt; }
+.pr-table tfoot td.km { text-align: right; color: #3ec87a !important; font-size: 11pt; }
+
+/* ── Print page footer ── */
+.pr-page-footer {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #162c1e !important;
+  padding: 5pt 32pt;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pr-page-footer span {
+  font-size: 7pt;
+  color: rgba(255,255,255,0.45) !important;
+  letter-spacing: 1px;
+}
+
+/* ── Individual breakdown print ── */
+.pi-person {
+  page-break-after: always;
+  page-break-inside: avoid;
+}
+.pi-person:last-child { page-break-after: auto; }
+.pi-person-head {
+  background: #0c1a11 !important;
+  padding: 24px 32px 20px;
+  page-break-inside: avoid;
+}
+.pi-person-eyebrow {
+  font-size: 7.5pt; font-weight: 600; letter-spacing: 2.5px; text-transform: uppercase;
+  color: #3ec87a !important; margin-bottom: 6px;
+}
+.pi-person-name {
+  font-family: 'Fraunces', serif; font-size: 20pt; font-weight: 900; color: #fff !important;
+  line-height: 1.15; margin-bottom: 8px;
+}
+.pi-person-meta { font-size: 8.5pt; color: rgba(255,255,255,0.5) !important; }
+.pi-person-badges { display: flex; gap: 14pt; margin-top: 10pt; flex-wrap: wrap; }
+.pi-badge-label { font-size: 7pt; letter-spacing: 1.2px; text-transform: uppercase; color: rgba(255,255,255,0.4) !important; margin-bottom: 2pt; }
+.pi-badge-val { font-family: 'Fraunces', serif; font-size: 13pt; font-weight: 800; color: #3ec87a !important; }
+.pi-accent { height: 3pt; background: #3ec87a !important; }
+.pi-table-wrap { padding: 14pt 32pt 28pt; }
+.pi-table { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.pi-table thead tr { background: #162c1e !important; }
+.pi-table thead th {
+  font-size: 7pt; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+  color: rgba(255,255,255,0.65) !important; padding: 8pt 10pt; text-align: left;
+}
+.pi-table tbody tr { border-bottom: 0.5pt solid #dde4df !important; page-break-inside: avoid; }
+.pi-table tbody tr:nth-child(even) { background: #f6fbf8 !important; }
+.pi-table tbody td { padding: 7pt 10pt; color: #18201c !important; vertical-align: top; }
+.pi-table tbody td.sl { color: #9aac9f !important; width: 24pt; }
+.pi-table tbody td.remarks { color: #566058 !important; font-size: 8pt; }
+.pi-status-tag { display: inline-block; font-size: 7pt; font-weight: 700; padding: 2pt 7pt; border-radius: 8pt; }
+.pi-status-tag.st-approved { background: rgba(62,200,122,0.15); color: #1f7a45 !important; }
+.pi-status-tag.st-rejected { background: rgba(220,60,60,0.13); color: #b02424 !important; }
+.pi-status-tag.st-provisional { background: rgba(212,168,50,0.15); color: #8a6400 !important; }
+.pi-status-tag.st-other { background: rgba(107,125,114,0.13); color: #566058 !important; }
+.pi-footer {
+  padding: 5pt 32pt; background: #162c1e !important; display: flex; justify-content: space-between;
+}
+.pi-footer span { font-size: 7pt; color: rgba(255,255,255,0.45) !important; letter-spacing: 1px; }
+
+/* ── Loading overlay (shown while a PDF is being rendered) ── */
+.pdf-loading-overlay {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(12,26,17,0.72);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  color: #fff;
+}
+.pdf-loading-overlay.show { display: flex; }
+.pdf-loading-overlay .spinner {
+  width: 40px; height: 40px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: var(--mint);
+  border-radius: 50%;
+  animation: spin 0.75s linear infinite;
+}
+.pdf-loading-overlay .pl-text { font-size: 14px; font-weight: 600; letter-spacing: 0.3px; }
+.pdf-loading-overlay .pl-sub { font-size: 12px; color: rgba(255,255,255,0.55); }
+
+/* ══════════════════════════════════════════
+   APP CREDIT FOOTER (screen only, hidden on print)
+══════════════════════════════════════════ */
+.app-credit-footer {
+  margin-top: 32px;
+  padding: 22px 40px 26px;
+  background: var(--deep);
+  color: rgba(255,255,255,0.55);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  text-align: center;
+  line-height: 1.7;
+}
+.app-credit-footer strong {
+  color: var(--mint);
+  font-weight: 600;
+}
+.app-credit-footer .credit-links a {
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  margin: 0 8px;
+  border-bottom: 1px dotted rgba(255,255,255,0.3);
+}
+.app-credit-footer .credit-links a:hover {
+  color: var(--mint);
+  border-bottom-color: var(--mint);
+}
+.app-credit-footer .credit-disclaimer {
+  color: rgba(255,255,255,0.4);
+  font-size: 11px;
+  margin-top: 4px;
+}
+@media print {
+  .app-credit-footer { display: none !important; }
+}
+@media (max-width: 600px) {
+  .app-credit-footer { padding: 18px 16px 22px; }
+}
+
+/* ══════════ v7 — new Excel format (Section · Beat · Verification Flag) ══════════ */
+.modal-card { max-width: min(1040px, 96vw); }
+.sec-chip { display:inline-block; font-size:10.5px; font-weight:600; padding:2px 8px; border-radius:10px;
+  background: rgba(107,143,163,0.12); color:#3d6275; margin:0 4px 3px 0; white-space:nowrap; }
+td.sections { max-width: 200px; }
+.flag-tag { display:inline-flex; align-items:center; gap:4px; font-size:10px; font-weight:700; padding:2px 8px;
+  border-radius:10px; background: rgba(224,122,95,0.14); color:#b4492f; border:1px solid rgba(224,122,95,0.3); margin-top:4px; }
+.no-flag { color: var(--faint); }
+td.flags { text-align:center; }
+.flag-total { text-align:center; color:#f4a682; font-weight:700; }
+.mb-dur { font-size:10.5px; color: var(--faint); margin-top:2px; }
+.mb-sec .beat { font-size:10.5px; color: var(--faint); display:block; margin-top:1px; }
+.data-check { display:none; flex-wrap:wrap; gap:10px; margin: -12px 0 26px; }
+.data-check.show { display:flex; }
+.dc-item { display:inline-flex; align-items:center; gap:8px; font-size:12px; padding:8px 14px; border-radius:10px;
+  background:#fff; border:1px solid var(--border, #dde4df); color: var(--muted); }
+.dc-item strong { color:#162c1e; font-weight:700; }
+.dc-item .dc-dot { width:8px; height:8px; border-radius:50%; background:#9aac9f; flex-shrink:0; }
+.dc-item.ok .dc-dot { background:#3ec87a; }
+.dc-item.warn { border-color: rgba(224,122,95,0.45); background: rgba(224,122,95,0.06); }
+.dc-item.warn .dc-dot { background:#e07a5f; }
+.pi-flag { font-size:7pt; font-weight:700; color:#b4492f !important; margin-top:2pt; }
+.pi-sub { font-size:7pt; color:#9aac9f !important; display:block; margin-top:1pt; }
+</style>
+
+</head>
+<body>
+
+<!-- ══════ SITE HEADER ══════ -->
+<header class="site-header">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 3C12 3 7 7 7 12C7 15 9 17 12 17C15 17 17 15 17 12C17 7 12 3 12 3Z" fill="white" opacity="0.9"/>
+        <path d="M12 17V21M10 21H14" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M8 10C8 10 6 11 6 13" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+        <path d="M16 10C16 10 18 11 18 13" stroke="white" stroke-width="1.2" stroke-linecap="round" opacity="0.6"/>
+      </svg>
+    </div>
+    <div>
+      <div class="logo-title">Patrol Report</div>
+      <div class="logo-sub" id="logoSub">Sundargarh · Gopalpur Range</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <a class="creator-badge" href="https://www.instagram.com/tushan.adarsh/" target="_blank" rel="noopener noreferrer" title="Independent tool — not a Government of Odisha / Forest Department product">
+      <span class="long">Created by</span> <strong>Tushan Naik</strong>
+    </a>
+  </div>
+</header>
+
+<!-- ══════ MAIN ══════ -->
+<main class="main">
+
+  <!-- UPLOAD -->
+  <div class="upload-section">
+    <div class="upload-card" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="upload-icon-wrap">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M9 12H15M12 9V15" stroke="#3ec87a" stroke-width="2" stroke-linecap="round"/>
+          <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#9aac9f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M14 2V8H20" stroke="#9aac9f" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="upload-title">Drop your Excel file here</div>
+      <div class="upload-sub">Supports .xls and .xlsx &mdash; the patrol list export (Division · Range · Section · Beat · Surveyor · Trip Details · Distance · Status · Verification Flag)</div>
+      <button class="upload-btn" onclick="event.stopPropagation(); document.getElementById('fileInput').click()">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="14" height="14"><path d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L11 6.414V13a1 1 0 11-2 0V6.414L7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-6.5 11a1.5 1.5 0 000 3h13a1.5 1.5 0 000-3h-13z"/></svg>
+        Browse File
+      </button>
+      <input type="file" id="fileInput" accept=".xls,.xlsx" onchange="handleFile(this.files[0])"/>
+    </div>
+
+    <div class="file-strip" id="fileStrip">
+      <div class="file-info">
+        <div class="file-icon">
+          <svg viewBox="0 0 24 24" fill="none">
+            <path d="M14 2H6C5.46957 2 4.96086 2.21071 4.58579 2.58579C4.21071 2.96086 4 3.46957 4 4V20C4 20.5304 4.21071 21.0391 4.58579 21.4142C4.96086 21.7893 5.46957 22 6 22H18C18.5304 22 19.0391 21.7893 19.4142 21.4142C19.7893 21.0391 20 20.5304 20 20V8L14 2Z" stroke="#3ec87a" stroke-width="1.5" stroke-linejoin="round"/>
+            <path d="M14 2V8H20" stroke="#3ec87a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <div>
+          <div class="fname" id="stripName">—</div>
+          <div class="fmeta" id="stripMeta">—</div>
+        </div>
+      </div>
+      <button class="strip-clear" onclick="clearData()" title="Remove file">
+        <svg viewBox="0 0 20 20" fill="currentColor" width="12" height="12"><path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ERROR -->
+  <div class="error-bar" id="errorBar"></div>
+
+  <!-- LOADER -->
+  <div class="loader" id="loader">
+    <div class="spinner"></div>
+    Processing patrol data…
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card c1">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="8" r="4" stroke="#3ec87a" stroke-width="1.8"/>
+          <path d="M6 20C6 17.2386 8.68629 15 12 15C15.3137 15 18 17.2386 18 20" stroke="#3ec87a" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">Total Surveyors</div>
+        <div class="stat-val" id="stSurveyors">—</div>
+        <div class="stat-unit">unique staff</div>
+      </div>
+    </div>
+    <div class="stat-card c2">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="4" width="18" height="17" rx="2" stroke="#d4a832" stroke-width="1.8"/>
+          <path d="M16 2V6M8 2V6M3 9H21" stroke="#d4a832" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M8 13H12M8 17H15" stroke="#d4a832" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">Total Patrol Days</div>
+        <div class="stat-val" id="stDays">—</div>
+        <div class="stat-unit">combined unique days</div>
+      </div>
+    </div>
+    <div class="stat-card c3">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M3 12C3 12 6 5 12 5C18 5 21 12 21 12C21 12 18 19 12 19C6 19 3 12 3 12Z" stroke="#e07a5f" stroke-width="1.8"/>
+          <circle cx="12" cy="12" r="3" stroke="#e07a5f" stroke-width="1.8"/>
+          <path d="M12 2V4M12 20V22M2 12H4M20 12H22" stroke="#e07a5f" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">Total Distance</div>
+        <div class="stat-val" id="stKm">—</div>
+        <div class="stat-unit">kilometres covered</div>
+      </div>
+    </div>
+    <div class="stat-card c4">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M4 6H20M4 12H20M4 18H14" stroke="#6b8fa3" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">Total Patrolling</div>
+        <div class="stat-val" id="stTrips">—</div>
+        <div class="stat-unit">patrol entries logged</div>
+      </div>
+    </div>
+    <div class="stat-card c5">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M5 12l4 4L19 6" stroke="#3ec87a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">Approved / Provisional</div>
+        <div class="stat-val" id="stApprovedProv">—</div>
+        <div class="stat-unit">entries not rejected</div>
+      </div>
+    </div>
+    <div class="stat-card c6">
+      <div class="stat-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M6 6l12 12M18 6L6 18" stroke="#d94b4b" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="stat-body">
+        <div class="stat-label">Rejected</div>
+        <div class="stat-val" id="stRejected">—</div>
+        <div class="stat-unit">entries rejected</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="data-check" id="dataCheck"></div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-left">
+      <div class="tbl-title">Surveyor Summary</div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 20 20" fill="none">
+          <circle cx="9" cy="9" r="5.5" stroke="#9aac9f" stroke-width="1.6"/>
+          <path d="M13.5 13.5L17 17" stroke="#9aac9f" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+        <input type="text" id="searchInput" placeholder="Search surveyor or section…" oninput="renderTable()"/>
+      </div>
+    </div>
+    <div class="toolbar-right">
+      <div class="export-group">
+        <button class="export-btn btn-excel" onclick="toggleExportMenu('excel')">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 000 2h1.586l-2.293 2.293a1 1 0 101.414 1.414L9 13.414V15a1 1 0 102 0v-1.586l2.293 2.293a1 1 0 001.414-1.414L12.414 12H14a1 1 0 100-2H6z"/></svg>
+          Excel
+          <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"/></svg>
+        </button>
+        <div class="export-menu" id="menuExcel">
+          <div class="export-menu-item" onclick="exportExcel(); closeExportMenus();">
+            <div class="emi-title">Summary Export</div>
+            <div class="emi-sub">One row per surveyor · respects status filter</div>
+          </div>
+          <div class="export-menu-item" onclick="exportExcelIndividual(); closeExportMenus();">
+            <div class="emi-title">Individual Breakdown</div>
+            <div class="emi-sub">Every surveyor's every patrol day + status</div>
+          </div>
+        </div>
+      </div>
+      <div class="export-group">
+        <button class="export-btn btn-pdf" onclick="toggleExportMenu('pdf')">
+          <svg viewBox="0 0 20 20" fill="currentColor"><path d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v3.586L7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 10-1.414-1.414L11 11.586V8z"/></svg>
+          Export PDF
+          <svg viewBox="0 0 20 20" fill="currentColor" width="10" height="10"><path d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.24 4.24a.75.75 0 01-1.06 0L5.21 8.29a.75.75 0 01.02-1.08z"/></svg>
+        </button>
+        <div class="export-menu" id="menuPdf">
+          <div class="export-menu-item" onclick="exportPDF(); closeExportMenus();">
+            <div class="emi-title">Summary Export</div>
+            <div class="emi-sub">One row per surveyor · respects status filter</div>
+          </div>
+          <div class="export-menu-item" onclick="exportPDFIndividualAll(); closeExportMenus();">
+            <div class="emi-title">Individual Breakdown</div>
+            <div class="emi-sub">One page per surveyor with all patrol days</div>
+          </div>
+          <div class="export-menu-item" onclick="exportPDFIndividualAllWithIndex(); closeExportMenus();">
+            <div class="emi-title">Individual Breakdown + Index</div>
+            <div class="emi-sub">Cover page listing everyone, then one page per surveyor</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STATUS FILTER -->
+  <div class="status-filter-bar" id="statusFilterBar">
+    <span class="status-filter-label">Status</span>
+    <div id="statusChips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    <span class="status-chip-reset" onclick="resetStatusFilter()">Reset</span>
+  </div>
+
+  <!-- SECTION FILTER + FLAGGED ONLY -->
+  <div class="status-filter-bar" id="sectionFilterBar">
+    <span class="status-filter-label">Section</span>
+    <div id="sectionChips" style="display:flex; flex-wrap:wrap; gap:8px;"></div>
+    <span class="status-chip-reset" onclick="resetSectionFilter()">Reset</span>
+    <div class="status-chip" id="flagOnlyChip" onclick="toggleFlagOnly()" style="margin-left:10px;">
+      <span class="dot" style="background:#e07a5f"></span>Flagged only <span class="cnt" id="flagOnlyCnt">0</span>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="table-wrap" id="tableWrap">
+    <div class="empty-state" id="emptyState">
+      <div class="empty-state-icon">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M16 4C16 4 9 10 9 17C9 21 12 24 16 24C20 24 23 21 23 17C23 10 16 4 16 4Z" stroke="#3ec87a" stroke-width="1.8"/>
+          <path d="M16 24V30" stroke="#3ec87a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M12 30H20" stroke="#3ec87a" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M10 14C10 14 8 15 7 17" stroke="#3ec87a" stroke-width="1.4" stroke-linecap="round" opacity="0.5"/>
+        </svg>
+      </div>
+      <p>Upload a patrol Excel file<br>to view the summary table.</p>
+    </div>
+    <table id="reportTable" style="display:none">
+      <thead>
+        <tr>
+          <th class="num">Sl.</th>
+          <th>Surveyor Name</th>
+          <th>Section(s)</th>
+          <th class="num">Trip Days</th>
+          <th class="right">Distance</th>
+          <th>Status Breakdown</th>
+          <th class="num">Flags</th>
+          <th class="actions"></th>
+        </tr>
+      </thead>
+      <tbody id="reportBody"></tbody>
+      <tfoot id="reportFoot"></tfoot>
+    </table>
+  </div>
+
+</main>
+
+<!-- ══════ INDIVIDUAL DETAIL MODAL ══════ -->
+<div class="pdf-loading-overlay" id="pdfLoadingOverlay">
+  <div class="spinner"></div>
+  <div class="pl-text" id="pdfLoadingText">Generating PDF…</div>
+  <div class="pl-sub" id="pdfLoadingSub">This can take a few seconds</div>
+</div>
+
+<div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this) closeModal()">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="modal-head-name" id="modalName">—</div>
+        <div class="modal-head-stats">
+          <div class="modal-head-stat">Trip Days <strong id="modalDays">—</strong></div>
+          <div class="modal-head-stat">Distance <strong id="modalKm">—</strong></div>
+          <div class="modal-head-stat" id="modalFlagWrap" style="display:none">Flagged <strong id="modalFlags">—</strong></div>
+          <div class="modal-head-stat" id="modalStatusWrap">Status <div class="status-breakdown" id="modalStatusBreakdown" style="margin-top:4px;"></div></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <table>
+        <thead>
+          <tr>
+            <th class="num">Sl.</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Section / Beat</th>
+            <th>Remarks</th>
+            <th class="right">Distance</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="modalBody"></tbody>
+      </table>
+    </div>
+    <div class="modal-foot">
+      <button class="export-btn btn-pdf" onclick="exportPDFIndividualSingle(modalSurveyor)">Export This Surveyor · PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ APP CREDIT FOOTER (screen only) ══════ -->
+<footer class="app-credit-footer">
+  <div>This tool is independently built by <strong>Tushan Naik</strong> — it is not an official Forest Department or Government of Odisha application.</div>
+  <div class="credit-links">
+    <a href="https://www.instagram.com/tushan.adarsh/" target="_blank" rel="noopener noreferrer">Instagram: @tushan.adarsh</a>
+    ·
+    <a href="mailto:tushannaik94@gmail.com">tushannaik94@gmail.com</a>
+  </div>
+  <div class="credit-disclaimer">Data entered is processed locally in your browser and is not sent to any server.</div>
+</footer>
+
+<!-- ══════ PRINTABLE SECTION (hidden on screen, shown on print) ══════ -->
+<div id="printable">
+  <div class="pr-header">
+    <div class="pr-header-left">
+      <div class="pr-org">Forest Department — Odisha</div>
+      <div class="pr-title">Patrol Summary Report</div>
+      <div class="pr-sub" id="prSub">Sundargarh Division &nbsp;·&nbsp; Gopalpur Range</div>
+      <div class="pr-credit">Export tool by Tushan Naik</div>
+      <div class="pr-status-note" id="prStatusNote" style="font-size:8pt;color:rgba(255,255,255,0.5);margin-top:4px;"></div>
+    </div>
+    <div class="pr-header-right">
+      <div class="pr-date-label">Generated</div>
+      <div class="pr-date-val" id="prDate">—</div>
+      <div class="pr-file-val" id="prFile">—</div>
+    </div>
+  </div>
+  <div class="pr-accent"></div>
+
+  <div class="pr-stats">
+    <div class="pr-stat s1">
+      <div class="pr-stat-label">Total Surveyors</div>
+      <div class="pr-stat-val" id="prSurveyors">—</div>
+      <div class="pr-stat-unit">unique staff</div>
+    </div>
+    <div class="pr-stat s2">
+      <div class="pr-stat-label">Total Patrol Days</div>
+      <div class="pr-stat-val" id="prDays">—</div>
+      <div class="pr-stat-unit">combined unique days</div>
+    </div>
+    <div class="pr-stat s3">
+      <div class="pr-stat-label">Total Distance</div>
+      <div class="pr-stat-val" id="prKm">—</div>
+      <div class="pr-stat-unit">kilometres covered</div>
+    </div>
+    <div class="pr-stat s4">
+      <div class="pr-stat-label">Total Patrolling</div>
+      <div class="pr-stat-val" id="prTrips">—</div>
+      <div class="pr-stat-unit">patrol entries logged</div>
+    </div>
+    <div class="pr-stat s5">
+      <div class="pr-stat-label">Approved / Provisional</div>
+      <div class="pr-stat-val" id="prApprovedProv">—</div>
+      <div class="pr-stat-unit">entries not rejected</div>
+    </div>
+    <div class="pr-stat s6">
+      <div class="pr-stat-label">Rejected</div>
+      <div class="pr-stat-val" id="prRejected">—</div>
+      <div class="pr-stat-unit">entries rejected</div>
+    </div>
+  </div>
+
+  <div class="pr-table-section">
+    <div class="pr-table-heading">Surveyor-wise Breakdown</div>
+    <table class="pr-table">
+      <thead>
+        <tr>
+          <th class="num">Sl.</th>
+          <th>Surveyor Name</th>
+          <th class="num">Trip Days</th>
+          <th class="right">Distance (km)</th>
+        </tr>
+      </thead>
+      <tbody id="prBody"></tbody>
+      <tfoot id="prFoot"></tfoot>
+    </table>
+  </div>
+
+  <div class="pr-page-footer">
+    <span id="prFooterMeta">Patrol Monitoring System &nbsp;·&nbsp; Sundargarh Division, Gopalpur Range &nbsp;·&nbsp; Export tool by Tushan Naik</span>
+    <span id="prFooterFile">—</span>
+  </div>
+</div>
+
+<!-- ══════ PRINTABLE INDIVIDUAL BREAKDOWN (filled dynamically) ══════ -->
+<div id="printableIndividuals"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let allData = [];        // every parsed trip record (full history, unfiltered)
+let summaryData = [];    // per-surveyor rows currently shown in the table (status-filtered)
+let personIndex = {};    // surveyor name -> ALL their trips (full history, unfiltered) — used by modal/individual exports
+let activeStatuses = new Set();
+let fileName = '';
+let modalSurveyor = null;
+let activeSections = new Set();
+let flaggedOnly = false;
+let meta = { division: 'Sundargarh', range: 'Gopalpur', systemKm: null };
+
+/* ── DRAG & DROP ── */
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+
+/* ── FILE HANDLER ── */
+function handleFile(file) {
+  if (!file) return;
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!['xls','xlsx'].includes(ext)) {
+    showError('Please upload a valid .xls or .xlsx file.');
+    return;
+  }
+  hideError();
+  fileName = file.name;
+  document.getElementById('loader').classList.add('show');
+  hideResults();
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, { type: 'binary' });
+      const ws = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { header: 1, defval: '' });
+      parseData(rows);
+      showFileStrip(file);
+      document.getElementById('loader').classList.remove('show');
+    } catch(err) {
+      document.getElementById('loader').classList.remove('show');
+      showError('Failed to read file: ' + err.message);
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+/* ── PARSE ──
+   Current export columns (matched by header text, so order doesn't matter):
+   Division · Range · Section · Beat · Remarks · Surveyor · Trip Details · Upload Time ·
+   Distance (km) · Current Status · Verification Flag
+   Older exports (System Approved Distance, Speed, no Section/Beat/Flag) still load.
+   A footer row like "System Approved Distance : 102.559 km" is read as a control total.
+*/
+function cleanCell(v) { return String(v == null ? '' : v).replace(/\s+/g, ' ').trim(); }
+
+function to24(h, ap) {
+  h = +h;
+  if (!ap) return h;
+  ap = ap.toUpperCase();
+  if (ap === 'PM' && h < 12) return h + 12;
+  if (ap === 'AM' && h === 12) return 0;
+  return h;
+}
+function fmt12(h24, mm) {
+  const ap = h24 >= 12 ? 'PM' : 'AM';
+  const h = h24 % 12 === 0 ? 12 : h24 % 12;
+  return `${String(h).padStart(2,'0')}:${mm} ${ap}`;
+}
+/* "06-10-2026 06:38:06 AM - 08:06:21 AM" → start/end labels + duration (end before start = crossed midnight) */
+function parseTripWindow(trip) {
+  const m = trip.match(/^(\d{2})-(\d{2})-(\d{4})\s+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?\s*[-–]\s*(?:(\d{2})-(\d{2})-(\d{4})\s+)?(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?/i);
+  if (!m) return { startLabel: '', endLabel: '', durationMin: null };
+  const sh = to24(m[4], m[7]), eh = to24(m[11], m[14] || m[7]);
+  const start = new Date(+m[3], +m[2]-1, +m[1], sh, +m[5], +(m[6]||0));
+  let end = m[8] ? new Date(+m[10], +m[9]-1, +m[8], eh, +m[12], +(m[13]||0))
+                 : new Date(+m[3], +m[2]-1, +m[1], eh, +m[12], +(m[13]||0));
+  if (end <= start && !m[8]) end = new Date(end.getTime() + 86400000);
+  return { startLabel: fmt12(sh, m[5]), endLabel: fmt12(eh, m[12]), durationMin: Math.round((end - start) / 60000) };
+}
+function formatDuration(min) {
+  if (min == null) return '';
+  const h = Math.floor(min / 60), m = min % 60;
+  return h ? `${h}h ${String(m).padStart(2,'0')}m` : `${m}m`;
+}
+function timeText(t) { return t.startLabel ? `${t.startLabel} – ${t.endLabel}` : ''; }
+
+function parseData(rows) {
+  allData = [];
+  meta = { division: 'Sundargarh', range: 'Gopalpur', systemKm: null };
+  let startRow = 0;
+  let headerRow = null;
+  for (let i = 0; i < Math.min(rows.length, 5); i++) {
+    const r = rows[i].map(c => String(c).toLowerCase());
+    if (r.some(c => c.includes('surveyor')) && r.some(c => c.includes('trip'))) {
+      startRow = i + 1; headerRow = rows[i]; break;
+    }
+  }
+  const hdr = headerRow || rows[0] || [];
+  let colDivision=-1, colRange=-1, colSection=-1, colBeat=-1, colSurveyor=-1, colTrip=-1, colKm=-1,
+      colStatus=-1, colRemarks=-1, colUpload=-1, colSpeed=-1, colFlag=-1;
+  hdr.forEach((h, i) => {
+    const v = String(h).toLowerCase().trim();
+    if (v === 'division') colDivision = i;
+    else if (v === 'range') colRange = i;
+    else if (v === 'section') colSection = i;
+    else if (v === 'beat') colBeat = i;
+    else if (v.includes('surveyor')) colSurveyor = i;
+    else if (v.includes('trip')) colTrip = i;
+    else if (v.includes('distance') || v.includes('approved')) colKm = i;
+    else if (v.includes('status')) colStatus = i;
+    else if (v.includes('remark')) colRemarks = i;
+    else if (v.includes('upload')) colUpload = i;
+    else if (v.includes('speed')) colSpeed = i;
+    else if (v.includes('flag') || v.includes('verif')) colFlag = i;
+  });
+  // positional fallbacks = current 11-column layout
+  if (colSurveyor < 0) colSurveyor = 5;
+  if (colTrip < 0)     colTrip     = 6;
+  if (colKm < 0)       colKm       = 8;
+
+  const divisions = new Set(), ranges = new Set();
+  const cell = (row, c) => c >= 0 ? cleanCell(row[c]) : '';
+
+  for (let i = startRow; i < rows.length; i++) {
+    const row = rows[i];
+    // footer control total, e.g. "System Approved Distance : 102.559 km"
+    for (const c of row) {
+      const fm = String(c).match(/approved\s*distance\s*:?\s*([\d.,]+)\s*km/i);
+      if (fm) { meta.systemKm = parseFloat(fm[1].replace(',', '.')); }
+    }
+    const surveyor = cell(row, colSurveyor);
+    const trip     = cell(row, colTrip);
+    if (!surveyor || !trip) continue;
+    const dateMatch = trip.match(/^(\d{2}-\d{2}-\d{4})/);
+    if (!dateMatch) continue;
+    const km = parseFloat(String(row[colKm] == null || row[colKm] === '' ? 0 : row[colKm]).replace(',', '.')) || 0;
+    const division = cell(row, colDivision), range = cell(row, colRange);
+    if (division) divisions.add(division);
+    if (range) ranges.add(range);
+    const win = parseTripWindow(trip);
+    allData.push({
+      surveyor: normalizeName(surveyor),
+      date: dateMatch[1],
+      km,
+      status: cell(row, colStatus) || 'Unspecified',
+      remarks: cell(row, colRemarks),
+      tripDetails: trip,
+      uploadTime: cell(row, colUpload),
+      speed: cell(row, colSpeed),
+      section: cell(row, colSection) || 'Unspecified',
+      beat: cell(row, colBeat),
+      flag: cell(row, colFlag),
+      startLabel: win.startLabel, endLabel: win.endLabel, durationMin: win.durationMin
+    });
+  }
+  if (divisions.size) meta.division = Array.from(divisions).join(' / ');
+  if (ranges.size)    meta.range    = Array.from(ranges).join(' / ');
+  buildPersonIndex();
+  buildStatusFilterUI();
+  buildSectionFilterUI();
+  flaggedOnly = false;
+  document.getElementById('flagOnlyChip').classList.remove('active');
+  document.getElementById('flagOnlyCnt').textContent = allData.filter(t => t.flag).length;
+  applyMeta();
+  buildSummary();
+  renderDataCheck();
+}
+
+function divRangeText() { return `${meta.division} Division · ${meta.range} Range`; }
+function applyMeta() {
+  document.getElementById('logoSub').textContent = `${meta.division} · ${meta.range} Range`;
+  document.getElementById('prSub').innerHTML = `${escapeHtml(meta.division)} Division &nbsp;·&nbsp; ${escapeHtml(meta.range)} Range`;
+  document.getElementById('prFooterMeta').innerHTML = `Patrol Monitoring System &nbsp;·&nbsp; ${escapeHtml(meta.division)} Division, ${escapeHtml(meta.range)} Range &nbsp;·&nbsp; Export tool by Tushan Naik`;
+  document.title = `Patrol Report — ${meta.range} Range`;
+}
+
+function normalizeName(n) {
+  return n.trim().replace(/[.,;:]+$/, '').replace(/\s+/g,' ').trim()
+    .split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+}
+
+/* ── DATA CHECK STRIP: control-total reconciliation + flagged / zero-distance trips ── */
+function renderDataCheck() {
+  const el = document.getElementById('dataCheck');
+  const items = [];
+  const total = +allData.reduce((a, t) => a + t.km, 0).toFixed(3);
+  if (meta.systemKm != null) {
+    const diff = Math.abs(total - meta.systemKm);
+    if (diff <= 0.01) items.push(`<div class="dc-item ok"><span class="dc-dot"></span>System total <strong>${meta.systemKm.toFixed(3)} km</strong> matches the rows (${total.toFixed(3)} km)</div>`);
+    else items.push(`<div class="dc-item warn"><span class="dc-dot"></span>System total <strong>${meta.systemKm.toFixed(3)} km</strong> but rows add up to <strong>${total.toFixed(3)} km</strong> (off by ${diff.toFixed(3)} km)</div>`);
+  }
+  const flagged = allData.filter(t => t.flag);
+  if (flagged.length) {
+    const byReason = {};
+    flagged.forEach(t => byReason[t.flag] = (byReason[t.flag] || 0) + 1);
+    const txt = Object.entries(byReason).map(([r, c]) => `${escapeHtml(r)} × ${c}`).join(', ');
+    items.push(`<div class="dc-item warn"><span class="dc-dot"></span><strong>${flagged.length}</strong> flagged trip${flagged.length>1?'s':''}: ${txt}</div>`);
+  }
+  const zero = allData.filter(t => t.km === 0).length;
+  if (zero) items.push(`<div class="dc-item"><span class="dc-dot"></span><strong>${zero}</strong> trip${zero>1?'s':''} with 0 km recorded</div>`);
+  el.innerHTML = items.join('');
+  el.classList.toggle('show', items.length > 0);
+}
+
+/* Classifies ANY status string the source system throws at us — Approve, DFO Approve,
+   RO Approve, Reject, System Rejected, DFO Reject, Provisional, or anything new —
+   into one of 4 display buckets. The original text is always preserved & shown as-is. */
+function classifyStatus(status) {
+  const s = String(status || '').toLowerCase();
+  if (!s) return 'other';
+  if (s.includes('reject'))     return 'rejected';
+  if (s.includes('approve'))    return 'approved';
+  if (s.includes('provisional')) return 'provisional';
+  return 'other';
+}
+
+function parseDMY(d) {
+  const [dd, mm, yyyy] = d.split('-').map(Number);
+  return new Date(yyyy, mm - 1, dd).getTime();
+}
+
+function escapeHtml(str) {
+  return String(str).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ── PER-PERSON INDEX (full, unfiltered history) ── */
+function buildPersonIndex() {
+  personIndex = {};
+  allData.forEach(t => {
+    if (!personIndex[t.surveyor]) personIndex[t.surveyor] = [];
+    personIndex[t.surveyor].push(t);
+  });
+  Object.values(personIndex).forEach(arr => arr.sort((a,b) => parseDMY(a.date) - parseDMY(b.date)));
+}
+
+/* ── STATUS FILTER BAR ── */
+function buildStatusFilterUI() {
+  const counts = {};
+  allData.forEach(t => { counts[t.status] = (counts[t.status] || 0) + 1; });
+  const statuses = Object.keys(counts).sort((a,b) => counts[b] - counts[a]);
+  activeStatuses = new Set(statuses); // everything active by default
+  const wrap = document.getElementById('statusChips');
+  wrap.innerHTML = statuses.map(s => {
+    const cat = classifyStatus(s);
+    return `<div class="status-chip active st-${cat}" data-status="${escapeHtml(s)}" onclick="toggleStatusChip(this)">
+      <span class="dot"></span>${escapeHtml(s)} <span class="cnt">${counts[s]}</span>
+    </div>`;
+  }).join('');
+  document.getElementById('statusFilterBar').classList.toggle('show', statuses.length > 0);
+}
+function toggleStatusChip(el) {
+  const status = el.getAttribute('data-status');
+  if (activeStatuses.has(status)) { activeStatuses.delete(status); el.classList.remove('active'); }
+  else { activeStatuses.add(status); el.classList.add('active'); }
+  buildSummary();
+}
+function resetStatusFilter() {
+  document.querySelectorAll('.status-chip').forEach(el => {
+    activeStatuses.add(el.getAttribute('data-status'));
+    el.classList.add('active');
+  });
+  buildSummary();
+}
+function isAllStatusesActive() {
+  const all = new Set(allData.map(t => t.status));
+  if (all.size !== activeStatuses.size) return false;
+  for (const s of all) if (!activeStatuses.has(s)) return false;
+  return true;
+}
+function statusFilterNoteText() {
+  const parts = [];
+  parts.push(isAllStatusesActive() ? 'All statuses included'
+    : 'Status filter: ' + (activeStatuses.size ? Array.from(activeStatuses).join(', ') : 'none selected'));
+  if (!isAllSectionsActive()) parts.push('Section filter: ' + (activeSections.size ? Array.from(activeSections).join(', ') : 'none selected'));
+  if (flaggedOnly) parts.push('Flagged trips only');
+  return parts.join('  ·  ');
+}
+
+/* One place that decides whether a trip is in the current (status + section + flagged) view */
+function passesFilters(t) {
+  return activeStatuses.has(t.status) && activeSections.has(t.section) && (!flaggedOnly || !!t.flag);
+}
+
+/* ── SECTION FILTER ── */
+function buildSectionFilterUI() {
+  const counts = {};
+  allData.forEach(t => { counts[t.section] = (counts[t.section] || 0) + 1; });
+  const sections = Object.keys(counts).sort((a,b) => a.localeCompare(b));
+  activeSections = new Set(sections);
+  document.getElementById('sectionChips').innerHTML = sections.map(sec =>
+    `<div class="status-chip active" data-section="${escapeHtml(sec)}" onclick="toggleSectionChip(this)">
+      <span class="dot"></span>${escapeHtml(sec)} <span class="cnt">${counts[sec]}</span>
+    </div>`).join('');
+}
+function toggleSectionChip(el) {
+  const sec = el.getAttribute('data-section');
+  if (activeSections.has(sec)) { activeSections.delete(sec); el.classList.remove('active'); }
+  else { activeSections.add(sec); el.classList.add('active'); }
+  buildSummary();
+}
+function resetSectionFilter() {
+  document.querySelectorAll('#sectionChips .status-chip').forEach(el => {
+    activeSections.add(el.getAttribute('data-section'));
+    el.classList.add('active');
+  });
+  flaggedOnly = false;
+  document.getElementById('flagOnlyChip').classList.remove('active');
+  buildSummary();
+}
+function isAllSectionsActive() {
+  const all = new Set(allData.map(t => t.section));
+  if (all.size !== activeSections.size) return false;
+  for (const x of all) if (!activeSections.has(x)) return false;
+  return true;
+}
+function toggleFlagOnly() {
+  flaggedOnly = !flaggedOnly;
+  document.getElementById('flagOnlyChip').classList.toggle('active', flaggedOnly);
+  buildSummary();
+}
+
+/* ── BUILD SUMMARY (respects the active status filter) ── */
+function buildSummary() {
+  const map = {};
+  allData.filter(passesFilters).forEach(t => {
+    if (!map[t.surveyor]) map[t.surveyor] = { name: t.surveyor, dates: new Set(), totalKm: 0, statusCounts: {}, sections: new Set(), flagCount: 0 };
+    map[t.surveyor].dates.add(t.date);
+    map[t.surveyor].sections.add(t.section);
+    if (t.flag) map[t.surveyor].flagCount++;
+    map[t.surveyor].totalKm += t.km;
+    map[t.surveyor].statusCounts[t.status] = (map[t.surveyor].statusCounts[t.status] || 0) + 1;
+  });
+  summaryData = Object.values(map)
+    .map(s => ({ name: s.name, days: s.dates.size, totalKm: +s.totalKm.toFixed(3), statusCounts: s.statusCounts,
+                 sections: Array.from(s.sections).sort(), flagCount: s.flagCount }))
+    .sort((a, b) => a.name.localeCompare(b.name));
+  updateStats();
+  renderTable();
+  showResults();
+}
+
+/* ── STATS ── */
+function updateStats() {
+  const totalDays = summaryData.reduce((s,r) => s + r.days, 0);
+  const totalKm   = summaryData.reduce((s,r) => s + r.totalKm, 0);
+  document.getElementById('stSurveyors').textContent = summaryData.length;
+  document.getElementById('stDays').textContent = totalDays;
+  document.getElementById('stKm').textContent = totalKm.toFixed(2);
+
+  // Status totals ignore the status chips (so "Total Rejected" stays meaningful) but follow the Section filter.
+  const totals = statusTotals(allData.filter(t => activeSections.has(t.section)));
+  document.getElementById('stTrips').textContent = totals.total;
+  document.getElementById('stApprovedProv').textContent = totals.approvedOrProvisional;
+  document.getElementById('stRejected').textContent = totals.rejected;
+}
+
+/* Counts patrol entries (not unique days) by status category, for a given list of trips. */
+function statusTotals(trips) {
+  let approved = 0, provisional = 0, rejected = 0, other = 0;
+  trips.forEach(t => {
+    const cat = classifyStatus(t.status);
+    if (cat === 'approved') approved++;
+    else if (cat === 'provisional') provisional++;
+    else if (cat === 'rejected') rejected++;
+    else other++;
+  });
+  return {
+    total: trips.length,
+    approved, provisional, rejected, other,
+    approvedOrProvisional: approved + provisional
+  };
+}
+
+function statusCountsToBadges(counts) {
+  return Object.entries(counts)
+    .sort((a,b) => b[1]-a[1])
+    .map(([s,c]) => `<span class="status-mini st-${classifyStatus(s)}">${escapeHtml(s)} · ${c}</span>`)
+    .join('');
+}
+function statusBadge(status) {
+  const cat = classifyStatus(status);
+  return `<span class="status-badge st-${cat}"><span class="dot"></span>${escapeHtml(status)}</span>`;
+}
+
+/* ── RENDER TABLE ── */
+function renderTable() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = q
+    ? summaryData.filter(r => r.name.toLowerCase().includes(q) || r.sections.join(' ').toLowerCase().includes(q))
+    : summaryData;
+
+  const tbody = document.getElementById('reportBody');
+  const tfoot = document.getElementById('reportFoot');
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center;padding:36px;color:var(--muted);font-size:13px;">No surveyors match your search or filters.</td></tr>`;
+    tfoot.innerHTML = '';
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((r, i) => `
+    <tr data-name="${escapeHtml(r.name)}">
+      <td class="sl">${i + 1}</td>
+      <td class="name">${escapeHtml(r.name)}</td>
+      <td class="sections">${r.sections.map(x => `<span class="sec-chip">${escapeHtml(x)}</span>`).join('')}</td>
+      <td class="days"><span class="days-badge">${r.days}</span></td>
+      <td class="km"><span class="km-val">${r.totalKm.toFixed(3)}</span><span class="km-unit"> km</span></td>
+      <td><div class="status-breakdown">${statusCountsToBadges(r.statusCounts)}</div></td>
+      <td class="flags">${r.flagCount ? `<span class="flag-tag">⚑ ${r.flagCount}</span>` : '<span class="no-flag">—</span>'}</td>
+      <td class="actions">
+        <button class="row-view-btn" title="View individual record" onclick="openModal(this.closest('tr').dataset.name)">
+          <svg viewBox="0 0 20 20" fill="none"><path d="M2 10s3-6 8-6 8 6 8 6-3 6-8 6-8-6-8-6z" stroke="currentColor" stroke-width="1.5"/><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+      </td>
+    </tr>
+  `).join('');
+
+  const totalKm   = filtered.reduce((s,r) => s + r.totalKm, 0);
+  const totalDays = filtered.reduce((s,r) => s + r.days, 0);
+  const totalFlags = filtered.reduce((s,r) => s + r.flagCount, 0);
+  tfoot.innerHTML = `
+    <tr class="tfoot-row">
+      <td colspan="3" style="letter-spacing:1.5px;text-transform:uppercase;font-size:10px;color:rgba(255,255,255,0.55);">
+        Grand Total &nbsp;&middot;&nbsp; ${filtered.length} Surveyors
+      </td>
+      <td class="days-total">${totalDays}</td>
+      <td class="km-total">${totalKm.toFixed(3)} km</td>
+      <td></td>
+      <td class="flag-total">${totalFlags || ''}</td>
+      <td></td>
+    </tr>
+  `;
+
+  document.getElementById('reportTable').style.display = '';
+  document.getElementById('emptyState').style.display = 'none';
+}
+
+/* ── INDIVIDUAL DETAIL MODAL (always shows the surveyor's FULL history, ignoring the status filter) ── */
+function openModal(name) {
+  if (!name || !personIndex[name]) return;
+  modalSurveyor = name;
+  const trips = personIndex[name];
+  const days = new Set(trips.map(t => t.date)).size;
+  const km = trips.reduce((s,t) => s + t.km, 0);
+  const counts = {};
+  trips.forEach(t => counts[t.status] = (counts[t.status] || 0) + 1);
+
+  document.getElementById('modalName').textContent = name;
+  document.getElementById('modalDays').textContent = days;
+  document.getElementById('modalKm').textContent = km.toFixed(3) + ' km';
+  document.getElementById('modalStatusBreakdown').innerHTML = statusCountsToBadges(counts);
+  const nFlag = trips.filter(t => t.flag).length;
+  document.getElementById('modalFlagWrap').style.display = nFlag ? '' : 'none';
+  document.getElementById('modalFlags').textContent = nFlag;
+  document.getElementById('modalBody').innerHTML = trips.map((t, i) => `
+    <tr>
+      <td class="sl">${i + 1}</td>
+      <td>${t.date}</td>
+      <td class="mb-time">${t.startLabel ? `${escapeHtml(timeText(t))}<div class="mb-dur">${formatDuration(t.durationMin)}</div>` : '—'}</td>
+      <td class="mb-sec">${escapeHtml(t.section)}${t.beat ? `<span class="beat">${escapeHtml(t.beat)}</span>` : ''}</td>
+      <td class="mb-remarks">${escapeHtml(t.remarks || '—')}</td>
+      <td class="right">${t.km.toFixed(3)} km</td>
+      <td>${statusBadge(t.status)}${t.flag ? `<div class="flag-tag">⚑ ${escapeHtml(t.flag)}</div>` : ''}</td>
+    </tr>
+  `).join('');
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  modalSurveyor = null;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeModal(); closeExportMenus(); } });
+
+/* ── EXPORT MENUS ── */
+function toggleExportMenu(which) {
+  const id = which === 'excel' ? 'menuExcel' : 'menuPdf';
+  const el = document.getElementById(id);
+  const wasShown = el.classList.contains('show');
+  closeExportMenus();
+  if (!wasShown) el.classList.add('show');
+}
+function closeExportMenus() {
+  const a = document.getElementById('menuExcel');
+  const b = document.getElementById('menuPdf');
+  if (a) a.classList.remove('show');
+  if (b) b.classList.remove('show');
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.export-group')) closeExportMenus();
+});
+
+/* ── FILENAME HELPER: "Patrolling Report of Gopalpur Range_DD-MM-YYYY_HH-MM-SS" ── */
+function buildExportFileName() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const dateStr = `${pad(now.getDate())}-${pad(now.getMonth()+1)}-${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}-${pad(now.getMinutes())}-${pad(now.getSeconds())}`;
+  return `Patrolling Report of ${meta.range} Range_${dateStr}_${timeStr}`;
+}
+function nowDateStr() {
+  return new Date().toLocaleDateString('en-IN', { day:'2-digit', month:'long', year:'numeric' });
+}
+function nowDateTimeStr() {
+  return new Date().toLocaleString('en-IN', { day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' });
+}
+
+/* ── EXPORT EXCEL — Summary (respects the active status filter), styled with ExcelJS ── */
+const STATUS_CATS = ['approved','rejected','provisional','other'];
+const STATUS_CAT_LABEL = { approved:'Approved', rejected:'Rejected', provisional:'Provisional', other:'Other' };
+const STATUS_CAT_FILL  = { approved:'FF3EC87A', rejected:'FFE07A5F', provisional:'FFD4A832', other:'FF9AAC9F' };
+const STATUS_CAT_FONT  = { approved:'FF1F7A45', rejected:'FFB02424', provisional:'FF8A6400', other:'FF566058' };
+const BRAND_DARK  = 'FF162C1E';
+const BRAND_DEEP  = 'FF0C1A11';
+const BRAND_MINT  = 'FF3EC87A';
+const BRAND_BAND  = 'FFF6FBF8';
+
+function categoryCountsFor(statusCounts) {
+  const out = { approved: 0, rejected: 0, provisional: 0, other: 0 };
+  Object.entries(statusCounts).forEach(([s, c]) => { out[classifyStatus(s)] += c; });
+  return out;
+}
+
+async function exportExcel() {
+  if (!summaryData.length) return;
+  showPdfLoading('Building Excel workbook…', 'Applying formatting and colors');
+  try {
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Tushan Naik';
+    wb.company = 'Independent — Not a Government of Odisha product';
+    const ws = wb.addWorksheet('Patrol Summary', { views: [{ state: 'frozen', ySplit: 6 }] });
+
+    ws.columns = [
+      { width: 6 }, { width: 28 }, { width: 12 }, { width: 16 },
+      { width: 12 }, { width: 12 }, { width: 12 }, { width: 10 },
+      { width: 28 }, { width: 10 }
+    ];
+
+    ws.mergeCells('A1:J1');
+    ws.getCell('A1').value = `Patrolling Report of ${meta.range} Range`;
+    ws.getCell('A1').font = { name: 'Calibri', bold: true, size: 16, color: { argb: 'FFFFFFFF' } };
+    ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DEEP } };
+    ws.getCell('A1').alignment = { vertical: 'middle', horizontal: 'left', indent: 1 };
+    ws.getRow(1).height = 28;
+
+    ws.mergeCells('A2:J2');
+    ws.getCell('A2').value = `${meta.division} Forest Division  ·  Generated on ${nowDateTimeStr()}`;
+    ws.getCell('A2').font = { italic: true, size: 10, color: { argb: 'FF6B7D72' } };
+    ws.getCell('A2').alignment = { indent: 1 };
+
+    ws.mergeCells('A3:J3');
+    ws.getCell('A3').value = statusFilterNoteText();
+    ws.getCell('A3').font = { size: 10, color: { argb: 'FF166534' }, bold: true };
+    ws.getCell('A3').alignment = { indent: 1 };
+
+    const totalDays = summaryData.reduce((s,r) => s + r.days, 0);
+    const totalKm   = +summaryData.reduce((s,r) => s + r.totalKm, 0).toFixed(3);
+    const excelTotals = statusTotals(allData.filter(passesFilters));
+    ws.mergeCells('A4:J4');
+    ws.getCell('A4').value = `${summaryData.length} surveyors  ·  ${totalDays} total trip days  ·  ${totalKm} km total distance  ·  ${excelTotals.total} total patrolling  ·  ${excelTotals.approvedOrProvisional} approved/provisional  ·  ${excelTotals.rejected} rejected`;
+    ws.getCell('A4').font = { size: 10, color: { argb: 'FF6B7D72' } };
+    ws.getCell('A4').alignment = { indent: 1 };
+
+    const headerRow = ws.getRow(6);
+    const headers = ['Sl.', 'Surveyor Name', 'Trip Days', 'Distance (km)', 'Approved', 'Rejected', 'Provisional', 'Other', 'Section(s)', 'Flagged'];
+    headers.forEach((h, i) => { headerRow.getCell(i+1).value = h; });
+    headerRow.eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DARK } };
+      cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      cell.border = { bottom: { style: 'thin', color: { argb: BRAND_MINT } } };
+    });
+    headerRow.getCell(2).alignment = { vertical: 'middle', horizontal: 'left' };
+    headerRow.height = 20;
+
+    summaryData.forEach((r, i) => {
+      const rowIdx = 7 + i;
+      const row = ws.getRow(rowIdx);
+      const cats = categoryCountsFor(r.statusCounts);
+      row.getCell(1).value = i + 1;
+      row.getCell(2).value = r.name;
+      row.getCell(3).value = r.days;
+      row.getCell(4).value = r.totalKm;
+      row.getCell(4).numFmt = '0.000';
+      STATUS_CATS.forEach((cat, ci) => {
+        const cell = row.getCell(5 + ci);
+        cell.value = cats[cat] || 0;
+        cell.alignment = { horizontal: 'center' };
+        if (cats[cat]) cell.font = { bold: true, color: { argb: STATUS_CAT_FONT[cat] } };
+        else cell.font = { color: { argb: 'FFC8D4CC' } };
+      });
+      row.getCell(1).alignment = { horizontal: 'center' };
+      row.getCell(1).font = { color: { argb: 'FF9AAC9F' }, size: 9 };
+      row.getCell(2).font = { bold: true, color: { argb: 'FF162C1E' } };
+      row.getCell(3).alignment = { horizontal: 'center' };
+      row.getCell(4).alignment = { horizontal: 'right' };
+      row.getCell(4).font = { bold: true, color: { argb: 'FF2C7A50' } };
+      row.getCell(9).value = r.sections.join(', ');
+      row.getCell(9).font = { color: { argb: 'FF3D6275' } };
+      row.getCell(10).value = r.flagCount || 0;
+      row.getCell(10).alignment = { horizontal: 'center' };
+      row.getCell(10).font = r.flagCount ? { bold: true, color: { argb: 'FFB4492F' } } : { color: { argb: 'FFC8D4CC' } };
+      if (i % 2 === 1) {
+        for (let c = 1; c <= 10; c++) {
+          row.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_BAND } };
+        }
+      }
+      for (let c = 1; c <= 10; c++) {
+        row.getCell(c).border = { bottom: { style: 'hair', color: { argb: 'FFDDE4DF' } } };
+      }
+    });
+
+    const totalRowIdx = 7 + summaryData.length;
+    const totalRow = ws.getRow(totalRowIdx);
+    totalRow.getCell(2).value = 'Grand Total';
+    totalRow.getCell(3).value = totalDays;
+    totalRow.getCell(4).value = totalKm;
+    totalRow.getCell(4).numFmt = '0.000';
+    totalRow.getCell(10).value = summaryData.reduce((x, r) => x + r.flagCount, 0);
+    totalRow.getCell(10).alignment = { horizontal: 'center' };
+    for (let c = 1; c <= 10; c++) {
+      const cell = totalRow.getCell(c);
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' } };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DARK } };
+      cell.border = { top: { style: 'medium', color: { argb: 'FF2C7A50' } } };
+    }
+    totalRow.getCell(3).alignment = { horizontal: 'center' };
+    totalRow.getCell(4).alignment = { horizontal: 'right' };
+
+    ws.autoFilter = { from: { row: 6, column: 1 }, to: { row: 6, column: 10 } };
+
+    const creditRowIdx = totalRowIdx + 2;
+    ws.mergeCells(`A${creditRowIdx}:J${creditRowIdx}`);
+    ws.getCell(`A${creditRowIdx}`).value = 'Export tool by Tushan Naik  |  Instagram: @tushan.adarsh  |  tushannaik94@gmail.com';
+    ws.getCell(`A${creditRowIdx}`).font = { italic: true, size: 9, color: { argb: 'FF6B7D72' } };
+
+    // ── Second sheet: the trip-level log (all columns of the source export), same filters as the summary ──
+    const tl = wb.addWorksheet('Trip Log', { views: [{ state: 'frozen', ySplit: 1 }] });
+    const tlHead = ['Sl.', 'Surveyor', 'Date', 'Start', 'End', 'Duration', 'Section', 'Beat', 'Remarks', 'Distance (km)', 'Status', 'Verification Flag'];
+    tl.columns = [6, 24, 12, 11, 11, 10, 14, 16, 38, 13, 14, 22].map(w => ({ width: w }));
+    tlHead.forEach((h, i) => { tl.getRow(1).getCell(i + 1).value = h; });
+    tl.getRow(1).eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 10 };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DARK } };
+      cell.alignment = { vertical: 'middle' };
+    });
+    const tlTrips = allData.filter(passesFilters).slice()
+      .sort((x, y) => x.surveyor.localeCompare(y.surveyor) || parseDMY(x.date) - parseDMY(y.date));
+    tlTrips.forEach((t, i) => {
+      const row = tl.getRow(2 + i);
+      [i + 1, t.surveyor, t.date, t.startLabel, t.endLabel, formatDuration(t.durationMin), t.section, t.beat, t.remarks, t.km, t.status, t.flag]
+        .forEach((v, c) => { row.getCell(c + 1).value = v; });
+      row.getCell(10).numFmt = '0.000';
+      const cat = classifyStatus(t.status);
+      row.getCell(11).font = { bold: true, color: { argb: STATUS_CAT_FONT[cat] } };
+      row.getCell(11).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: lightTint(STATUS_CAT_FILL[cat]) } };
+      if (t.flag) row.getCell(12).font = { bold: true, color: { argb: 'FFB4492F' } };
+    });
+    tl.autoFilter = { from: { row: 1, column: 1 }, to: { row: 1, column: tlHead.length } };
+
+    await downloadWorkbook(wb, `${buildExportFileName()}.xlsx`);
+  } catch (err) {
+    showError('Failed to build Excel file: ' + err.message);
+  } finally {
+    hidePdfLoading();
+  }
+}
+
+/* ── EXPORT EXCEL — Individual Breakdown (every surveyor's FULL history + status), styled with ExcelJS ── */
+async function exportExcelIndividual() {
+  const names = Object.keys(personIndex).sort((a,b) => a.localeCompare(b));
+  if (!names.length) return;
+  showPdfLoading('Building Excel workbook…', 'Formatting individual sections');
+  try {
+    const wb = new ExcelJS.Workbook();
+    wb.creator = 'Tushan Naik';
+    wb.company = 'Independent — Not a Government of Odisha product';
+    const ws = wb.addWorksheet('Individual Breakdown');
+    ws.columns = [
+      { width: 6 }, { width: 26 }, { width: 24 }, { width: 16 }, { width: 16 }, { width: 38 }, { width: 14 }, { width: 18 }, { width: 22 }
+    ];
+
+    ws.mergeCells('A1:I1');
+    ws.getCell('A1').value = `Patrolling Report of ${meta.range} Range — Individual Breakdown`;
+    ws.getCell('A1').font = { bold: true, size: 15, color: { argb: 'FFFFFFFF' } };
+    ws.getCell('A1').fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DEEP } };
+    ws.getCell('A1').alignment = { vertical: 'middle', indent: 1 };
+    ws.getRow(1).height = 26;
+    ws.mergeCells('A2:I2');
+    ws.getCell('A2').value = `${meta.division} Forest Division  ·  Generated on ${nowDateTimeStr()}`;
+    ws.getCell('A2').font = { italic: true, size: 10, color: { argb: 'FF6B7D72' } };
+    ws.getCell('A2').alignment = { indent: 1 };
+    ws.mergeCells('A3:I3');
+    ws.getCell('A3').value = `Each section below lists one surveyor's complete patrol history (${names.length} surveyors), regardless of the status filter applied on-screen.`;
+    ws.getCell('A3').font = { size: 9.5, color: { argb: 'FF6B7D72' } };
+    ws.getCell('A3').alignment = { indent: 1, wrapText: true };
+
+    // ── Index / table of contents ──
+    let r = 5;
+    ws.mergeCells(`A${r}:I${r}`);
+    ws.getCell(`A${r}`).value = 'Index';
+    ws.getCell(`A${r}`).font = { bold: true, size: 12, color: { argb: 'FF162C1E' } };
+    r++;
+    const idxHeaderRow = r;
+    ['Sl.', 'Surveyor Name', 'Trip Days', 'Distance (km)', ''].forEach((h,i) => { ws.getCell(r, i+1).value = h; });
+    ws.getRow(r).eachCell(cell => {
+      cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 9.5 };
+      cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DARK } };
+    });
+    r++;
+    const indexStartRow = r;
+    const sectionStartRows = {};
+    names.forEach((name, i) => {
+      const trips = personIndex[name];
+      const days = new Set(trips.map(t => t.date)).size;
+      const km = +trips.reduce((s,t) => s + t.km, 0).toFixed(3);
+      const row = ws.getRow(r);
+      row.getCell(1).value = i + 1;
+      row.getCell(2).value = name; // hyperlink patched in after we know section rows
+      row.getCell(3).value = days;
+      row.getCell(3).alignment = { horizontal: 'center' };
+      row.getCell(4).value = km;
+      row.getCell(4).numFmt = '0.000';
+      row.getCell(4).alignment = { horizontal: 'right' };
+      if (i % 2 === 1) for (let c=1;c<=4;c++) row.getCell(c).fill = { type:'pattern', pattern:'solid', fgColor:{argb:BRAND_BAND} };
+      sectionStartRows[name] = null; // filled below once we lay out sections
+      r++;
+    });
+    const indexEndRow = r - 1;
+    r += 1;
+
+    // ── Per-person sections ──
+    names.forEach((name, idx) => {
+      const trips = personIndex[name];
+      const days = new Set(trips.map(t => t.date)).size;
+      const km = +trips.reduce((s,t) => s + t.km, 0).toFixed(3);
+      const counts = {};
+      trips.forEach(t => counts[t.status] = (counts[t.status]||0)+1);
+
+      const headRowIdx = r;
+      sectionStartRows[name] = headRowIdx;
+      ws.mergeCells(`A${r}:I${r}`);
+      ws.getCell(`A${r}`).value = `${idx+1}. ${name}`;
+      ws.getCell(`A${r}`).font = { bold: true, size: 12.5, color: { argb: 'FFFFFFFF' } };
+      ws.getCell(`A${r}`).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: BRAND_DARK } };
+      ws.getRow(r).height = 20;
+      r++;
+      ws.mergeCells(`A${r}:I${r}`);
+      const statusSummary = Object.entries(counts).map(([s,c]) => `${s}: ${c}`).join('   ·   ');
+      ws.getCell(`A${r}`).value = `Trip Days: ${days}    Total Distance: ${km} km    ${statusSummary}`;
+      ws.getCell(`A${r}`).font = { size: 9.5, italic: true, color: { argb: 'FF6B7D72' } };
+      r++;
+      const tHeaderRow = r;
+      ['Sl.', 'Date', 'Time', 'Section', 'Beat', 'Remarks / Location', 'Distance (km)', 'Status', 'Verification Flag'].forEach((h,i) => { ws.getCell(r, i+1).value = h; });
+      ws.getRow(r).eachCell(cell => {
+        cell.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 9 };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2C7A50' } };
+      });
+      r++;
+      trips.forEach((t, i) => {
+        const row = ws.getRow(r);
+        row.getCell(1).value = i + 1;
+        row.getCell(2).value = t.date;
+        row.getCell(3).value = t.startLabel ? `${timeText(t)} (${formatDuration(t.durationMin)})` : '';
+        row.getCell(4).value = t.section;
+        row.getCell(5).value = t.beat;
+        row.getCell(6).value = t.remarks;
+        row.getCell(7).value = t.km;
+        row.getCell(7).numFmt = '0.000';
+        row.getCell(7).alignment = { horizontal: 'right' };
+        row.getCell(8).value = t.status;
+        const cat = classifyStatus(t.status);
+        row.getCell(8).font = { bold: true, color: { argb: STATUS_CAT_FONT[cat] } };
+        row.getCell(8).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: lightTint(STATUS_CAT_FILL[cat]) } };
+        row.getCell(9).value = t.flag;
+        if (t.flag) row.getCell(9).font = { bold: true, color: { argb: 'FFB4492F' } };
+        if (i % 2 === 1) for (let c = 1; c <= 7; c++) row.getCell(c).fill = { type:'pattern', pattern:'solid', fgColor:{argb:BRAND_BAND} };
+        r++;
+      });
+      r += 2; // spacer
+    });
+
+    // Patch index hyperlinks now that section rows are known
+    for (let i = 0; i < names.length; i++) {
+      const cell = ws.getCell(indexStartRow + i, 2);
+      const target = sectionStartRows[names[i]];
+      cell.value = { text: names[i], hyperlink: `#'Individual Breakdown'!A${target}` };
+      cell.font = { bold: true, color: { argb: 'FF166534' }, underline: true };
+    }
+
+    ws.mergeCells(`A${r}:I${r}`);
+    ws.getCell(`A${r}`).value = 'Export tool by Tushan Naik  |  Instagram: @tushan.adarsh  |  tushannaik94@gmail.com';
+    ws.getCell(`A${r}`).font = { italic: true, size: 9, color: { argb: 'FF6B7D72' } };
+
+    await downloadWorkbook(wb, `${buildExportFileName()}_Individual.xlsx`);
+  } catch (err) {
+    showError('Failed to build Excel file: ' + err.message);
+  } finally {
+    hidePdfLoading();
+  }
+}
+
+function lightTint(argb) {
+  // returns a pale (≈15%) tint of a given ARGB color, for cell fills that stay readable with black text
+  const r = parseInt(argb.slice(2,4), 16), g = parseInt(argb.slice(4,6), 16), b = parseInt(argb.slice(6,8), 16);
+  const mix = c => Math.round(c + (255 - c) * 0.82);
+  const hex = c => c.toString(16).padStart(2,'0').toUpperCase();
+  return 'FF' + hex(mix(r)) + hex(mix(g)) + hex(mix(b));
+}
+
+async function downloadWorkbook(wb, filename) {
+  const buffer = await wb.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/octet-stream' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+/* ── PDF LOADING OVERLAY ── */
+function showPdfLoading(text, sub) {
+  const el = document.getElementById('pdfLoadingOverlay');
+  document.getElementById('pdfLoadingText').textContent = text || 'Generating PDF…';
+  document.getElementById('pdfLoadingSub').textContent = sub || 'This can take a few seconds';
+  el.classList.add('show');
+}
+function hidePdfLoading() {
+  document.getElementById('pdfLoadingOverlay').classList.remove('show');
+}
+
+/* ── OFF-SCREEN RENDER HELPERS (containers are laid out off-screen so html2canvas can capture them,
+   without disturbing what's on screen) ── */
+function showOffscreen(el) {
+  el.style.display = 'block';
+  el.style.position = 'fixed';
+  el.style.left = '-11000px';
+  el.style.top = '0';
+  el.style.zIndex = '-1';
+}
+function hideOffscreen(el) {
+  el.style.display = 'none';
+  el.style.position = '';
+  el.style.left = '';
+  el.style.top = '';
+  el.style.zIndex = '';
+}
+
+/* Renders a list of DOM blocks into a single downloadable PDF — each block always starts on
+   a fresh page, and is sliced across further pages automatically if it's taller than one page. */
+async function blocksToPdf(blocks, filename) {
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF('p', 'pt', 'a4');
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  let firstPageUsed = false;
+
+  for (const block of blocks) {
+    const canvas = await html2canvas(block, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
+    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+    const imgWidth = pageWidth;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    let yOffset = 0;
+    while (yOffset < imgHeight - 0.5) {
+      if (firstPageUsed) pdf.addPage();
+      firstPageUsed = true;
+      pdf.addImage(imgData, 'JPEG', 0, -yOffset, imgWidth, imgHeight);
+      yOffset += pageHeight;
+    }
+  }
+  pdf.save(filename.endsWith('.pdf') ? filename : filename + '.pdf');
+}
+
+/* ── EXPORT PDF — Summary (direct download, respects the active status filter) ── */
+async function exportPDF() {
+  if (!summaryData.length) return;
+  showPdfLoading('Generating PDF…', 'Rendering the summary report');
+  try {
+    const totalKm   = summaryData.reduce((s,r) => s + r.totalKm, 0);
+    const totalDays = summaryData.reduce((s,r) => s + r.days, 0);
+    const filteredTrips = allData.filter(passesFilters);
+    const totals = statusTotals(filteredTrips);
+
+    document.getElementById('prDate').textContent = nowDateStr();
+    document.getElementById('prFile').textContent = fileName || 'Patrol List';
+    document.getElementById('prSurveyors').textContent = summaryData.length;
+    document.getElementById('prDays').textContent = totalDays;
+    document.getElementById('prKm').textContent = totalKm.toFixed(2) + ' km';
+    document.getElementById('prTrips').textContent = totals.total;
+    document.getElementById('prApprovedProv').textContent = totals.approvedOrProvisional;
+    document.getElementById('prRejected').textContent = totals.rejected;
+    document.getElementById('prFooterFile').textContent = fileName || 'Patrol List';
+    document.getElementById('prStatusNote').textContent = statusFilterNoteText();
+
+    const prBody = document.getElementById('prBody');
+    prBody.innerHTML = summaryData.map((r, i) => `
+      <tr>
+        <td class="sl">${i + 1}</td>
+        <td class="name">${escapeHtml(r.name)}</td>
+        <td class="days">${r.days}</td>
+        <td class="km">${r.totalKm.toFixed(3)}</td>
+      </tr>
+    `).join('');
+
+    const prFoot = document.getElementById('prFoot');
+    prFoot.innerHTML = `
+      <tr>
+        <td colspan="2" style="font-size:8pt;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,0.55);">
+          Grand Total &nbsp;&middot;&nbsp; ${summaryData.length} Surveyors
+        </td>
+        <td class="days">${totalDays}</td>
+        <td class="km">${totalKm.toFixed(3)}</td>
+      </tr>
+    `;
+
+    const container = document.getElementById('printable');
+    showOffscreen(container);
+    await blocksToPdf([container], `${buildExportFileName()}.pdf`);
+    hideOffscreen(container);
+  } catch (err) {
+    showError('Failed to generate PDF: ' + err.message);
+  } finally {
+    hidePdfLoading();
+  }
+}
+
+/* ── BUILD ONE PRINTABLE "PAGE" BLOCK FOR A SINGLE SURVEYOR (full, unfiltered history) ── */
+function buildPersonPrintBlock(name, idx, total) {
+  const trips = personIndex[name] ? personIndex[name] : [];
+  const days = new Set(trips.map(t => t.date)).size;
+  const km = trips.reduce((s,t) => s + t.km, 0);
+  const counts = {};
+  trips.forEach(t => counts[t.status] = (counts[t.status] || 0) + 1);
+  const badgesHtml = Object.entries(counts).map(([s,c]) =>
+    `<div><div class="pi-badge-label">${escapeHtml(s)}</div><div class="pi-badge-val">${c}</div></div>`
+  ).join('');
+  const flagN = trips.filter(t => t.flag).length;
+  const flagBadge = flagN ? `<div><div class="pi-badge-label">Flagged</div><div class="pi-badge-val" style="color:#f4a682 !important;">${flagN}</div></div>` : '';
+  const rows = trips.map((t,i) => `
+    <tr>
+      <td class="sl">${i+1}</td>
+      <td>${t.date}</td>
+      <td class="remarks">${t.startLabel ? `${escapeHtml(timeText(t))}<span class="pi-sub">${formatDuration(t.durationMin)}</span>` : '—'}</td>
+      <td>${escapeHtml(t.section)}${t.beat ? `<span class="pi-sub">${escapeHtml(t.beat)}</span>` : ''}</td>
+      <td class="remarks">${escapeHtml(t.remarks || '—')}</td>
+      <td style="text-align:right;font-weight:700;color:#2c7a50;">${t.km.toFixed(3)} km</td>
+      <td><span class="pi-status-tag st-${classifyStatus(t.status)}">${escapeHtml(t.status)}</span>${t.flag ? `<div class="pi-flag">⚑ ${escapeHtml(t.flag)}</div>` : ''}</td>
+    </tr>
+  `).join('');
+  const wrap = document.createElement('div');
+  wrap.className = 'pi-person';
+  wrap.innerHTML = `
+    <div class="pi-person-head">
+      <div class="pi-person-eyebrow">Forest Department — Odisha &nbsp;·&nbsp; Individual Record ${idx} of ${total}</div>
+      <div class="pi-person-name">${escapeHtml(name)}</div>
+      <div class="pi-person-meta">${escapeHtml(meta.division)} Division &nbsp;·&nbsp; ${escapeHtml(meta.range)} Range &nbsp;·&nbsp; Generated ${nowDateStr()}</div>
+      <div class="pi-person-badges">
+        <div><div class="pi-badge-label">Trip Days</div><div class="pi-badge-val">${days}</div></div>
+        <div><div class="pi-badge-label">Total Distance</div><div class="pi-badge-val">${km.toFixed(3)} km</div></div>
+        ${badgesHtml}
+        ${flagBadge}
+      </div>
+    </div>
+    <div class="pi-accent"></div>
+    <div class="pi-table-wrap">
+      <table class="pi-table">
+        <thead><tr><th class="sl">Sl.</th><th>Date</th><th>Time</th><th>Section / Beat</th><th>Remarks</th><th style="text-align:right;">Distance</th><th>Status</th></tr></thead>
+        <tbody>${rows || `<tr><td colspan="7" style="text-align:center;padding:16pt;color:#9aac9f;">No trips recorded.</td></tr>`}</tbody>
+      </table>
+    </div>
+    <div class="pi-footer">
+      <span>Patrol Monitoring System &nbsp;·&nbsp; Individual Breakdown &nbsp;·&nbsp; Export tool by Tushan Naik</span>
+      <span>Page ${idx} of ${total}</span>
+    </div>
+  `;
+  return wrap;
+}
+
+/* ── BUILD AN INDEX / COVER PAGE listing every surveyor (like a syllabus) ── */
+function buildIndexCoverBlock(names) {
+  const rows = names.map((name, i) => {
+    const trips = personIndex[name];
+    const days = new Set(trips.map(t => t.date)).size;
+    const km = trips.reduce((s,t) => s + t.km, 0);
+    const counts = {};
+    trips.forEach(t => counts[t.status] = (counts[t.status]||0)+1);
+    return `
+      <tr>
+        <td class="sl">${i+1}</td>
+        <td class="name">${escapeHtml(name)}</td>
+        <td class="days">${days}</td>
+        <td class="km">${km.toFixed(3)}</td>
+        <td><div class="status-breakdown">${statusCountsToBadges(counts)}</div></td>
+      </tr>
+    `;
+  }).join('');
+  const allTrips = names.flatMap(n => personIndex[n]);
+  const totalDays = names.reduce((s,n) => s + new Set(personIndex[n].map(t=>t.date)).size, 0);
+  const totalKm   = allTrips.reduce((s,t) => s + t.km, 0);
+  const totals    = statusTotals(allTrips);
+
+  const wrap = document.createElement('div');
+  wrap.className = 'pi-person'; // reuse same page-block class for consistent sizing/margins
+  wrap.innerHTML = `
+    <div class="pr-header">
+      <div class="pr-header-left">
+        <div class="pr-org">Forest Department — Odisha</div>
+        <div class="pr-title">Surveyor Index</div>
+        <div class="pr-sub">${escapeHtml(meta.division)} Division &nbsp;·&nbsp; ${escapeHtml(meta.range)} Range</div>
+        <div class="pr-credit">Export tool by Tushan Naik</div>
+      </div>
+      <div class="pr-header-right">
+        <div class="pr-date-label">Generated</div>
+        <div class="pr-date-val">${nowDateStr()}</div>
+        <div class="pr-file-val">${escapeHtml(fileName || 'Patrol List')}</div>
+      </div>
+    </div>
+    <div class="pr-accent"></div>
+    <div class="pr-stats">
+      <div class="pr-stat s1"><div class="pr-stat-label">Total Surveyors</div><div class="pr-stat-val">${names.length}</div><div class="pr-stat-unit">unique staff</div></div>
+      <div class="pr-stat s2"><div class="pr-stat-label">Total Patrol Days</div><div class="pr-stat-val">${totalDays}</div><div class="pr-stat-unit">combined unique days</div></div>
+      <div class="pr-stat s3"><div class="pr-stat-label">Total Distance</div><div class="pr-stat-val">${totalKm.toFixed(2)}</div><div class="pr-stat-unit">kilometres covered</div></div>
+      <div class="pr-stat s4"><div class="pr-stat-label">Total Patrolling</div><div class="pr-stat-val">${totals.total}</div><div class="pr-stat-unit">patrol entries logged</div></div>
+      <div class="pr-stat s5"><div class="pr-stat-label">Approved / Provisional</div><div class="pr-stat-val">${totals.approvedOrProvisional}</div><div class="pr-stat-unit">entries not rejected</div></div>
+      <div class="pr-stat s6"><div class="pr-stat-label">Rejected</div><div class="pr-stat-val">${totals.rejected}</div><div class="pr-stat-unit">entries rejected</div></div>
+    </div>
+    <div class="pr-table-section">
+      <div class="pr-table-heading">Contents</div>
+      <table class="pr-table">
+        <thead><tr><th class="num">Sl.</th><th>Surveyor Name</th><th class="num">Trip Days</th><th class="right">Distance (km)</th><th>Status Breakdown</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="pi-footer">
+      <span>Patrol Monitoring System &nbsp;·&nbsp; Individual Breakdown &nbsp;·&nbsp; Export tool by Tushan Naik</span>
+      <span>Index</span>
+    </div>
+  `;
+  return wrap;
+}
+
+/* ── EXPORT PDF — Individual Breakdown, ALL surveyors (one page per person, direct download) ── */
+async function exportPDFIndividualAll() {
+  const names = Object.keys(personIndex).sort((a,b) => a.localeCompare(b));
+  if (!names.length) return;
+  showPdfLoading('Generating PDF…', `Rendering ${names.length} individual pages`);
+  try {
+    const container = document.getElementById('printableIndividuals');
+    container.innerHTML = '';
+    names.forEach((n,i) => container.appendChild(buildPersonPrintBlock(n, i+1, names.length)));
+    showOffscreen(container);
+    const blocks = Array.from(container.querySelectorAll('.pi-person'));
+    await blocksToPdf(blocks, `${buildExportFileName()}_Individual.pdf`);
+    hideOffscreen(container);
+  } catch (err) {
+    showError('Failed to generate PDF: ' + err.message);
+  } finally {
+    hidePdfLoading();
+  }
+}
+
+/* ── EXPORT PDF — Individual Breakdown WITH a summary index cover page first (like a syllabus) ── */
+async function exportPDFIndividualAllWithIndex() {
+  const names = Object.keys(personIndex).sort((a,b) => a.localeCompare(b));
+  if (!names.length) return;
+  showPdfLoading('Generating PDF…', `Building index + ${names.length} individual pages`);
+  try {
+    const container = document.getElementById('printableIndividuals');
+    container.innerHTML = '';
+    container.appendChild(buildIndexCoverBlock(names));
+    names.forEach((n,i) => container.appendChild(buildPersonPrintBlock(n, i+1, names.length)));
+    showOffscreen(container);
+    const blocks = Array.from(container.children);
+    await blocksToPdf(blocks, `${buildExportFileName()}_Individual_with_Index.pdf`);
+    hideOffscreen(container);
+  } catch (err) {
+    showError('Failed to generate PDF: ' + err.message);
+  } finally {
+    hidePdfLoading();
+  }
+}
+
+/* ── EXPORT PDF — Individual Breakdown, ONE surveyor (from the detail modal, direct download) ── */
+async function exportPDFIndividualSingle(name) {
+  if (!name || !personIndex[name]) return;
+  showPdfLoading('Generating PDF…', `Rendering ${name}'s record`);
+  try {
+    const container = document.getElementById('printableIndividuals');
+    container.innerHTML = '';
+    container.appendChild(buildPersonPrintBlock(name, 1, 1));
+    showOffscreen(container);
+    const blocks = Array.from(container.querySelectorAll('.pi-person'));
+    await blocksToPdf(blocks, `${buildExportFileName()}_${name.replace(/\s+/g, '_')}.pdf`);
+    hideOffscreen(container);
+  } catch (err) {
+    showError('Failed to generate PDF: ' + err.message);
+  } finally {
+    hidePdfLoading();
+  }
+}
+
+/* ── UI HELPERS ── */
+function showResults() {
+  document.getElementById('statsRow').classList.add('show');
+  document.getElementById('toolbar').classList.add('show');
+  document.getElementById('tableWrap').classList.add('show');
+  document.getElementById('statusFilterBar').classList.add('show');
+  document.getElementById('sectionFilterBar').classList.add('show');
+}
+function hideResults() {
+  document.getElementById('statsRow').classList.remove('show');
+  document.getElementById('toolbar').classList.remove('show');
+  document.getElementById('tableWrap').classList.remove('show');
+  document.getElementById('statusFilterBar').classList.remove('show');
+  document.getElementById('sectionFilterBar').classList.remove('show');
+  document.getElementById('dataCheck').classList.remove('show');
+  document.getElementById('reportTable').style.display = 'none';
+  document.getElementById('emptyState').style.display = '';
+  document.getElementById('reportBody').innerHTML = '';
+  document.getElementById('reportFoot').innerHTML = '';
+}
+function showFileStrip(file) {
+  document.getElementById('stripName').textContent = file.name;
+  document.getElementById('stripMeta').textContent =
+    `${(file.size/1024).toFixed(1)} KB  ·  Loaded ${new Date().toLocaleTimeString()}`;
+  document.getElementById('fileStrip').classList.add('show');
+}
+function clearData() {
+  allData = []; summaryData = []; personIndex = {}; activeStatuses = new Set(); activeSections = new Set(); flaggedOnly = false;
+  meta = { division: 'Sundargarh', range: 'Gopalpur', systemKm: null };
+  closeModal(); closeExportMenus();
+  document.getElementById('fileInput').value = '';
+  document.getElementById('fileStrip').classList.remove('show');
+  document.getElementById('searchInput').value = '';
+  document.getElementById('statusChips').innerHTML = '';
+  document.getElementById('sectionChips').innerHTML = '';
+  document.getElementById('flagOnlyChip').classList.remove('active');
+  hideResults();
+  hideError();
+}
+function showError(msg) {
+  const el = document.getElementById('errorBar');
+  el.textContent = '⚠ ' + msg;
+  el.classList.add('show');
+}
+function hideError() {
+  document.getElementById('errorBar').classList.remove('show');
+}
+</script>
+</body>
+</html>

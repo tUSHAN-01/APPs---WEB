@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CV Builder Pro</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+CjxyZWN0IHdpZHRoPSI2NCIgaGVpZ2h0PSI2NCIgcng9IjE0IiBmaWxsPSIjMWE0YTZiIi8+Cjx0ZXh0IHg9IjMyIiB5PSI0MiIgZm9udC1mYW1pbHk9Ikdlb3JnaWEsIFBsYXlmYWlyIERpc3BsYXksIHNlcmlmIiBmb250LXNpemU9IjI4IiBmb250LXdlaWdodD0iNzAwIiBmaWxsPSIjYzg1MzFhIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIj5DVjwvdGV4dD4KPC9zdmc+">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--bg:#f0ede7;--surface:#fff;--surface2:#f7f5f1;--border:#e2ddd6;--text:#1c1a16;--muted:#7b756d;--accent:#c8531a;--accent2:#1a4a6b;--glow:rgba(200,83,26,.14);--pvbg:#fff;--shadow:0 2px 16px rgba(0,0,0,.07);--shadowlg:0 8px 48px rgba(0,0,0,.13);--r:10px;--t:.22s cubic-bezier(.4,0,.2,1)}
+[data-theme=dark]{--bg:#100f0d;--surface:#1c1a16;--surface2:#242119;--border:#322e27;--text:#f0ede7;--muted:#8c867e;--accent:#e07040;--accent2:#4a9bd4;--glow:rgba(224,112,64,.16);--pvbg:#f0ede7;--shadow:0 2px 16px rgba(0,0,0,.4);--shadowlg:0 8px 48px rgba(0,0,0,.6)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--t),color var(--t)}
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:200;height:56px;background:var(--surface);border-bottom:1px solid var(--border);box-shadow:var(--shadow);display:flex;align-items:center;justify-content:space-between;padding:0 22px;gap:10px}
+.brand{font-family:'Playfair Display',serif;font-size:1.2rem;font-weight:700;color:var(--text);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.brand em{color:var(--accent);font-style:normal}
+.tbar-r{display:flex;align-items:center;gap:8px}
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;border-radius:7px;font:500 .77rem 'DM Sans',sans-serif;cursor:pointer;border:1.5px solid transparent;transition:all var(--t);white-space:nowrap}
+.btn-p{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-p:hover{filter:brightness(1.1)}
+.btn-o{background:transparent;color:var(--accent2);border-color:var(--accent2)}.btn-o:hover{background:var(--accent2);color:#fff}
+.btn-g{background:transparent;color:var(--muted);border-color:transparent}.btn-g:hover{background:var(--surface2);color:var(--text)}
+.toggle{width:40px;height:23px;border-radius:12px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background var(--t);flex-shrink:0}
+.toggle::after{content:'';position:absolute;top:2.5px;left:2.5px;width:18px;height:18px;border-radius:50%;background:var(--surface);transition:transform var(--t);box-shadow:0 1px 3px rgba(0,0,0,.25)}
+[data-theme=dark] .toggle{background:var(--accent)}
+[data-theme=dark] .toggle::after{transform:translateX(17px)}
+/* APP LAYOUT — single active pane (Edit / Preview) switched by tabs, at every screen width */
+.app{display:block}
+.viewtabs{display:flex;gap:3px;background:var(--surface2);border-radius:9px;padding:3px;flex-shrink:0}
+.vtab{padding:6px 14px;border:none;border-radius:7px;background:transparent;color:var(--muted);font:600 .74rem 'DM Sans',sans-serif;cursor:pointer;transition:all var(--t)}
+.vtab:hover{color:var(--text)}
+.vtab.active{background:var(--surface);color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+/* LEFT */
+.lp{display:none;width:100%;max-width:680px;margin:0 auto;box-sizing:border-box;background:var(--surface);flex-direction:column;gap:9px;padding:24px 20px 60px}
+.app.pane-edit .lp{display:flex}
+.lp::-webkit-scrollbar{width:4px}
+.lp::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+/* Progress */
+.pg-bar{height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin-bottom:3px}
+.pg-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:2px;transition:width .5s ease}
+.pg-lbl{font-size:.67rem;color:var(--muted);text-align:right}
+/* Card */
+.card{border:1px solid var(--border);border-radius:var(--r);background:var(--surface2);overflow:hidden}
+.ch{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;cursor:pointer;user-select:none;background:var(--surface2);border-bottom:1px solid transparent;transition:background var(--t)}
+.ch:hover{background:var(--border)}
+.ch.open{border-bottom-color:var(--border)}
+.ct{display:flex;align-items:center;gap:7px;font-size:.76rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text)}
+.chv{color:var(--muted);font-size:.72rem;transition:transform .2s}
+.ch.open .chv{transform:rotate(180deg)}
+.cb{display:none;flex-direction:column;gap:10px;padding:13px}
+.cb.open{display:flex}
+/* Fields */
+.fg{display:flex;flex-direction:column;gap:3px}
+.fl{font-size:.67rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.r2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+input[type=text],input[type=email],input[type=tel],input[type=url],textarea,select{width:100%;padding:7px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:7px;font:.83rem 'DM Sans',sans-serif;color:var(--text);outline:none;transition:border-color var(--t),box-shadow var(--t)}
+input[type=text]:focus,input[type=email]:focus,input[type=tel]:focus,input[type=url]:focus,textarea:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+textarea{resize:vertical;min-height:68px;line-height:1.5}
+select{cursor:pointer}
+input[type=color]{width:36px;height:32px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer;padding:2px;background:var(--surface)}
+input[type=range]{padding:0;border:none;box-shadow:none;background:transparent;cursor:pointer;width:100%}
+/* Photo */
+.ph-zone{display:flex;align-items:center;gap:11px;padding:11px;border:2px dashed var(--border);border-radius:var(--r);cursor:pointer;background:var(--surface);transition:border-color var(--t)}
+.ph-zone:hover{border-color:var(--accent)}
+.ph-circ{width:60px;height:60px;border-radius:50%;background:var(--surface2);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:1.5rem}
+.ph-circ img{width:100%;height:100%;object-fit:cover}
+.ph-info p{font-size:.76rem;font-weight:600;margin-bottom:2px}
+.ph-info small{font-size:.68rem;color:var(--muted)}
+.ph-info span{font-size:.68rem;color:var(--accent);display:block;margin-top:3px}
+.ph-rm{font-size:.67rem;color:#d94040;border:1px solid #d94040;background:transparent;border-radius:5px;padding:2px 7px;cursor:pointer;margin-top:5px;transition:all var(--t)}
+.ph-rm:hover{background:#d94040;color:#fff}
+/* Repeater */
+.ri{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px;display:flex;flex-direction:column;gap:8px;position:relative}
+.rm{position:absolute;top:8px;right:8px;width:20px;height:20px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--muted);font-size:.72rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t);line-height:1}
+.rm:hover{background:#fce8e8;border-color:#d94040;color:#d94040}
+.add-r{display:flex;align-items:center;justify-content:center;gap:5px;width:100%;padding:7px;border-radius:7px;border:1.5px dashed var(--border);background:var(--surface);color:var(--accent);font:500 .76rem 'DM Sans',sans-serif;cursor:pointer;transition:all var(--t)}
+.ai-btn{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;padding:5px 11px;border-radius:20px;border:none;background:linear-gradient(90deg,var(--accent2),var(--accent));color:#fff;font:600 .68rem 'DM Sans',sans-serif;letter-spacing:.02em;cursor:pointer;transition:all var(--t);margin-top:2px}
+.ai-btn:hover{filter:brightness(1.12);transform:translateY(-1px)}
+.ai-btn:disabled{opacity:.6;cursor:wait;transform:none}
+.ai-btn.small{padding:3px 9px;font-size:.62rem;margin-top:6px}
+@keyframes aiPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.ai-btn.loading{animation:aiPulse 1s ease-in-out infinite}
+.add-r:hover{border-color:var(--accent);background:var(--glow)}
+/* Tags */
+.tw{display:flex;flex-wrap:wrap;gap:5px}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px 3px 11px;border-radius:20px;background:var(--glow);border:1px solid var(--accent);color:var(--accent);font-size:.7rem;font-weight:500}
+.tx{width:13px;height:13px;border-radius:50%;background:var(--accent);color:#fff;border:none;font-size:.55rem;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.sk-r{display:flex;gap:7px}
+.sk-r input{flex:1}
+/* Template cards */
+.tg{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
+.tc{aspect-ratio:3/4;border-radius:7px;cursor:pointer;border:2.5px solid var(--border);overflow:hidden;transition:all var(--t);position:relative}
+.tc.active{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow)}
+.tc:hover:not(.active){border-color:var(--accent2);transform:translateY(-2px)}
+.tn{position:absolute;bottom:3px;left:0;right:0;text-align:center;font-size:.56rem;color:var(--muted);font-weight:600}
+/* RIGHT */
+.rp{display:none;background:var(--bg);flex-direction:column;align-items:center;padding:20px 24px 60px;min-height:calc(100vh - 56px)}
+.app.pane-preview .rp{display:flex}
+.rp::-webkit-scrollbar{width:6px}
+.rp::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.pvbar{display:flex;align-items:center;justify-content:space-between;width:100%;max-width:820px;margin-bottom:15px}
+.pvbar h3{font-size:.7rem;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.zr{display:flex;align-items:center;gap:6px}
+.zb{width:25px;height:25px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:.9rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all var(--t)}
+.zb:hover{border-color:var(--accent);color:var(--accent)}
+.zl{font-size:.7rem;color:var(--muted);min-width:32px;text-align:center}
+/* CV PAPER */
+.pw{transform-origin:top center;transition:transform var(--t)}
+.cvp{width:794px;min-height:1123px;background:#fff;color:#1c1a16;box-shadow:var(--shadowlg);border-radius:3px;font-family:'DM Sans',sans-serif;overflow:hidden}
+/* CV CLASSIC */
+.tpl-c{display:grid;grid-template-columns:248px 1fr;min-height:1123px}
+.cs{padding:34px 21px;display:flex;flex-direction:column;gap:20px;color:#fff}
+.cs-name{font-family:'Playfair Display',serif;font-size:1.18rem;font-weight:700;text-align:center;line-height:1.3}
+.cs-role{font-size:.7rem;text-align:center;opacity:.72;margin-top:3px}
+.cs-sl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;opacity:.55;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:5px;margin-bottom:8px}
+.cs-ci{display:flex;align-items:flex-start;gap:6px;font-size:.7rem;margin-bottom:5px;opacity:.88;word-break:break-word}
+.cs-tag{display:inline-block;font-size:.64rem;margin:2px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)}
+.cs-lr{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;margin-bottom:5px}
+.cm{padding:34px 28px;display:flex;flex-direction:column;gap:20px}
+/* CV MODERN */
+.tpl-m{display:flex;flex-direction:column;min-height:1123px}
+.mh{padding:36px 42px;color:#fff;display:flex;align-items:center;gap:22px}
+.mh-name{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:900;line-height:1.1}
+.mh-role{font-size:.78rem;opacity:.8;margin-top:5px}
+.mh-cts{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px}
+.mh-c{font-size:.68rem;opacity:.88;display:flex;align-items:center;gap:4px}
+.mb{display:grid;grid-template-columns:1fr 248px;flex:1}
+.mm{padding:28px 34px}
+.ma{padding:28px 20px;border-left:1px solid #e0dbd3;background:#f8f6f2}
+.mo-stag{display:inline-block;font-size:.66rem;margin:2px;padding:2px 8px;border-radius:20px}
+/* CV MINIMAL */
+.tpl-n{padding:50px 56px;min-height:1123px}
+.nh{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:16px;margin-bottom:24px}
+.nh-name{font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:900;line-height:1}
+.nh-role{font-size:.8rem;color:#666;margin-top:5px}
+.nh-cts{font-size:.68rem;color:#666;text-align:right;line-height:1.9}
+.nh-ph{width:70px;height:70px;border-radius:50%;object-fit:cover;display:block}
+.nb{display:grid;grid-template-columns:184px 1fr;gap:0 34px}
+.ns-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:#999;margin-bottom:7px}
+.ns{margin-bottom:20px}
+/* Shared CV parts */
+.sh{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px}
+.sh::after{content:'';flex:1;height:1px;background:#e0dbd3;display:block}
+.cobj{font-size:.8rem;line-height:1.7;color:#444}
+.ce{margin-bottom:13px}
+.cet{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}
+.cetl{font-weight:600;font-size:.84rem}
+.ceorg{font-size:.74rem;color:#555;margin-top:1px}
+.cedt{font-size:.68rem;font-weight:600;white-space:nowrap;margin-left:7px}
+.cedsc{font-size:.74rem;line-height:1.6;color:#555;margin-top:4px}
+/* EXPORT FLYOUT */
+.efly{position:fixed;bottom:20px;right:20px;z-index:300;width:190px;background:var(--surface);border:1px solid var(--border);border-radius:13px;box-shadow:var(--shadowlg);padding:13px;display:flex;flex-direction:column;gap:6px;transform:translateY(calc(100% + 20px)) scale(.95);opacity:0;pointer-events:none;transition:all .28s cubic-bezier(.34,1.56,.64,1)}
+.efly.open{transform:none;opacity:1;pointer-events:all}
+.efly h4{font-size:.65rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:700;margin-bottom:2px}
+.efb{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);font:.76rem 'DM Sans',sans-serif;color:var(--text);transition:all var(--t)}
+.efb:hover{border-color:var(--accent);color:var(--accent);background:var(--glow)}
+/* TOAST */
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(60px);background:#1c1a16;color:#fff;padding:8px 18px;border-radius:8px;font-size:.8rem;z-index:500;opacity:0;pointer-events:none;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .25s}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* PRINT */
+@media print{.topbar,.lp,.pvbar,.efly,.toast{display:none!important}.app{display:block;height:auto;overflow:visible}.rp{display:flex!important;padding:0;background:#fff;overflow:visible;min-height:auto}.pw{transform:none!important}.cvp{box-shadow:none;width:100%;min-height:auto}}
+
+/* ── SMALL-SCREEN TOPBAR TIGHTENING ── */
+@media(max-width:640px){
+  .topbar{padding:0 10px;gap:5px}
+  .brand{font-size:.95rem}
+  .tbar-r{gap:4px}
+  .tbar-r .btn{font-size:.68rem;padding:6px 8px}
+  .r2{grid-template-columns:1fr}
+  .tg{grid-template-columns:repeat(3,1fr)}
+}
+</style>
+</head>
+
+<body>
+<!-- TOPBAR -->
+<header class="topbar">
+  <div class="brand"><em>CV</em> Builder Pro</div>
+  <div class="viewtabs" id="viewTabs">
+    <button class="vtab active" id="vtEdit" onclick="setPane('edit')">✎ Edit</button>
+    <button class="vtab" id="vtPrev" onclick="setPane('preview')">👁 Preview</button>
+  </div>
+  <div class="tbar-r">
+    <button class="btn btn-g" onclick="resetAll()">↺ Reset</button>
+    <button class="btn btn-o" id="expBtn" onclick="toggleFly()">↑ Export</button>
+    <button class="btn btn-p" onclick="setPane('preview');window.print()">⎙ Print</button>
+    <button class="toggle" onclick="toggleTheme()" aria-label="Dark mode"></button>
+  </div>
+</header>
+
+<!-- APP -->
+<div class="app pane-edit" id="appEl">
+
+<!-- LEFT PANEL -->
+<aside class="lp" id="lp">
+
+  <!-- Progress -->
+  <div>
+    <div class="pg-bar"><div class="pg-fill" id="pgFill" style="width:0"></div></div>
+    <div class="pg-lbl" id="pgLbl">0% complete</div>
+  </div>
+
+  <!-- Template & Style -->
+  <div class="card">
+    <div class="ch open" onclick="tgl(this)"><div class="ct">🎨 Template &amp; Style</div><span class="chv">▾</span></div>
+    <div class="cb open">
+      <div class="tg">
+        <div class="tc active" id="tcA" onclick="setTpl('classic',this)" title="Classic Sidebar">
+          <div style="display:grid;grid-template-columns:38% 62%;height:100%">
+            <div id="tcAbg" style="background:#1a4a6b;padding:4px">
+              <div style="width:16px;height:16px;border-radius:50%;background:rgba(255,255,255,.35);margin:0 auto 3px"></div>
+              <div style="height:2.5px;background:rgba(255,255,255,.4);margin:2px 0;border-radius:2px"></div>
+              <div style="height:2px;background:rgba(255,255,255,.25);margin:2px 0;border-radius:2px"></div>
+              <div style="height:2px;background:rgba(255,255,255,.25);margin:2px 0;border-radius:2px"></div>
+            </div>
+            <div style="padding:5px 4px">
+              <div style="height:2.5px;background:#ccc;width:80%;margin:2px 0;border-radius:2px"></div>
+              <div style="height:2px;background:#eee;width:95%;margin:2px 0;border-radius:2px"></div>
+              <div style="height:2px;background:#eee;width:80%;margin:2px 0;border-radius:2px"></div>
+            </div>
+          </div>
+          <div class="tn">Classic</div>
+        </div>
+        <div class="tc" id="tcB" onclick="setTpl('modern',this)" title="Modern">
+          <div style="display:flex;flex-direction:column;height:100%">
+            <div id="tcBbg" style="background:linear-gradient(135deg,#1a4a6b,#c8531a);height:28%;padding:3px 5px;display:flex;align-items:center;gap:3px">
+              <div style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.3)"></div>
+              <div><div style="height:2.5px;background:rgba(255,255,255,.6);width:36px;border-radius:2px"></div><div style="height:2px;background:rgba(255,255,255,.3);width:24px;border-radius:2px;margin-top:2px"></div></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 32%;flex:1;padding:3px">
+              <div><div style="height:2px;background:#ddd;margin:2px 0;border-radius:2px"></div><div style="height:2px;background:#eee;margin:2px 0;border-radius:2px"></div></div>
+              <div style="background:#f5f3ef;margin-left:3px;border-radius:2px"></div>
+            </div>
+          </div>
+          <div class="tn">Modern</div>
+        </div>
+        <div class="tc" id="tcC" onclick="setTpl('minimal',this)" title="Minimal">
+          <div style="padding:5px">
+            <div style="height:4px;background:#1c1a16;width:70%;border-radius:2px;margin-bottom:3px"></div>
+            <div style="height:1.5px;background:#1c1a16;width:100%;margin-bottom:4px"></div>
+            <div style="display:grid;grid-template-columns:38% 62%;gap:3px">
+              <div><div style="height:2px;background:#ccc;margin:2px 0;border-radius:2px"></div><div style="height:2px;background:#ddd;margin:2px 0;border-radius:2px"></div></div>
+              <div><div style="height:2px;background:#ccc;margin:2px 0;border-radius:2px"></div><div style="height:2px;background:#eee;margin:2px 0;border-radius:2px"></div><div style="height:2px;background:#eee;margin:2px 0;border-radius:2px"></div></div>
+            </div>
+          </div>
+          <div class="tn">Minimal</div>
+        </div>
+      </div>
+      <div class="r2">
+        <div class="fg">
+          <label class="fl">Primary Color</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="color" id="cA" value="#c8531a" oninput="setCA(this.value)">
+            <input type="text" id="cAH" value="#c8531a" oninput="setCAH(this.value)" style="font-size:.72rem;padding:5px 7px">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Secondary Color</label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <input type="color" id="cB" value="#1a4a6b" oninput="setCB(this.value)">
+            <input type="text" id="cBH" value="#1a4a6b" oninput="setCBH(this.value)" style="font-size:.72rem;padding:5px 7px">
+          </div>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Font Size: <span id="fsLbl">10px</span></label>
+        <input type="range" id="fsSlider" min="8" max="14" step="0.5" value="10" oninput="setFS(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- Personal Info -->
+  <div class="card">
+    <div class="ch open" onclick="tgl(this)"><div class="ct">👤 Personal Info</div><span class="chv">▾</span></div>
+    <div class="cb open">
+      <div>
+        <label class="fl" style="display:block;margin-bottom:5px">Profile Photo</label>
+        <div class="ph-zone" onclick="document.getElementById('phFile').click()">
+          <div class="ph-circ" id="phCirc"><span>🧑</span></div>
+          <div class="ph-info">
+            <p>Upload Photo</p>
+            <small>JPG · PNG · WebP · Max 5MB</small>
+            <span>Click to browse →</span>
+          </div>
+        </div>
+        <input type="file" id="phFile" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+        <div id="phAct" style="display:none;margin-top:5px">
+          <button class="ph-rm" onclick="removePhoto()">✕ Remove photo</button>
+        </div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label class="fl">First Name</label><input type="text" id="fFirst" value="Tushan" placeholder="First" oninput="redraw()"></div>
+        <div class="fg"><label class="fl">Last Name</label><input type="text" id="fLast" value="Naik" placeholder="Last" oninput="redraw()"></div>
+      </div>
+      <div class="fg"><label class="fl">Job Title</label><input type="text" id="fTitle" value="Project Manager" placeholder="e.g. Software Engineer" oninput="redraw()"></div>
+      <div class="fg"><label class="fl">Address</label><input type="text" id="fAddr" value="234 5th Ave, Madison, WI 12131" placeholder="City, State, Country" oninput="redraw()"></div>
+      <div class="r2">
+        <div class="fg"><label class="fl">Phone</label><input type="tel" id="fPhone" value="+91 9124991620" placeholder="+1 555 0000" oninput="redraw()"></div>
+        <div class="fg"><label class="fl">Email</label><input type="email" id="fEmail" value="tushannaik94@gmail.com" placeholder="you@email.com" oninput="redraw()"></div>
+      </div>
+      <div class="r2">
+        <div class="fg"><label class="fl">LinkedIn</label><input type="text" id="fLI" placeholder="linkedin.com/in/you" oninput="redraw()"></div>
+        <div class="fg"><label class="fl">Website</label><input type="url" id="fWeb" placeholder="https://yoursite.com" oninput="redraw()"></div>
+      </div>
+      <div class="fg"><label class="fl">Nationality</label><input type="text" id="fNat" placeholder="e.g. Indian" oninput="redraw()"></div>
+    </div>
+  </div>
+
+  <!-- Summary -->
+  <div class="card">
+    <div class="ch open" onclick="tgl(this)"><div class="ct">🎯 Professional Summary</div><span class="chv">▾</span></div>
+    <div class="cb open">
+      <div class="fg"><label class="fl">Summary / Objective</label>
+        <textarea id="fSum" rows="4" placeholder="Write a compelling summary..." oninput="redraw()">Looking to obtain a challenging project management position in a dynamic and innovative organization where I can apply my skills and experience to drive success.</textarea>
+        <button class="ai-btn" id="aiSumBtn" onclick="aiEnhanceSummary()">✨ Polish with AI</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Experience -->
+  <div class="card">
+    <div class="ch open" onclick="tgl(this)"><div class="ct">💼 Experience</div><span class="chv">▾</span></div>
+    <div class="cb open">
+      <div id="expList"></div>
+      <button class="add-r" onclick="addExp()">＋ Add Experience</button>
+    </div>
+  </div>
+
+  <!-- Education -->
+  <div class="card">
+    <div class="ch open" onclick="tgl(this)"><div class="ct">🎓 Education</div><span class="chv">▾</span></div>
+    <div class="cb open">
+      <div id="eduList"></div>
+      <button class="add-r" onclick="addEdu()">＋ Add Education</button>
+    </div>
+  </div>
+
+  <!-- Skills -->
+  <div class="card">
+    <div class="ch open" onclick="tgl(this)"><div class="ct">⚡ Skills</div><span class="chv">▾</span></div>
+    <div class="cb open">
+      <div class="sk-r">
+        <input type="text" id="skIn" placeholder="Type skill, press Enter or Add…" onkeydown="if(event.key==='Enter'){event.preventDefault();addSkill();}">
+        <button class="btn btn-p" onclick="addSkill()" style="padding:6px 11px;font-size:.72rem">Add</button>
+      </div>
+      <div class="tw" id="tw"></div>
+    </div>
+  </div>
+
+  <!-- Certifications -->
+  <div class="card">
+    <div class="ch" onclick="tgl(this)"><div class="ct">📜 Certifications</div><span class="chv">▾</span></div>
+    <div class="cb">
+      <div id="certList"></div>
+      <button class="add-r" onclick="addCert()">＋ Add Certification</button>
+    </div>
+  </div>
+
+  <!-- Languages -->
+  <div class="card">
+    <div class="ch" onclick="tgl(this)"><div class="ct">🌍 Languages</div><span class="chv">▾</span></div>
+    <div class="cb">
+      <div id="langList"></div>
+      <button class="add-r" onclick="addLang()">＋ Add Language</button>
+    </div>
+  </div>
+
+  <!-- Interests -->
+  <div class="card">
+    <div class="ch" onclick="tgl(this)"><div class="ct">🎸 Interests</div><span class="chv">▾</span></div>
+    <div class="cb">
+      <div class="fg"><textarea id="fInt" rows="2" placeholder="Photography, Hiking, Open Source..." oninput="redraw()"></textarea></div>
+    </div>
+  </div>
+
+  <!-- References -->
+  <div class="card">
+    <div class="ch" onclick="tgl(this)"><div class="ct">🤝 References</div><span class="chv">▾</span></div>
+    <div class="cb">
+      <div id="refList"></div>
+      <button class="add-r" onclick="addRef()">＋ Add Reference</button>
+    </div>
+  </div>
+
+</aside>
+
+<!-- RIGHT PANEL -->
+<main class="rp">
+  <div class="pvbar">
+    <h3>Live Preview</h3>
+    <div class="zr">
+      <button class="zb" onclick="doZoom(-10)">−</button>
+      <span class="zl" id="zLbl">75%</span>
+      <button class="zb" onclick="doZoom(10)">+</button>
+      <button class="btn btn-g" onclick="doZoom(0,true)" style="font-size:.7rem;padding:4px 8px">Reset</button>
+    </div>
+  </div>
+  <div class="pw" id="pw" style="transform:scale(.75)">
+    <div class="cvp" id="cvp"></div>
+  </div>
+</main>
+
+</div><!-- /app -->
+
+<!-- Export flyout -->
+<div class="efly" id="eFly">
+  <h4>Export As</h4>
+  <button class="efb" onclick="doExp('docx')"><span>📄</span> Word (.docx)</button>
+  <button class="efb" onclick="doExp('xlsx')"><span>📊</span> Excel (.xlsx)</button>
+  <button class="efb" onclick="doExp('txt')"><span>📝</span> Plain Text</button>
+  <button class="efb" onclick="doExp('md')"><span>⬇️</span> Markdown</button>
+  <button class="efb" onclick="doExp('html')"><span>🌐</span> HTML Page</button>
+  <button class="efb" onclick="doExp('json')"><span>📦</span> JSON Data</button>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toastEl"></div>
+
+<script>
+'use strict';
+// STATE
+let curTpl='classic', photoURL=null, zPct=75, cvFS=10, CA='#c8531a', CB='#1a4a6b';
+const skills=['Strong Leadership','Project Management','Agile / Scrum','Risk Management','Team Building'];
+const exps=[
+  {t:'Project Manager',o:'ValArsdel, Ltd.',s:'May 20XX',e:'Present',d:'Led cross-functional teams to successfully deliver multiple projects on-time and within budget.'},
+  {t:'Project Coordinator',o:'Wide World Importers',s:'Sept 20XX',e:'May 20XX',d:'Monitored project progress and identified potential roadblocks, proactively communicating with teams to keep projects on track.'},
+  {t:'Intern Coordinator',o:'ValArsdel, Ltd.',s:'Apr 20XX',e:'Sept 20XX',d:'Assisted cross-functional teams to successfully deliver multiple projects on-time and within budget.'}
+];
+const edus=[{dg:'Bachelor of Science in Project Management',sc:'Glennwood University',s:'Aug 20XX',e:'May 20XX',n:'Graduated with Honors (GPA: 3.7). Relevant coursework: Project Management Fundamentals, Agile PM, Risk Management, Leadership.'}];
+const certs=[],langs=[],refs=[];
+
+// INIT
+window.addEventListener('DOMContentLoaded',()=>{rExp();rEdu();rCerts();rLangs();rRefs();rTags();redraw();const rp=document.querySelector('.rp');if(rp)rpResizeObserver.observe(rp);document.addEventListener('click',e=>{const f=document.getElementById('eFly'),b=document.getElementById('expBtn');if(!f.contains(e.target)&&!b.contains(e.target))f.classList.remove('open');});});
+
+// THEME
+function toggleTheme(){document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';}
+
+// ACCORDION
+function tgl(h){const b=h.nextElementSibling;h.classList.toggle('open');b.classList.toggle('open');}
+
+// TEMPLATE
+function setTpl(n,el){curTpl=n;document.querySelectorAll('.tc').forEach(c=>c.classList.remove('active'));el.classList.add('active');redraw();}
+
+// COLORS
+function setCA(v){CA=v;document.getElementById('cAH').value=v;syncTC();redraw();}
+function setCAH(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){CA=v;document.getElementById('cA').value=v;syncTC();redraw();}}
+function setCB(v){CB=v;document.getElementById('cBH').value=v;syncTC();redraw();}
+function setCBH(v){if(/^#[0-9a-fA-F]{6}$/.test(v)){CB=v;document.getElementById('cB').value=v;syncTC();redraw();}}
+function syncTC(){const a=document.getElementById('tcAbg');if(a)a.style.background=CB;const b=document.getElementById('tcBbg');if(b)b.style.background=`linear-gradient(135deg,${CB},${CA})`;}
+
+// FONT SIZE
+function setFS(v){cvFS=parseFloat(v);document.getElementById('fsLbl').textContent=v+'px';redraw();}
+
+// PANE SWITCH (mobile Edit/Preview tabs)
+function setPane(mode){
+  const app=document.getElementById('appEl');
+  app.classList.toggle('pane-edit',mode==='edit');
+  app.classList.toggle('pane-preview',mode==='preview');
+  document.getElementById('vtEdit').classList.toggle('active',mode==='edit');
+  document.getElementById('vtPrev').classList.toggle('active',mode==='preview');
+  if(mode==='preview')fitZoom();
+}
+
+// Auto-fit the CV paper to whatever width is actually available. This replaces guessing
+// from window.innerWidth (unreliable across OS/browser zoom and display scaling) with
+// measuring the real rendered container width via ResizeObserver.
+let userZoomed=false;
+function fitZoom(){
+  const rp=document.querySelector('.rp');
+  if(!rp||!rp.clientWidth)return;
+  const avail=rp.clientWidth-32; // account for side padding
+  const pct=Math.max(15,Math.min(100,Math.floor((avail/794)*100)));
+  zPct=pct;
+  applyZoom();
+}
+function applyZoom(){
+  document.getElementById('pw').style.transform=`scale(${zPct/100})`;
+  document.getElementById('zLbl').textContent=zPct+'%';
+}
+const rpResizeObserver=new ResizeObserver(()=>{ if(!userZoomed) fitZoom(); });
+
+// ZOOM
+function doZoom(d,reset){if(reset){zPct=75;userZoomed=false;fitZoom();return;}userZoomed=true;zPct=Math.max(15,Math.min(150,zPct+d));applyZoom();}
+
+// PHOTO
+function handlePhoto(ev){const f=ev.target.files[0];if(!f)return;if(f.size>5242880){toast('Image too large (max 5MB)');return;}const r=new FileReader();r.onload=e=>{photoURL=e.target.result;document.getElementById('phCirc').innerHTML=`<img src="${photoURL}" alt="Photo">`;document.getElementById('phAct').style.display='block';redraw();};r.readAsDataURL(f);ev.target.value='';}
+function removePhoto(){photoURL=null;document.getElementById('phCirc').innerHTML='<span>🧑</span>';document.getElementById('phAct').style.display='none';redraw();}
+
+// SKILLS
+function addSkill(){const inp=document.getElementById('skIn'),v=inp.value.trim();if(v&&!skills.includes(v)){skills.push(v);rTags();redraw();}inp.value='';inp.focus();}
+function rmSkill(i){skills.splice(i,1);rTags();redraw();}
+function rTags(){document.getElementById('tw').innerHTML=skills.map((s,i)=>`<span class="tag">${x(s)}<button class="tx" onclick="rmSkill(${i})">✕</button></span>`).join('');}
+
+// EXPERIENCE
+function addExp(){exps.push({t:'',o:'',s:'',e:'',d:''});rExp();}
+function rmExp(i){exps.splice(i,1);rExp();redraw();}
+function rExp(){document.getElementById('expList').innerHTML=exps.map((e,i)=>`<div class="ri"><button class="rm" onclick="rmExp(${i})">✕</button><div class="r2"><div class="fg"><label class="fl">Job Title</label><input type="text" value="${x(e.t)}" placeholder="Project Manager" oninput="exps[${i}].t=this.value;redraw()"></div><div class="fg"><label class="fl">Company</label><input type="text" value="${x(e.o)}" placeholder="Company" oninput="exps[${i}].o=this.value;redraw()"></div></div><div class="r2"><div class="fg"><label class="fl">Start</label><input type="text" value="${x(e.s)}" placeholder="Jan 2020" oninput="exps[${i}].s=this.value;redraw()"></div><div class="fg"><label class="fl">End</label><input type="text" value="${x(e.e)}" placeholder="Present" oninput="exps[${i}].e=this.value;redraw()"></div></div><div class="fg"><label class="fl">Description</label><textarea oninput="exps[${i}].d=this.value;redraw()" placeholder="Key achievements...">${x(e.d)}</textarea><button class="ai-btn small" id="aiExpBtn${i}" onclick="aiEnhanceExp(${i})">✨ Sharpen bullet</button></div></div>`).join('');}
+
+// EDUCATION
+function addEdu(){edus.push({dg:'',sc:'',s:'',e:'',n:''});rEdu();}
+function rmEdu(i){edus.splice(i,1);rEdu();redraw();}
+function rEdu(){document.getElementById('eduList').innerHTML=edus.map((e,i)=>`<div class="ri"><button class="rm" onclick="rmEdu(${i})">✕</button><div class="fg"><label class="fl">Degree</label><input type="text" value="${x(e.dg)}" placeholder="B.Sc. Computer Science" oninput="edus[${i}].dg=this.value;redraw()"></div><div class="fg"><label class="fl">Institution</label><input type="text" value="${x(e.sc)}" placeholder="University Name" oninput="edus[${i}].sc=this.value;redraw()"></div><div class="r2"><div class="fg"><label class="fl">Start</label><input type="text" value="${x(e.s)}" placeholder="Aug 2018" oninput="edus[${i}].s=this.value;redraw()"></div><div class="fg"><label class="fl">End</label><input type="text" value="${x(e.e)}" placeholder="May 2022" oninput="edus[${i}].e=this.value;redraw()"></div></div><div class="fg"><label class="fl">Notes / GPA</label><textarea oninput="edus[${i}].n=this.value;redraw()" placeholder="GPA, honours, courses...">${x(e.n)}</textarea></div></div>`).join('');}
+
+// CERTS
+function addCert(){certs.push({n:'',is:'',y:''});rCerts();}
+function rmCert(i){certs.splice(i,1);rCerts();redraw();}
+function rCerts(){document.getElementById('certList').innerHTML=certs.map((c,i)=>`<div class="ri"><button class="rm" onclick="rmCert(${i})">✕</button><div class="r2"><div class="fg"><label class="fl">Certification</label><input type="text" value="${x(c.n)}" placeholder="PMP" oninput="certs[${i}].n=this.value;redraw()"></div><div class="fg"><label class="fl">Issuer</label><input type="text" value="${x(c.is)}" placeholder="PMI" oninput="certs[${i}].is=this.value;redraw()"></div></div><div class="fg"><label class="fl">Year</label><input type="text" value="${x(c.y)}" placeholder="2023" oninput="certs[${i}].y=this.value;redraw()"></div></div>`).join('');}
+
+// LANGS
+function addLang(){langs.push({l:'',lv:'Fluent'});rLangs();}
+function rmLang(i){langs.splice(i,1);rLangs();redraw();}
+function rLangs(){const ops=['Native','Fluent','Advanced','Intermediate','Basic'];document.getElementById('langList').innerHTML=langs.map((l,i)=>`<div class="ri"><button class="rm" onclick="rmLang(${i})">✕</button><div class="r2"><div class="fg"><label class="fl">Language</label><input type="text" value="${x(l.l)}" placeholder="English" oninput="langs[${i}].l=this.value;redraw()"></div><div class="fg"><label class="fl">Proficiency</label><select onchange="langs[${i}].lv=this.value;redraw()">${ops.map(o=>`<option${l.lv===o?' selected':''}>${o}</option>`).join('')}</select></div></div></div>`).join('');}
+
+// REFS
+function addRef(){refs.push({n:'',r:'',c:'',e:'',p:''});rRefs();}
+function rmRef(i){refs.splice(i,1);rRefs();redraw();}
+function rRefs(){document.getElementById('refList').innerHTML=refs.length?refs.map((r,i)=>`<div class="ri"><button class="rm" onclick="rmRef(${i})">✕</button><div class="r2"><div class="fg"><label class="fl">Name</label><input type="text" value="${x(r.n)}" placeholder="Jane Smith" oninput="refs[${i}].n=this.value;redraw()"></div><div class="fg"><label class="fl">Title</label><input type="text" value="${x(r.r)}" placeholder="Manager" oninput="refs[${i}].r=this.value;redraw()"></div></div><div class="fg"><label class="fl">Company</label><input type="text" value="${x(r.c)}" placeholder="Company Inc." oninput="refs[${i}].c=this.value;redraw()"></div><div class="r2"><div class="fg"><label class="fl">Email</label><input type="email" value="${x(r.e)}" placeholder="jane@co.com" oninput="refs[${i}].e=this.value;redraw()"></div><div class="fg"><label class="fl">Phone</label><input type="tel" value="${x(r.p)}" placeholder="+1 555 0100" oninput="refs[${i}].p=this.value;redraw()"></div></div></div>`).join(''):'<p style="font-size:.72rem;color:var(--muted);text-align:center;padding:5px">No references yet.</p>';}
+
+// AI ENHANCE (powered by Claude)
+async function callClaude(prompt){
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok) throw new Error('API error '+res.status);
+  const data=await res.json();
+  return (data.content||[]).map(b=>b.text||'').join('').trim();
+}
+
+async function aiEnhanceSummary(){
+  const btn=document.getElementById('aiSumBtn'),ta=document.getElementById('fSum');
+  const current=ta.value.trim();
+  const title=g('fTitle'),skillList=skills.join(', ');
+  if(!current&&!title){toast('Add a job title or a draft summary first');return;}
+  btn.disabled=true;btn.classList.add('loading');btn.textContent='✨ Thinking…';
+  try{
+    const prompt=`Rewrite this resume professional summary to be sharp, specific, and achievement-oriented. Keep it to 2-3 sentences, no fluff, no first person "I", no markdown, plain text only.\n\nTarget role: ${title||'(not specified)'}\nKey skills: ${skillList||'(not specified)'}\nCurrent draft: "${current||'(none yet, write one from scratch based on the role and skills)'}"\n\nReturn ONLY the rewritten summary text, nothing else.`;
+    const improved=await callClaude(prompt);
+    if(improved){ta.value=improved;redraw();toast('Summary polished ✨');}
+    else toast('No response — try again');
+  }catch(err){console.error(err);toast('AI enhance failed — try again');}
+  finally{btn.disabled=false;btn.classList.remove('loading');btn.textContent='✨ Polish with AI';}
+}
+
+async function aiEnhanceExp(i){
+  const btn=document.getElementById('aiExpBtn'+i);
+  const e=exps[i];
+  if(!e.d&&!e.t){toast('Add a job title or description first');return;}
+  const orig=btn.textContent;
+  btn.disabled=true;btn.classList.add('loading');btn.textContent='✨ Thinking…';
+  try{
+    const prompt=`Rewrite this single resume bullet point description to start with a strong action verb, be specific, and quantify impact where plausible. Keep it to one tight sentence, plain text, no markdown, no first person.\n\nRole: ${e.t||'(unspecified)'}\nCompany: ${e.o||'(unspecified)'}\nCurrent description: "${e.d||'(none, write a plausible one for this role)'}"\n\nReturn ONLY the rewritten sentence, nothing else.`;
+    const improved=await callClaude(prompt);
+    if(improved){exps[i].d=improved;rExp();redraw();toast('Bullet sharpened ✨');}
+    else toast('No response — try again');
+  }catch(err){console.error(err);toast('AI enhance failed — try again');}
+  finally{const b=document.getElementById('aiExpBtn'+i);if(b){b.disabled=false;b.classList.remove('loading');b.textContent=orig;}}
+}
+
+// HELPERS
+const g=id=>(document.getElementById(id)?.value||'').trim();
+function x(s){if(!s)return '';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+const rw=s=>s||'';
+
+// PROGRESS
+function prog(){const fs=['fFirst','fLast','fTitle','fPhone','fEmail','fSum'];let f=0,t=fs.length+3;fs.forEach(id=>{if(g(id))f++;});if(exps.length)f++;if(edus.length)f++;if(skills.length)f++;const p=Math.round(f/t*100);document.getElementById('pgFill').style.width=p+'%';document.getElementById('pgLbl').textContent=p+'% complete';}
+
+// CV BUILD HELPERS
+function phImg(sz,rd){return photoURL?`<img src="${photoURL}" style="width:${sz};height:${sz};border-radius:${rd};object-fit:cover;border:3px solid rgba(255,255,255,.3);display:block" alt="Photo">`:''}
+function sh(label,col){return `<div class="sh" style="color:${col}">${label}</div>`;}
+function entryB(e,col){const dt=[e.s||e.e?[e.s,e.e].filter(Boolean).join(' – '):''].filter(Boolean).join('');return `<div class="ce"><div class="cet"><div><div class="cetl">${rw(e.t||e.dg||'')}</div><div class="ceorg">${rw(e.o||e.sc||'')}</div></div>${dt?`<div class="cedt" style="color:${col}">${dt}</div>`:''}</div>${(e.d||e.n)?`<div class="cedsc">${rw(e.d||e.n)}</div>`:''}</div>`;}
+
+// BUILD CLASSIC
+function buildC(){
+  const sSkills=skills.map(s=>`<span class="cs-tag">${rw(s)}</span>`).join('');
+  const sCerts=certs.map(c=>`<div style="font-size:.67rem;margin-bottom:5px;opacity:.9"><strong>${rw(c.n)}</strong>${c.is?`<br><span style="opacity:.7">${rw(c.is)}</span>`:''}${c.y?' · '+c.y:''}</div>`).join('');
+  const sLangs=langs.map(l=>`<div class="cs-lr"><span>${rw(l.l)}</span><span style="opacity:.6;font-size:.63rem">${rw(l.lv)}</span></div>`).join('');
+  const sRefs=refs.map(r=>`<div style="margin-bottom:8px"><div style="font-weight:600;font-size:.72rem">${rw(r.n)}</div><div style="font-size:.66rem;opacity:.7">${rw(r.r)}${r.c?', '+rw(r.c):''}</div>${r.e?`<div style="font-size:.63rem;opacity:.6">${rw(r.e)}</div>`:''}</div>`).join('');
+  return `<div class="tpl-c" style="font-size:${cvFS}px">
+<div class="cs" style="background:${CB}">
+  ${photoURL?`<div style="text-align:center">${phImg('86px','50%')}</div>`:''}
+  <div><div class="cs-name">${rw(g('fFirst'))} ${rw(g('fLast'))}</div><div class="cs-role">${rw(g('fTitle'))}</div></div>
+  <div><div class="cs-sl">Contact</div>
+    ${g('fAddr')?`<div class="cs-ci"><span>📍</span><span>${rw(g('fAddr'))}</span></div>`:''}
+    ${g('fPhone')?`<div class="cs-ci"><span>📞</span><span>${rw(g('fPhone'))}</span></div>`:''}
+    ${g('fEmail')?`<div class="cs-ci"><span>✉️</span><span>${rw(g('fEmail'))}</span></div>`:''}
+    ${g('fLI')?`<div class="cs-ci"><span>💼</span><span>${rw(g('fLI'))}</span></div>`:''}
+    ${g('fWeb')?`<div class="cs-ci"><span>🌐</span><span>${rw(g('fWeb'))}</span></div>`:''}
+    ${g('fNat')?`<div class="cs-ci"><span>🏳️</span><span>${rw(g('fNat'))}</span></div>`:''}
+  </div>
+  ${skills.length?`<div><div class="cs-sl">Skills</div><div>${sSkills}</div></div>`:''}
+  ${certs.length?`<div><div class="cs-sl">Certifications</div>${sCerts}</div>`:''}
+  ${langs.length?`<div><div class="cs-sl">Languages</div>${sLangs}</div>`:''}
+  ${g('fInt')?`<div><div class="cs-sl">Interests</div><div style="font-size:.67rem;opacity:.88;line-height:1.6">${rw(g('fInt'))}</div></div>`:''}
+  ${refs.length?`<div><div class="cs-sl">References</div>${sRefs}</div>`:''}
+</div>
+<div class="cm">
+  ${g('fSum')?`<div>${sh('Objective',CA)}<div class="cobj">${rw(g('fSum'))}</div></div>`:''}
+  ${exps.length?`<div>${sh('Experience',CA)}${exps.map(e=>entryB(e,CA)).join('')}</div>`:''}
+  ${edus.length?`<div>${sh('Education',CA)}${edus.map(e=>entryB(e,CA)).join('')}</div>`:''}
+</div>
+</div>`;}
+
+// BUILD MODERN
+function buildM(){
+  const aTags=skills.map(s=>`<span class="mo-stag" style="background:${CA}22;border:1px solid ${CA}55;color:${CA}">${rw(s)}</span>`).join('');
+  const aLangs=langs.map(l=>`<div style="display:flex;justify-content:space-between;font-size:.72rem;margin-bottom:4px"><span>${rw(l.l)}</span><span style="color:#999;font-size:.66rem">${rw(l.lv)}</span></div>`).join('');
+  const aCerts=certs.map(c=>`<div style="margin-bottom:7px"><strong style="font-size:.76rem">${rw(c.n)}</strong><div style="font-size:.66rem;color:#888">${rw(c.is)}${c.y?' · '+c.y:''}</div></div>`).join('');
+  const aRefs=refs.map(r=>`<div style="margin-bottom:9px"><div style="font-weight:600;font-size:.76rem">${rw(r.n)}</div><div style="font-size:.66rem;color:#777">${rw(r.r)}${r.c?', '+rw(r.c):''}</div>${r.e?`<div style="font-size:.64rem;color:#aaa">${rw(r.e)}</div>`:''}</div>`).join('');
+  return `<div class="tpl-m" style="font-size:${cvFS}px">
+<div class="mh" style="background:linear-gradient(135deg,${CB},${CA})">
+  ${photoURL?phImg('94px','12px'):''}
+  <div>
+    <div class="mh-name">${rw(g('fFirst'))} ${rw(g('fLast'))}</div>
+    <div class="mh-role">${rw(g('fTitle'))}</div>
+    <div class="mh-cts">
+      ${g('fPhone')?`<span class="mh-c">📞 ${rw(g('fPhone'))}</span>`:''}
+      ${g('fEmail')?`<span class="mh-c">✉️ ${rw(g('fEmail'))}</span>`:''}
+      ${g('fAddr')?`<span class="mh-c">📍 ${rw(g('fAddr'))}</span>`:''}
+      ${g('fLI')?`<span class="mh-c">💼 ${rw(g('fLI'))}</span>`:''}
+      ${g('fWeb')?`<span class="mh-c">🌐 ${rw(g('fWeb'))}</span>`:''}
+    </div>
+  </div>
+</div>
+<div class="mb">
+  <div class="mm">
+    ${g('fSum')?`<div style="margin-bottom:18px">${sh('About',CA)}<div class="cobj">${rw(g('fSum'))}</div></div>`:''}
+    ${exps.length?`<div style="margin-bottom:18px">${sh('Experience',CA)}${exps.map(e=>entryB(e,CA)).join('')}</div>`:''}
+    ${edus.length?`<div style="margin-bottom:18px">${sh('Education',CA)}${edus.map(e=>entryB(e,CA)).join('')}</div>`:''}
+    ${g('fInt')?`<div>${sh('Interests',CA)}<div class="cobj">${rw(g('fInt'))}</div></div>`:''}
+  </div>
+  <div class="ma">
+    ${skills.length?`<div style="margin-bottom:16px">${sh('Skills',CA)}<div>${aTags}</div></div>`:''}
+    ${certs.length?`<div style="margin-bottom:16px">${sh('Certifications',CA)}${aCerts}</div>`:''}
+    ${langs.length?`<div style="margin-bottom:16px">${sh('Languages',CA)}${aLangs}</div>`:''}
+    ${refs.length?`<div style="margin-bottom:16px">${sh('References',CA)}${aRefs}</div>`:''}
+  </div>
+</div>
+</div>`;}
+
+// BUILD MINIMAL
+function buildN(){
+  const ct=[g('fAddr'),g('fPhone'),g('fEmail'),g('fLI'),g('fWeb')].filter(Boolean).map(rw).join('<br>');
+  const skTxt=skills.join(' · ');
+  const lgTxt=langs.map(l=>`${rw(l.l)}: ${rw(l.lv)}`).join(' · ');
+  const cTxt=certs.map(c=>`<div style="margin-bottom:5px"><strong style="font-size:.78rem">${rw(c.n)}</strong><div style="font-size:.66rem;color:#888">${rw(c.is)}${c.y?' · '+c.y:''}</div></div>`).join('');
+  const rTxt=refs.map(r=>`<div style="margin-bottom:9px"><div style="font-weight:600;font-size:.8rem">${rw(r.n)}</div><div style="font-size:.7rem;color:#777">${rw(r.r)}${r.c?', '+rw(r.c):''}</div>${r.e?`<div style="font-size:.66rem;color:#aaa">${rw(r.e)}</div>`:''}</div>`).join('');
+  return `<div class="tpl-n" style="font-size:${cvFS}px">
+<div class="nh" style="border-bottom:3px solid ${CB}">
+  <div>
+    <div class="nh-name" style="color:${CB}">${rw(g('fFirst'))} ${rw(g('fLast'))}</div>
+    ${g('fTitle')?`<div class="nh-role">${rw(g('fTitle'))}</div>`:''}
+  </div>
+  <div style="text-align:right">
+    ${photoURL?`<img src="${photoURL}" class="nh-ph" alt="Photo" style="margin-left:auto;margin-bottom:5px">`:''}
+    <div class="nh-cts">${ct}</div>
+  </div>
+</div>
+<div class="nb">
+  <div>
+    ${g('fSum')?`<div class="ns"><div class="ns-lbl">About</div><div style="font-size:.74rem;line-height:1.65;color:#555">${rw(g('fSum'))}</div></div>`:''}
+    ${skills.length?`<div class="ns"><div class="ns-lbl">Skills</div><div style="font-size:.72rem;line-height:1.8;color:#555">${skTxt}</div></div>`:''}
+    ${langs.length?`<div class="ns"><div class="ns-lbl">Languages</div><div style="font-size:.72rem;line-height:1.8;color:#555">${lgTxt}</div></div>`:''}
+    ${certs.length?`<div class="ns"><div class="ns-lbl">Certifications</div>${cTxt}</div>`:''}
+    ${g('fInt')?`<div class="ns"><div class="ns-lbl">Interests</div><div style="font-size:.72rem;line-height:1.7;color:#555">${rw(g('fInt'))}</div></div>`:''}
+    ${refs.length?`<div class="ns"><div class="ns-lbl">References</div>${rTxt}</div>`:''}
+  </div>
+  <div>
+    ${exps.length?`<div class="ns"><div class="ns-lbl">Experience</div>${exps.map(e=>`<div style="margin-bottom:13px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div style="font-weight:600;font-size:.82rem">${rw(e.t)}</div><div style="font-size:.7rem;color:#777">${rw(e.o)}</div></div><div style="font-size:.66rem;color:#aaa;white-space:nowrap;margin-left:7px">${[e.s,e.e].filter(Boolean).join(' – ')}</div></div>${e.d?`<div style="font-size:.72rem;line-height:1.6;color:#555;margin-top:3px">${rw(e.d)}</div>`:''}</div>`).join('')}</div>`:''}
+    ${edus.length?`<div class="ns"><div class="ns-lbl">Education</div>${edus.map(e=>`<div style="margin-bottom:13px"><div style="font-weight:600;font-size:.82rem">${rw(e.dg)}</div><div style="font-size:.7rem;color:#777">${rw(e.sc)}</div><div style="font-size:.66rem;color:#aaa">${[e.s,e.e].filter(Boolean).join(' – ')}</div>${e.n?`<div style="font-size:.72rem;line-height:1.6;color:#555;margin-top:3px">${rw(e.n)}</div>`:''}</div>`).join('')}</div>`:''}
+  </div>
+</div>
+</div>`;}
+
+// REDRAW
+function redraw(){prog();let h='';if(curTpl==='classic')h=buildC();else if(curTpl==='modern')h=buildM();else h=buildN();document.getElementById('cvp').innerHTML=h;}
+
+// FLYOUT
+function toggleFly(){document.getElementById('eFly').classList.toggle('open');}
+
+// DOWNLOAD
+function dl(data,name,mime){const blob=data instanceof Blob?data:new Blob([data],{type:mime});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);}
+const fn=()=>`${g('fFirst')||'CV'}_${g('fLast')||'Resume'}`;
+
+function doExp(t){document.getElementById('eFly').classList.remove('open');if(t==='txt')expTXT();else if(t==='md')expMD();else if(t==='json')expJSON();else if(t==='html')expHTML();else if(t==='xlsx')expXLSX();else if(t==='docx')expDOCX();}
+
+// TXT
+function expTXT(){const L=[];L.push(`${g('fFirst')} ${g('fLast')}`,g('fTitle'),'─'.repeat(50));[['Address',g('fAddr')],['Phone',g('fPhone')],['Email',g('fEmail')],['LinkedIn',g('fLI')],['Website',g('fWeb')],['Nationality',g('fNat')]].filter(([,v])=>v).forEach(([k,v])=>L.push(`${k}: ${v}`));if(g('fSum'))L.push('','OBJECTIVE',g('fSum'));if(exps.length){L.push('','EXPERIENCE');exps.forEach(e=>{L.push(`${e.t} — ${e.o} (${e.s}–${e.e})`);if(e.d)L.push(e.d);L.push('');});}if(edus.length){L.push('EDUCATION');edus.forEach(e=>{L.push(`${e.dg} — ${e.sc} (${e.s}–${e.e})`);if(e.n)L.push(e.n);L.push('');});}if(skills.length)L.push('SKILLS',skills.join(', '));if(certs.length){L.push('','CERTIFICATIONS');certs.forEach(c=>L.push(`${c.n} — ${c.is} ${c.y}`));}if(langs.length){L.push('','LANGUAGES');langs.forEach(l=>L.push(`${l.l}: ${l.lv}`));}if(g('fInt'))L.push('','INTERESTS',g('fInt'));if(refs.length){L.push('','REFERENCES');refs.forEach(r=>L.push(`${r.n}, ${r.r} at ${r.c} | ${r.e} ${r.p}`));}dl(L.join('\n'),fn()+'_CV.txt','text/plain;charset=utf-8');toast('✓ Text file downloaded');}
+
+// MD
+function expMD(){const L=[];L.push(`# ${g('fFirst')} ${g('fLast')}`,`**${g('fTitle')}**`,'');const ct=[g('fAddr'),g('fPhone'),g('fEmail'),g('fLI'),g('fWeb')].filter(Boolean);if(ct.length)L.push(ct.join(' · '),'');if(g('fSum'))L.push('## Objective',g('fSum'),'');if(exps.length){L.push('## Experience');exps.forEach(e=>{L.push(`### ${e.t} — ${e.o}`,`*${e.s} – ${e.e}*`,e.d||'','');});}if(edus.length){L.push('## Education');edus.forEach(e=>{L.push(`### ${e.dg}`,`**${e.sc}** | *${e.s} – ${e.e}*`,e.n||'','');});}if(skills.length){L.push('## Skills');skills.forEach(s=>L.push(`- ${s}`));L.push('');}if(certs.length){L.push('## Certifications');certs.forEach(c=>L.push(`- **${c.n}** — ${c.is} (${c.y})`));L.push('');}if(langs.length){L.push('## Languages');langs.forEach(l=>L.push(`- ${l.l}: ${l.lv}`));L.push('');}if(g('fInt'))L.push('## Interests',g('fInt'),'');if(refs.length){L.push('## References');refs.forEach(r=>L.push(`- **${r.n}**, ${r.r} at ${r.c} | ${r.e}`));}dl(L.join('\n'),fn()+'_CV.md','text/markdown;charset=utf-8');toast('✓ Markdown downloaded');}
+
+// JSON
+function expJSON(){const d={personal:{firstName:g('fFirst'),lastName:g('fLast'),title:g('fTitle'),address:g('fAddr'),phone:g('fPhone'),email:g('fEmail'),linkedin:g('fLI'),website:g('fWeb'),nationality:g('fNat')},summary:g('fSum'),interests:g('fInt'),experience:exps,education:edus,skills,certifications:certs,languages:langs,references:refs,template:curTpl,colors:{primary:CA,secondary:CB}};dl(JSON.stringify(d,null,2),fn()+'_CV.json','application/json');toast('✓ JSON exported');}
+
+// HTML
+function expHTML(){const body=document.getElementById('cvp').innerHTML;const gF='https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap';const h=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${g('fFirst')} ${g('fLast')} — CV</title><link href="${gF}" rel="stylesheet"><style>*{box-sizing:border-box;margin:0;padding:0}body{font-family:'DM Sans',sans-serif;background:#e8e5df;display:flex;justify-content:center;padding:40px 20px;min-height:100vh}.cvp{width:794px;min-height:1123px;background:#fff;color:#1c1a16;box-shadow:0 8px 48px rgba(0,0,0,.15);border-radius:3px;overflow:hidden;font-family:'DM Sans',sans-serif}.tpl-c{display:grid;grid-template-columns:248px 1fr;min-height:1123px}.cs{padding:34px 21px;display:flex;flex-direction:column;gap:20px;color:#fff}.cs-name{font-family:'Playfair Display',serif;font-size:1.18rem;font-weight:700;text-align:center;line-height:1.3}.cs-role{font-size:.7rem;text-align:center;opacity:.72;margin-top:3px}.cs-sl{font-size:.58rem;text-transform:uppercase;letter-spacing:.1em;opacity:.55;border-bottom:1px solid rgba(255,255,255,.18);padding-bottom:5px;margin-bottom:8px}.cs-ci{display:flex;align-items:flex-start;gap:6px;font-size:.7rem;margin-bottom:5px;opacity:.88;word-break:break-word}.cs-tag{display:inline-block;font-size:.64rem;margin:2px;padding:2px 8px;border-radius:20px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2)}.cs-lr{display:flex;justify-content:space-between;align-items:center;font-size:.7rem;margin-bottom:5px}.cm{padding:34px 28px;display:flex;flex-direction:column;gap:20px}.tpl-m{display:flex;flex-direction:column;min-height:1123px}.mh{padding:36px 42px;color:#fff;display:flex;align-items:center;gap:22px}.mh-name{font-family:'Playfair Display',serif;font-size:1.75rem;font-weight:900;line-height:1.1}.mh-role{font-size:.78rem;opacity:.8;margin-top:5px}.mh-cts{display:flex;flex-wrap:wrap;gap:9px;margin-top:9px}.mh-c{font-size:.68rem;opacity:.88;display:flex;align-items:center;gap:4px}.mb{display:grid;grid-template-columns:1fr 248px;flex:1}.mm{padding:28px 34px}.ma{padding:28px 20px;border-left:1px solid #e0dbd3;background:#f8f6f2}.mo-stag{display:inline-block;font-size:.66rem;margin:2px;padding:2px 8px;border-radius:20px}.tpl-n{padding:50px 56px;min-height:1123px}.nh{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:16px;margin-bottom:24px}.nh-name{font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:900;line-height:1}.nh-role{font-size:.8rem;color:#666;margin-top:5px}.nh-cts{font-size:.68rem;color:#666;text-align:right;line-height:1.9}.nh-ph{width:70px;height:70px;border-radius:50%;object-fit:cover;display:block}.nb{display:grid;grid-template-columns:184px 1fr;gap:0 34px}.ns-lbl{font-size:.58rem;text-transform:uppercase;letter-spacing:.14em;font-weight:700;color:#999;margin-bottom:7px}.ns{margin-bottom:20px}.sh{font-size:.6rem;text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:7px}.sh::after{content:'';flex:1;height:1px;background:#e0dbd3;display:block}.cobj{font-size:.8rem;line-height:1.7;color:#444}.ce{margin-bottom:13px}.cet{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:2px}.cetl{font-weight:600;font-size:.84rem}.ceorg{font-size:.74rem;color:#555;margin-top:1px}.cedt{font-size:.68rem;font-weight:600;white-space:nowrap;margin-left:7px}.cedsc{font-size:.74rem;line-height:1.6;color:#555;margin-top:4px}@media print{body{padding:0;background:#fff}.cvp{box-shadow:none;width:100%}}</style></head><body><div class="cvp">${body}</div></body></html>`;dl(h,fn()+'_CV.html','text/html;charset=utf-8');toast('✓ HTML page downloaded');}
+
+// XLSX
+function expXLSX(){if(typeof XLSX==='undefined'){toast('XLSX library not loaded');return;}const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Field','Value'],['First Name',g('fFirst')],['Last Name',g('fLast')],['Title',g('fTitle')],['Address',g('fAddr')],['Phone',g('fPhone')],['Email',g('fEmail')],['LinkedIn',g('fLI')],['Website',g('fWeb')],['Nationality',g('fNat')],['Summary',g('fSum')],['Interests',g('fInt')]]),'Personal');XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Title','Company','Start','End','Description'],...exps.map(e=>[e.t,e.o,e.s,e.e,e.d])]),'Experience');XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Degree','School','Start','End','Notes'],...edus.map(e=>[e.dg,e.sc,e.s,e.e,e.n])]),'Education');XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Skills'],...skills.map(s=>[s])]),'Skills');if(certs.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Name','Issuer','Year'],...certs.map(c=>[c.n,c.is,c.y])]),'Certifications');if(langs.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Language','Level'],...langs.map(l=>[l.l,l.lv])]),'Languages');if(refs.length)XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Name','Role','Company','Email','Phone'],...refs.map(r=>[r.n,r.r,r.c,r.e,r.p])]),'References');XLSX.writeFile(wb,fn()+'_CV.xlsx');toast('✓ Excel downloaded');}
+
+// DOCX
+async function expDOCX(){if(typeof docx==='undefined'){toast('DOCX library not loaded');return;}toast('⏳ Generating Word document…');try{const {Document,Packer,Paragraph,TextRun,AlignmentType,BorderStyle}=docx;const ch=[];const P=(runs,after=80)=>new Paragraph({spacing:{after},children:Array.isArray(runs)?runs:[runs]});const T=(t,opts={})=>new TextRun({text:t,size:opts.sz||20,bold:!!opts.b,italics:!!opts.i,color:opts.c||'333333',font:opts.f});ch.push(P([T(`${g('fFirst')} ${g('fLast')}`,{sz:40,b:true,c:CB.replace('#',''),f:'Georgia'})],80,AlignmentType.CENTER));if(g('fTitle'))ch.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:60},children:[T(g('fTitle'),{sz:24,i:true,c:'666666'})]}));const cp=[g('fPhone'),g('fEmail'),g('fAddr'),g('fLI'),g('fWeb')].filter(Boolean);if(cp.length)ch.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:180},children:[T(cp.join('  ·  '),{sz:18,c:'555555'})]}));ch.push(new Paragraph({spacing:{after:200},border:{bottom:{style:BorderStyle.SINGLE,size:8,color:CB.replace('#',''),space:4}},children:[]}));const sec=l=>new Paragraph({spacing:{before:240,after:80},children:[T(l.toUpperCase(),{sz:20,b:true,c:CA.replace('#','')})]}); const bp=t=>P([T(t,{sz:20,c:'444444'})],120);if(g('fSum')){ch.push(sec('Objective'));ch.push(bp(g('fSum')));}if(exps.length){ch.push(sec('Experience'));exps.forEach(e=>{ch.push(P([T(e.t,{sz:22,b:true}),T('  '+e.o,{sz:20,c:'666666'}),T('  '+(e.s||'')+(e.e?'–'+e.e:''),{sz:18,i:true,c:CA.replace('#','')})],20));if(e.d)ch.push(bp(e.d));});}if(edus.length){ch.push(sec('Education'));edus.forEach(e=>{ch.push(P([T(e.dg,{sz:22,b:true}),T('  '+e.sc,{sz:20,c:'666666'}),T('  '+(e.s||'')+(e.e?'–'+e.e:''),{sz:18,i:true,c:CA.replace('#','')})],20));if(e.n)ch.push(bp(e.n));});}if(skills.length){ch.push(sec('Skills'));ch.push(bp(skills.join('  ·  ')));}if(certs.length){ch.push(sec('Certifications'));certs.forEach(c=>ch.push(P([T(c.n,{sz:20,b:true}),T('  '+c.is+(c.y?' · '+c.y:''),{sz:18,c:'777777'})],60)));}if(langs.length){ch.push(sec('Languages'));langs.forEach(l=>ch.push(P([T(l.l,{sz:20,b:true}),T('  '+l.lv,{sz:18,c:'777777'})],60)));}if(g('fInt')){ch.push(sec('Interests'));ch.push(bp(g('fInt')));}if(refs.length){ch.push(sec('References'));refs.forEach(r=>{ch.push(P([T(r.n,{sz:20,b:true}),T('  '+r.r+(r.c?', '+r.c:''),{sz:18,c:'666666'})],20));if(r.e||r.p)ch.push(P([T([r.e,r.p].filter(Boolean).join('  '),{sz:18,c:'999999'})],80));});}const doc=new Document({sections:[{properties:{page:{size:{width:12240,height:15840},margin:{top:1080,right:1080,bottom:1080,left:1080}}},children:ch}]});const blob=await Packer.toBlob(doc);dl(blob,fn()+'_CV.docx','application/vnd.openxmlformats-officedocument.wordprocessingml.document');toast('✓ Word document downloaded');}catch(err){console.error(err);toast('⚠ DOCX failed — check console');}}
+
+// TOAST
+function toast(m){const el=document.getElementById('toastEl');el.textContent=m;el.classList.add('show');clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove('show'),3000);}
+
+// RESET
+function resetAll(){if(!confirm('Reset everything?'))return;['fFirst','fLast','fTitle','fAddr','fPhone','fEmail','fLI','fWeb','fNat','fSum','fInt'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});exps.length=0;edus.length=0;certs.length=0;langs.length=0;refs.length=0;skills.length=0;photoURL=null;document.getElementById('phCirc').innerHTML='<span>🧑</span>';document.getElementById('phAct').style.display='none';document.getElementById('phFile').value='';rExp();rEdu();rCerts();rLangs();rRefs();rTags();redraw();toast('✓ Reset complete');}
+</script>
+</body>
+</html>
